@@ -113,6 +113,29 @@
       word-break: break-word;
     }
 
+    #vouchList {
+      margin-top: 40px;
+      background-color: #1f1f3d;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+    }
+
+    #vouchList h2 {
+      color: #bb86fc;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+    }
+
+    ol {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -121,12 +144,6 @@
       to {
         opacity: 1;
         transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .vouch-container {
-        padding: 25px;
       }
     }
   </style>
@@ -140,7 +157,7 @@
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account Info</a></li>
+        <li><a href="account.html">Account</a></li>
       </ul>
     </nav>
   </header>
@@ -161,10 +178,15 @@
     <button onclick="createVouch()">Genera Codice</button>
 
     <div id="vouchCode"></div>
+
+    <div id="vouchList">
+      <h2>I tuoi codici generati</h2>
+      <ol id="listContainer"></ol>
+    </div>
   </main>
 
   <script type="module">
-    import { db, ref, get, set, update } from './js/firebase.js';
+    import { db, ref, get, set, update, onValue } from './js/firebase.js';
 
     function generateCode() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -181,30 +203,50 @@
 
       const crypto = document.getElementById('cryptoType').value;
       const amount = parseFloat(document.getElementById('amount').value);
-
-      if (!amount || amount <= 0) {
-        alert('Quantità non valida.');
-        return;
-      }
+      if (!amount || amount <= 0) return alert('Quantità non valida.');
 
       const snap = await get(ref(db, `users/${user}/wallet`));
-      if (!snap.exists() || snap.val()[crypto] < amount) {
-        alert('Saldo insufficiente.');
-        return;
-      }
+      const wallet = snap.exists() ? snap.val() : {};
+
+      if (!wallet[crypto] || wallet[crypto] < amount) return alert('Saldo insufficiente.');
 
       const code = generateCode();
-      const newAmount = parseFloat((snap.val()[crypto] - amount).toFixed(6));
+      const newAmount = parseFloat((wallet[crypto] - amount).toFixed(6));
 
       await update(ref(db, `users/${user}/wallet`), { [crypto]: newAmount });
-      await set(ref(db, `vouch/${code}`), {
-        from: user,
+
+      await set(ref(db, `vouch/${user}/${code}`), {
         crypto,
-        amount: parseFloat(amount.toFixed(6))
+        amount: parseFloat(amount.toFixed(6)),
+        createdAt: Date.now()
       });
 
-      document.getElementById('vouchCode').textContent = `✅ Codice Vouch generato: ${code}`;
+      document.getElementById('vouchCode').textContent = `✅ Codice Vouch creato: ${code}`;
+
+      loadVouches(); // refresh lista
     }
+
+    async function loadVouches() {
+      const user = localStorage.getItem('user');
+      if (!user) return;
+
+      const container = document.getElementById('listContainer');
+      container.innerHTML = '';
+
+      const snap = await get(ref(db, `vouch/${user}`));
+      if (snap.exists()) {
+        const data = snap.val();
+        const entries = Object.entries(data);
+
+        entries.forEach(([code, info], index) => {
+          const li = document.createElement('li');
+          li.textContent = `${code} - ${info.amount} ${info.crypto}`;
+          container.appendChild(li);
+        });
+      }
+    }
+
+    window.addEventListener('load', loadVouches);
   </script>
 </body>
 </html>
