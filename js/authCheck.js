@@ -1,4 +1,4 @@
-import { db, ref, get } from './firebase.js';
+import { db, ref, get } from './js/firebase.js';
 
 async function getIP() {
   try {
@@ -6,57 +6,77 @@ async function getIP() {
     const data = await res.json();
     return data.ip;
   } catch {
-    return null;
+    return '0.0.0.0';
   }
 }
 
 async function checkAuth() {
-  const path = window.location.pathname.split('/').pop();
+  const username = localStorage.getItem('user');
+  const currentPath = window.location.pathname;
 
-  if (path === 'index.html' || path === 'register.html' || path === '') {
-    // Se siamo su index o register, controlla IP per login automatico
-    const ip = await getIP();
-    if (!ip) return; // Se non prende IP, esce
+  // Pagine pubbliche dove NON deve essere presente l'utente loggato:
+  const publicPages = ['/', '/index.html', '/register.html'];
 
-    try {
-      // Cerca utenti con questo IP
-      // Per Firebase Realtime DB devi fare una query per tutti gli utenti e filtrarli:
-      const usersSnapshot = await get(ref(db, 'users'));
-      if (!usersSnapshot.exists()) return;
-
-      const users = usersSnapshot.val();
-      for (const [username, userData] of Object.entries(users)) {
-        if (userData.ip === ip) {
-          // Utente trovato con stesso IP, login automatico
-          localStorage.setItem('user', username);
-          window.location.href = 'dashboard.html';
-          return;
-        }
-      }
-    } catch (err) {
-      console.error('Errore durante controllo IP:', err);
-    }
-    // Se non trovato, non fare nulla, resta sulla pagina (index o register)
-  } else {
-    // Se siamo su pagina protetta, controlla user localStorage e DB
-    const username = localStorage.getItem('user');
-    if (!username) {
-      window.location.href = 'index.html';
-      return;
-    }
+  if (username) {
+    // Se ho username in localStorage, verifico che esista nel DB
     try {
       const snapshot = await get(ref(db, `users/${username}`));
       if (!snapshot.exists()) {
+        // User non esiste, pulisco localStorage e redirect a login
         localStorage.removeItem('user');
-        window.location.href = 'index.html';
+        if (!publicPages.includes(currentPath)) {
+          window.location.href = '/index.html';
+        }
         return;
       }
+
+      // Se utente loggato e su pagina pubblica, mando alla dashboard
+      if (publicPages.includes(currentPath)) {
+        window.location.href = '/dashboard.html';
+      }
+
+      // Altrimenti utente loggato su pagina protetta: OK, nessun redirect
     } catch (error) {
-      console.error('Errore controllo autenticazione:', error);
+      console.error('Errore connessione DB', error);
+      // In caso di errore meglio reindirizzare a login per sicurezza
       localStorage.removeItem('user');
-      window.location.href = 'index.html';
+      if (!publicPages.includes(currentPath)) {
+        window.location.href = '/index.html';
+      }
+    }
+  } else {
+    // Non ho username in localStorage, provo a fare login automatico tramite IP su pagine pubbliche
+    if (publicPages.includes(currentPath)) {
+      try {
+        const ip = await getIP();
+        // Cerco utente con questo IP
+        // ATTENZIONE: questa funzione dipende da come sono strutturati i dati sul db
+        // Devi modificare in base a come fai la query nel tuo DB Firebase (firestore o realtime)
+        
+        // Esempio Realtime DB: cerca tutti gli utenti (attenzione a query in DB grande)
+        // Qui facciamo una scansione: NON efficiente ma d'esempio
+        const snapshot = await get(ref(db, 'users'));
+        if (snapshot.exists()) {
+          const users = snapshot.val();
+          for (const [userKey, userData] of Object.entries(users)) {
+            if (userData.ip === ip) {
+              // Found user with matching IP, log in automatically
+              localStorage.setItem('user', userKey);
+              window.location.href = '/dashboard.html';
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Errore durante login automatico IP', error);
+      }
+      // Se non trovato o errore, resta su pagina pubblica
+    } else {
+      // Se non ho user e sono su pagina protetta, reindirizzo a login
+      window.location.href = '/index.html';
     }
   }
 }
 
+// Eseguo subito la verifica
 checkAuth();
