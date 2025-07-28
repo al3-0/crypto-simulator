@@ -15,41 +15,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-async function checkVoucherPermission(username) {
-  try {
-    const response = await fetch('./js/wvouchers.json'); // <-- qui!
-    if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
-    const authorizedUsers = await response.json();
-    return authorizedUsers.includes(username);
-  } catch (error) {
-    console.error("Errore caricando wvouchers.json:", error);
-    return false;
-  }
-}
-
-async function hideVoucherSectionIfNoPermission(username) {
-  const voucherSection = document.getElementById('voucher-create-section');
-  if (!voucherSection) return;
-  const hasPermission = await checkVoucherPermission(username);
-  if (!hasPermission) {
-    voucherSection.style.display = 'none';
-    console.log("Voucher create section nascosta perché non autorizzato");
-  } else {
-    voucherSection.style.display = '';
-  }
-}
-
-async function redirectIfNoVoucherPermission(username, currentPath) {
-  if (currentPath.endsWith('vouch-create.html')) {
-    const hasPermission = await checkVoucherPermission(username);
-    if (!hasPermission) {
-      alert("Non sei autorizzato a creare vouchers!");
-      window.location.href = '/crypto-simulator/dashboard.html'; // redirect corretto
-      return true;
-    }
-  }
-  return false;
-}
+// Lista utenti autorizzati (hardcoded)
+const authorizedUsers = ["Ale"];
 
 async function checkAuth() {
   const username = localStorage.getItem('user');
@@ -61,6 +28,7 @@ async function checkAuth() {
   }
 
   try {
+    // Verifica esistenza utente nel DB Firebase
     const snapshot = await get(ref(db, `users/${username}`));
     if (!snapshot.exists()) {
       localStorage.removeItem('user');
@@ -68,9 +36,22 @@ async function checkAuth() {
       return;
     }
 
-    if (await redirectIfNoVoucherPermission(username, currentPath)) return;
+    // Controlla permessi voucher da lista interna
+    const hasPermission = authorizedUsers.includes(username);
 
-    await hideVoucherSectionIfNoPermission(username);
+    // Nasconde il bottone/elemento voucher-create se non autorizzato
+    const voucherSection = document.getElementById('voucher-create-section');
+    if (voucherSection && !hasPermission) {
+      voucherSection.style.display = 'none';
+      console.log("Voucher create section nascosta perché utente non autorizzato.");
+    }
+
+    // Se è su pagina di creazione vouchers e non ha permessi, redirect a dashboard
+    if (currentPath.endsWith('vouch-create.html') && !hasPermission) {
+      alert("Non sei autorizzato a creare vouchers!");
+      window.location.href = '/crypto-simulator/dashboard.html';
+      return;
+    }
 
   } catch (error) {
     console.error("Errore durante l'autenticazione:", error);
