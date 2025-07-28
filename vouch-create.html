@@ -238,15 +238,16 @@ window.createVouch = createVouch;
       const snap = await get(ref(db, `vouch/${user}`));
       if (snap.exists()) {
         const data = snap.val();
-        const entries = Object.entries(data);
-
-        entries.forEach(([code, info], index) => {
+        Object.entries(data).forEach(([code, info]) => {
           const li = document.createElement('li');
           li.textContent = `${code} - ${info.amount} ${info.crypto}`;
           container.appendChild(li);
         });
       }
     }
+
+    // ESSENZIALE: espongo la funzione a window per l'onclick inline
+    window.createVouch = createVouch;
 
     window.addEventListener('load', loadVouches);
   </script>
