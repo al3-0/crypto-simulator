@@ -2,34 +2,25 @@ import { db, ref, get } from './js/firebase.js';
 
 async function checkVoucherPermission(username) {
   try {
-    const response = await fetch('./js/wvouchers.json');
+    const response = await fetch('./js/wvouchers.json'); // percorso corretto
     if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
     const authorizedUsers = await response.json();
 
-    console.log('Utenti autorizzati:', authorizedUsers);
-    const isAuthorized = authorizedUsers.some(user => user.toLowerCase() === username.toLowerCase());
-    console.log(`Permesso voucher per ${username}:`, isAuthorized);
-    return isAuthorized;
+    // authorizedUsers è un array di username autorizzati, es: ["user1", "user2", "admin"]
+    return authorizedUsers.includes(username);
   } catch (error) {
     console.error("Errore caricando wvouchers.json:", error);
-    return false;
+    return false; // per sicurezza se fallisce, nessuna autorizzazione
   }
 }
 
 async function hideVoucherSectionIfNoPermission(username) {
   const voucherSection = document.getElementById('voucher-create-section');
-  if (!voucherSection) {
-    console.log("Sezione voucher-create non trovata");
-    return;
-  }
+  if (!voucherSection) return; // se la sezione non esiste, niente da fare
 
   const hasPermission = await checkVoucherPermission(username);
   if (!hasPermission) {
-    console.log("Nascondo sezione voucher-create per utente non autorizzato");
     voucherSection.style.display = 'none';
-  } else {
-    console.log("Utente autorizzato, mostro sezione voucher-create");
-    voucherSection.style.display = ''; // mostra la sezione
   }
 }
 
@@ -38,44 +29,43 @@ async function redirectIfNoVoucherPermission(username, currentPath) {
     const hasPermission = await checkVoucherPermission(username);
     if (!hasPermission) {
       alert("Non sei autorizzato a creare vouchers!");
-      window.location.href = '/index.html';
-      return true;
+      window.location.href = '/crypto-simulator/index.html'; // attenzione al percorso!
+      return true; // segnalare che abbiamo fatto redirect
     }
   }
-  return false;
+  return false; // nessun redirect fatto
 }
 
 async function checkAuth() {
   const username = localStorage.getItem('user');
   const currentPath = window.location.pathname;
 
-  console.log("Utente loggato:", username);
-  console.log("Pagina attuale:", currentPath);
-
   if (!username) {
-    console.log("Utente non loggato, redirect a login");
-    window.location.href = '/index.html';
+    // Non loggato → reindirizza sempre a login (index.html)
+    window.location.href = '/crypto-simulator/index.html'; // percorso corretto per login
     return;
   }
 
   try {
+    // Verifico se l'utente esiste nel DB Firebase
     const snapshot = await get(ref(db, `users/${username}`));
     if (!snapshot.exists()) {
-      console.log("Utente non trovato nel DB, rimuovo localStorage e redirect");
       localStorage.removeItem('user');
-      window.location.href = '/index.html';
+      window.location.href = '/crypto-simulator/index.html';
       return;
     }
 
+    // Se siamo nella pagina voucher-create.html, redirect se non autorizzati
     const redirected = await redirectIfNoVoucherPermission(username, currentPath);
     if (redirected) return;
 
+    // Se l'utente è su pagine dove appare la sezione voucher create, ma non ha permessi la nascondo:
     await hideVoucherSectionIfNoPermission(username);
 
   } catch (error) {
     console.error("Errore durante l'autenticazione:", error);
     localStorage.removeItem('user');
-    window.location.href = '/index.html';
+    window.location.href = '/crypto-simulator/index.html';
   }
 }
 
