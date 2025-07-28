@@ -238,6 +238,8 @@
       document.getElementById('redeemMsg').textContent = msg;
     }
 
+    window.redeemVouch = redeemVouch;
+
     async function loadRedeemedList() {
       const user = localStorage.getItem('user');
       if (!user) return;
