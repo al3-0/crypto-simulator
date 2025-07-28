@@ -77,13 +77,26 @@
     text-decoration: underline;
   }
 </style>
+
+<!-- Inserisco script reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <script type="module">
   import { db, ref, get } from './js/firebase.js';
 
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById('login-form');
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
+
+      // reCAPTCHA v2 controllo
+      const captchaResponse = grecaptcha.getResponse();
+      if (!captchaResponse) {
+        alert("Per favore, verifica il CAPTCHA.");
+        return;
+      }
+
       const username = form.username.value.trim();
       const password = form.password.value;
 
@@ -96,11 +109,13 @@
         const snapshot = await get(ref(db, `users/${username}`));
         if (!snapshot.exists()) {
           alert("Utente non trovato.");
+          grecaptcha.reset(); // reset CAPTCHA se fallito
           return;
         }
         const userData = snapshot.val();
         if (userData.password !== password) {
           alert("Password errata.");
+          grecaptcha.reset();
           return;
         }
         localStorage.setItem("user", username);
@@ -108,6 +123,7 @@
       } catch (error) {
         alert("Errore di connessione, riprova.");
         console.error(error);
+        grecaptcha.reset();
       }
     });
   });
@@ -119,6 +135,10 @@
     <form id="login-form" novalidate>
       <input type="text" name="username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri, max 15 caratteri" />
       <input type="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6" />
+
+      <!-- reCAPTCHA -->
+      <div class="g-recaptcha" data-sitekey="LA_TUA_SITE_KEY"></div>
+
       <button type="submit" aria-label="Accedi">Login</button>
     </form>
     <p class="register-link">
