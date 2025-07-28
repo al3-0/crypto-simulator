@@ -1,263 +1,90 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AFK Zone</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <style>
-    body {
-      margin: 0;
-      padding-top: 100px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1f1f3f, #12122b);
-      color: #eee;
-      overflow: hidden;
-    }
+<script type="module">
+import { db, ref, get, update } from './js/firebase.js';
 
-    .navbar {
-      width: 100%;
-      background: #1c1c3aee;
-      padding: 14px 30px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 999;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(12px);
-    }
+let btc = 0;
+let timer = null;
+let countdownTimer = null;
+let secondsLeft = 60;
 
-    .navbar ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 30px;
-      margin: 0;
-      padding: 0;
-    }
+const username = localStorage.getItem("user");
+const counterEl = document.getElementById('btcEarned');
+const statusEl = document.getElementById('afkStatus');
+const listEl = document.getElementById('sessionList');
+const countdownEl = document.getElementById('countdown');
 
-    .navbar a {
-      color: #eee;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
-      border-bottom: 2px solid transparent;
-    }
+function updateCountdown() {
+  countdownEl.textContent = secondsLeft;
+}
 
-    .navbar a:hover {
-      color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
-    }
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  secondsLeft = 60;
+  updateCountdown();
 
-    main {
-      max-width: 600px;
-      margin: auto;
-      background: #2a2a4f;
-      padding: 40px 30px;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
-      text-align: center;
-      position: relative;
-      z-index: 2;
-      animation: fadeIn 1.5s ease;
-    }
+  countdownTimer = setInterval(() => {
+    secondsLeft--;
+    updateCountdown();
 
-    h1 {
-      color: #bb86fc;
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-    }
-
-    .status {
-      font-size: 1.1rem;
-      margin-bottom: 10px;
-      color: #ccc;
-    }
-
-    .btc-counter {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #bb86fc;
-      margin: 10px 0 20px 0;
-      animation: glow 2s infinite alternate;
-    }
-
-    .countdown {
-      font-size: 1.2rem;
-      color: #aaa;
-      margin-bottom: 30px;
-    }
-
-    ul.session-list {
-      background: #1c1c3a;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: left;
-      list-style: none;
-      margin-top: 30px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    ul.session-list li {
-      padding: 8px 0;
-      border-bottom: 1px solid #444;
-      color: #ddd;
-      font-size: 0.95rem;
-      animation: slideIn 0.5s ease;
-    }
-
-    /* Animated circle */
-    .pulse-circle {
-      width: 80px;
-      height: 80px;
-      background-color: #bb86fc55;
-      border-radius: 50%;
-      margin: 30px auto;
-      animation: pulse 2s infinite;
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
-    }
-
-    /* Background particles */
-    .particles {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      top: 0; left: 0;
-      z-index: 0;
-      pointer-events: none;
-      background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
-      animation: moveBackground 60s linear infinite;
-      opacity: 0.07;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes glow {
-      0% { text-shadow: 0 0 10px #bb86fc66; }
-      100% { text-shadow: 0 0 25px #bb86fcaa; }
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(1); opacity: 0.8; }
-    }
-
-    @keyframes moveBackground {
-      0% { background-position: 0 0; }
-      100% { background-position: 1000px 1000px; }
-    }
-
-    @keyframes slideIn {
-      from { transform: translateY(10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-  </style>
-</head>
-<body>
-  <div class="particles"></div>
-
-  <header class="navbar">
-    <nav>
-      <ul>
-        <li><a href="dashboard.html">Home</a></li>
-        <li><a href="exchange.html">Exchange</a></li>
-        <li><a href="vouch-create.html">Vouch Create</a></li>
-        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
-        <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main>
-    <h1>AFK Zone</h1>
-    <p class="status" id="afkStatus">💤 Rimani su questa pagina per guadagnare!</p>
-    <div class="btc-counter" id="btcEarned">+0.000 BTC</div>
-    <div class="pulse-circle"></div>
-    <div class="countdown">⏳ Prossimo guadagno in: <span id="countdown">60</span>s</div>
-
-    <ul class="session-list" id="sessionList"></ul>
-  </main>
-
-  <script>
-    let btc = 0;
-    let timer = null;
-    let countdownTimer = null;
-    let secondsLeft = 60;
-
-    const counterEl = document.getElementById('btcEarned');
-    const statusEl = document.getElementById('afkStatus');
-    const listEl = document.getElementById('sessionList');
-    const countdownEl = document.getElementById('countdown');
-
-    function updateCountdown() {
-      countdownEl.textContent = secondsLeft;
-    }
-
-    function startCountdown() {
-      if (countdownTimer) clearInterval(countdownTimer);
+    if (secondsLeft <= 0) {
+      addReward();
       secondsLeft = 60;
-      updateCountdown();
-
-      countdownTimer = setInterval(() => {
-        secondsLeft--;
-        updateCountdown();
-
-        if (secondsLeft <= 0) {
-          addReward();
-          secondsLeft = 60;
-          updateCountdown();
-        }
-      }, 1000);
     }
+  }, 1000);
+}
 
-    function stopCountdown() {
-      if (countdownTimer) clearInterval(countdownTimer);
-    }
+function stopCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+}
 
-    function addReward() {
-      btc += 0.001;
-      counterEl.textContent = `+${btc.toFixed(3)} BTC`;
-      const li = document.createElement('li');
-      const now = new Date().toLocaleTimeString();
-      li.textContent = `${now} – Guadagnato 0.001 BTC`;
-      listEl.prepend(li);
-    }
+async function addReward() {
+  if (!username) return;
 
-    function startAFK() {
-      if (!timer) {
-        startCountdown();
-        statusEl.textContent = '✅ Guadagno attivo';
-      }
-    }
+  btc += 0.001;
+  counterEl.textContent = `+${btc.toFixed(3)} BTC`;
 
-    function stopAFK() {
-      stopCountdown();
-      timer = null;
-      statusEl.textContent = '⛔ Guadagno in pausa (scheda non attiva)';
-    }
+  const li = document.createElement('li');
+  const now = new Date().toLocaleTimeString();
+  li.textContent = `${now} – Guadagnato 0.001 BTC`;
+  listEl.prepend(li);
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        startAFK();
-      } else {
-        stopAFK();
-      }
-    });
+  try {
+    const userRef = ref(db, `users/${username}`);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists()) return;
 
-    window.addEventListener('load', () => {
-      if (document.visibilityState === 'visible') {
-        startAFK();
-      }
-    });
-  </script>
-</body>
-</html>
+    const current = snapshot.val();
+    const newWallet = (parseFloat(current.wallet) || 0) + 0.001;
+
+    await update(userRef, { wallet: newWallet.toFixed(8) });
+  } catch (error) {
+    console.error("Errore aggiornamento wallet:", error);
+  }
+}
+
+function startAFK() {
+  if (!timer) {
+    startCountdown();
+    statusEl.textContent = '✅ Guadagno attivo';
+  }
+}
+
+function stopAFK() {
+  stopCountdown();
+  timer = null;
+  statusEl.textContent = '⛔ Guadagno in pausa (scheda non attiva)';
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    startAFK();
+  } else {
+    stopAFK();
+  }
+});
+
+window.addEventListener('load', () => {
+  if (document.visibilityState === 'visible') {
+    startAFK();
+  }
+});
+</script>
