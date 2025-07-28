@@ -78,24 +78,20 @@
   }
 </style>
 
-<!-- reCAPTCHA v2 -->
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
 <script type="module">
   import { db, ref, get } from './js/firebase.js';
+
+  async function executeRecaptcha() {
+    return grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', {action: 'login'});
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById('login-form');
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-
-      // Controllo reCAPTCHA
-      const captchaResponse = grecaptcha.getResponse();
-      if (!captchaResponse) {
-        alert("Per favore, verifica il CAPTCHA.");
-        return;
-      }
 
       const username = form.username.value.trim();
       const password = form.password.value;
@@ -106,16 +102,29 @@
       }
 
       try {
+        // Ottieni token reCAPTCHA v3
+        const token = await executeRecaptcha();
+
+        // Verifica token lato server qui (simulazione in frontend)
+        // In un sistema reale, fai POST al tuo backend con username, password e token
+        // e il backend verifica token con chiave segreta Google.
+
+        // Esempio: se vuoi, puoi creare endpoint /verifyRecaptcha
+
+        // Per ora proseguiamo solo se token esiste
+        if (!token) {
+          alert("Errore nella verifica reCAPTCHA, riprova.");
+          return;
+        }
+
         const snapshot = await get(ref(db, `users/${username}`));
         if (!snapshot.exists()) {
           alert("Utente non trovato.");
-          grecaptcha.reset();
           return;
         }
         const userData = snapshot.val();
         if (userData.password !== password) {
           alert("Password errata.");
-          grecaptcha.reset();
           return;
         }
         localStorage.setItem("user", username);
@@ -123,7 +132,6 @@
       } catch (error) {
         alert("Errore di connessione, riprova.");
         console.error(error);
-        grecaptcha.reset();
       }
     });
   });
@@ -135,10 +143,6 @@
     <form id="login-form" novalidate>
       <input type="text" name="username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri, max 15 caratteri" />
       <input type="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6" />
-      
-      <!-- reCAPTCHA -->
-      <div class="g-recaptcha" data-sitekey="6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></div>
-
       <button type="submit" aria-label="Accedi">Login</button>
     </form>
     <p class="register-link">
