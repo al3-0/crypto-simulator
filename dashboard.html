@@ -2,303 +2,307 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Dashboard</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script type="module" defer>
-    import { db, ref, get, update, set, child } from './js/firebase.js';
-
-    // --- Controllo utente e IP ---
-    const username = localStorage.getItem("user");
-    if (!username) window.location.href = "index.html";
-
-    let userData = null;
-    let currentSection = null;
-    let afkTimer = 60;
-    let afkInterval = null;
-
-    async function fetchUserData() {
-      const snapshot = await get(ref(db, `users/${username}`));
-      if (!snapshot.exists()) {
-        alert("Utente non trovato, effettua il login.");
-        localStorage.removeItem("user");
-        window.location.href = "index.html";
-      }
-      userData = snapshot.val();
-
-      // Controlla IP
-      const ipRes = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipRes.json();
-      if (ipData.ip !== userData.ip) {
-        alert("IP non corrispondente. Effettua nuovamente il login.");
-        localStorage.removeItem("user");
-        window.location.href = "index.html";
-      }
+  <style>
+    body {
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
+      overflow-x: hidden;
     }
 
-    // --- Gestione visualizzazione sezioni ---
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(sec => {
-        sec.classList.add('hidden');
-      });
-      document.getElementById(id).classList.remove('hidden');
-      currentSection = id;
-
-      // Se AFK zone, avvia timer
-      if (id === 'afk') {
-        startAfkTimer();
-      } else {
-        stopAfkTimer();
-      }
+    /* NAVBAR */
+    .navbar {
+      width: 100%;
+      background: #1c1c3ae0;
+      padding: 14px 30px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+      backdrop-filter: blur(12px);
     }
 
-    // --- Exchange: converte importi da crypto1 a crypto2 ---
-    async function exchange() {
-      const from = document.getElementById('exchange-from').value;
-      const to = document.getElementById('exchange-to').value;
-      const amount = parseFloat(document.getElementById('exchange-amount').value);
-      if (!from || !to || from === to || isNaN(amount) || amount <= 0) {
-        alert("Inserisci dati validi per l'exchange.");
-        return;
-      }
-      if (userData.wallet[from] < amount) {
-        alert(`Non hai abbastanza ${from}.`);
-        return;
-      }
-
-      // Tasso fisso 1:1 (puoi cambiarlo)
-      userData.wallet[from] -= amount;
-      userData.wallet[to] += amount;
-
-      await update(ref(db, `users/${username}/wallet`), userData.wallet);
-      alert(`Convertiti ${amount} ${from} in ${to}`);
-      refreshAccountInfo();
-      clearExchangeInputs();
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
     }
 
-    function clearExchangeInputs() {
-      document.getElementById('exchange-amount').value = '';
+    .navbar a {
+      color: #eee;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s ease, border-bottom 0.3s ease;
+      border-bottom: 2px solid transparent;
     }
 
-    // --- Vouch Create ---
-    async function createVouch() {
-      const type = document.getElementById('vouch-type').value;
-      const quantity = parseFloat(document.getElementById('vouch-quantity').value);
-      if (!type || isNaN(quantity) || quantity <= 0) {
-        alert("Inserisci quantità valida.");
-        return;
+    .navbar a:hover {
+      color: #bb86fc;
+      border-bottom: 2px solid #bb86fc;
+    }
+
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      font-weight: 800;
+      color: #bb86fc;
+      text-align: center;
+      letter-spacing: 1.5px;
+      animation: fadeInDown 1s ease forwards;
+      opacity: 0;
+    }
+
+    p.welcome {
+      font-size: 1.1rem;
+      color: #ccc;
+      margin: 0 0 40px 0;
+      text-align: center;
+      font-weight: 500;
+      animation: fadeIn 1.5s ease forwards;
+      opacity: 0;
+    }
+
+    .wallet {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeInUp 1.8s ease forwards;
+      opacity: 0;
+    }
+
+    .coin-card {
+      background: linear-gradient(145deg, #3b3b6a, #2a2a4f);
+      border-radius: 16px;
+      padding: 20px 30px;
+      box-shadow:
+        inset 0 0 12px #7e5fff88,
+        0 6px 18px rgba(123, 85, 255, 0.4);
+      color: #f0e6ff;
+      font-weight: 700;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: default;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .coin-card:hover {
+      transform: scale(1.05);
+      box-shadow:
+        inset 0 0 16px #a48fffcc,
+        0 10px 30px rgba(123, 85, 255, 0.7);
+    }
+
+    .coin-name {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.5rem;
+      text-shadow: 0 0 6px #bb86fcaa;
+    }
+
+    .coin-name svg {
+      width: 36px;
+      height: 36px;
+      filter: drop-shadow(0 0 2px #a08aff);
+      transition: filter 0.3s ease;
+    }
+
+    .coin-card:hover .coin-name svg {
+      filter: drop-shadow(0 0 6px #d0bfff);
+    }
+
+    .coin-amount {
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 2px;
+      font-size: 1.7rem;
+      color: #e0d4ff;
+      text-shadow: 0 0 4px #b68fffcc;
+    }
+
+    @keyframes fadeInDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-30px);
       }
-      if (userData.wallet[type] < quantity) {
-        alert(`Non hai abbastanza ${type} per creare il voucher.`);
-        return;
-      }
-
-      // Genera codice voucher 12 cifre XXXX-XXXX-XXXX
-      const code = generateVoucherCode();
-
-      // Salva voucher in DB
-      await set(ref(db, `vouchers/${code}`), {
-        type,
-        quantity,
-        createdBy: username,
-        redeemed: false
-      });
-
-      // Deduce crypto dal wallet
-      userData.wallet[type] -= quantity;
-      await update(ref(db, `users/${username}/wallet`), userData.wallet);
-
-      alert(`Voucher creato: ${code}`);
-      refreshAccountInfo();
-      clearVouchInputs();
-    }
-
-    function generateVoucherCode() {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      let code = "";
-      for (let i = 0; i < 12; i++) {
-        if (i > 0 && i % 4 === 0) code += "-";
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
-    }
-
-    function clearVouchInputs() {
-      document.getElementById('vouch-quantity').value = '';
-    }
-
-    // --- Vouch Redeem ---
-    async function redeemVouch() {
-      const code = document.getElementById('vouch-redeem-code').value.trim().toUpperCase();
-      if (!code || code.length !== 14) {
-        alert("Inserisci un codice voucher valido.");
-        return;
-      }
-
-      const snapshot = await get(ref(db, `vouchers/${code}`));
-      if (!snapshot.exists()) {
-        alert("Voucher non trovato.");
-        return;
-      }
-
-      const voucher = snapshot.val();
-      if (voucher.redeemed) {
-        alert("Voucher già riscattato.");
-        return;
-      }
-
-      // Aggiorna wallet dell'utente
-      userData.wallet[voucher.type] += voucher.quantity;
-      await update(ref(db, `users/${username}/wallet`), userData.wallet);
-
-      // Marca voucher come riscattato
-      await update(ref(db, `vouchers/${code}`), { redeemed: true, redeemedBy: username, redeemedAt: Date.now() });
-
-      alert(`Hai riscattato ${voucher.quantity} ${voucher.type}!`);
-      refreshAccountInfo();
-      clearRedeemInputs();
-    }
-
-    function clearRedeemInputs() {
-      document.getElementById('vouch-redeem-code').value = '';
-    }
-
-    // --- AFK Timer ---
-    function startAfkTimer() {
-      if (afkInterval) return; // timer già avviato
-      afkTimer = 60;
-      document.getElementById("afk-timer").textContent = afkTimer;
-
-      afkInterval = setInterval(async () => {
-        afkTimer--;
-        document.getElementById("afk-timer").textContent = afkTimer;
-
-        if (afkTimer <= 0) {
-          afkTimer = 60;
-          userData.wallet.BTC += 0.05;
-          await update(ref(db, `users/${username}/wallet`), { BTC: userData.wallet.BTC });
-          refreshAccountInfo();
-        }
-      }, 1000);
-    }
-    function stopAfkTimer() {
-      if (afkInterval) {
-        clearInterval(afkInterval);
-        afkInterval = null;
+      100% {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
-    // --- Mostra dati Account aggiornati ---
-    function refreshAccountInfo() {
-      document.getElementById("acc-username").textContent = username;
-      document.getElementById("acc-password").textContent = "******";
-      document.getElementById("acc-btc").textContent = userData.wallet.BTC.toFixed(4);
-      document.getElementById("acc-eth").textContent = userData.wallet.ETH.toFixed(4);
-      document.getElementById("acc-ltc").textContent = userData.wallet.LTC.toFixed(4);
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
-    // --- Toggle password visibility ---
-    let passVisible = false;
-    function togglePassword() {
-      if (!userData) return;
-      const passEl = document.getElementById("acc-password");
-      passVisible = !passVisible;
-      passEl.textContent = passVisible ? userData.password : "******";
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    // --- Setup pagina ---
-    window.addEventListener("DOMContentLoaded", async () => {
-      await fetchUserData();
-      refreshAccountInfo();
-      showSection('exchange'); // mostra Exchange di default
-    });
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-    window.showSection = showSection;
-    window.exchange = exchange;
-    window.createVouch = createVouch;
-    window.redeemVouch = redeemVouch;
-    window.togglePassword = togglePassword;
+    .particle {
+      position: absolute;
+      background: #bb86fc88;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: drift 12s linear infinite;
+      filter: drop-shadow(0 0 3px #a48aff);
+    }
 
-  </script>
+    @keyframes drift {
+      0% { transform: translateY(0) translateX(0); opacity: 0.6; }
+      50% { opacity: 0.2; }
+      100% { transform: translateY(-150px) translateX(20px); opacity: 0.6; }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 30px 20px;
+      }
+      .coin-card {
+        font-size: 1.1rem;
+        padding: 16px 24px;
+      }
+      .coin-amount {
+        font-size: 1.4rem;
+      }
+      h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <nav class="navbar">
-    <button onclick="showSection('exchange')">Exchange</button>
-    <button onclick="showSection('vouch-create')">Vouch Create</button>
-    <button onclick="showSection('vouch-redeem')">Vouch Redeem</button>
-    <button onclick="showSection('afk')">AFK Zone</button>
-    <button onclick="showSection('account')">Account Info</button>
-  </nav>
 
-  <main id="content">
-    <!-- Exchange -->
-    <section id="exchange" class="section hidden">
-      <h2>Exchange</h2>
-      <label>Da:
-        <select id="exchange-from">
-          <option value="BTC">BTC</option>
-          <option value="ETH">ETH</option>
-          <option value="LTC">LTC</option>
-        </select>
-      </label>
-      <label>A:
-        <select id="exchange-to">
-          <option value="BTC">BTC</option>
-          <option value="ETH">ETH</option>
-          <option value="LTC">LTC</option>
-        </select>
-      </label>
-      <label>Quantità:
-        <input type="number" id="exchange-amount" min="0" step="any" placeholder="0.00" />
-      </label>
-      <button onclick="exchange()">Converti</button>
-    </section>
-
-    <!-- Vouch Create -->
-    <section id="vouch-create" class="section hidden">
-      <h2>Crea Voucher</h2>
-      <label>Tipo Crypto:
-        <select id="vouch-type">
-          <option value="BTC">BTC</option>
-          <option value="ETH">ETH</option>
-          <option value="LTC">LTC</option>
-        </select>
-      </label>
-      <label>Quantità:
-        <input type="number" id="vouch-quantity" min="0" step="any" placeholder="0.00" />
-      </label>
-      <button onclick="createVouch()">Crea Voucher</button>
-    </section>
-
-    <!-- Vouch Redeem -->
-    <section id="vouch-redeem" class="section hidden">
-      <h2>Riscatta Voucher</h2>
-      <label>Codice Voucher:
-        <input type="text" id="vouch-redeem-code" maxlength="14" placeholder="XXXX-XXXX-XXXX" />
-      </label>
-      <button onclick="redeemVouch()">Riscatta</button>
-    </section>
-
-    <!-- AFK Zone -->
-    <section id="afk" class="section hidden">
-      <h2>AFK Zone</h2>
-      <p>Rimani su questa pagina per guadagnare 0.05 BTC ogni 60 secondi.</p>
-      <p>Timer: <span id="afk-timer">60</span> secondi</p>
-    </section>
-
-    <!-- Account Info -->
-    <section id="account" class="section hidden">
-      <h2>Account Info</h2>
-      <p><strong>Username:</strong> <span id="acc-username"></span></p>
-      <p><strong>Password:</strong> <span id="acc-password">******</span>
-        <button onclick="togglePassword()">Mostra/Nascondi</button>
-      </p>
-      <p><strong>Wallet:</strong></p>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <nav>
       <ul>
-        <li>BTC: <span id="acc-btc">0.0000</span></li>
-        <li>ETH: <span id="acc-eth">0.0000</span></li>
-        <li>LTC: <span id="acc-ltc">0.0000</span></li>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account Info</a></li>
       </ul>
+    </nav>
+  </header>
+
+  <!-- CONTENUTO PRINCIPALE -->
+  <main role="main" aria-label="Dashboard Crypto Simulator">
+    <h1 id="welcome-title">Benvenuto, <span id="username">...</span>!</h1>
+    <p class="welcome">Ecco il riepilogo del tuo portafoglio criptovalute</p>
+
+    <section class="wallet" aria-label="Portafoglio criptovalute">
+      <article class="coin-card" aria-label="Bitcoin (BTC)">
+        <div class="coin-name">
+          <svg viewBox="0 0 24 24" fill="#f7931a"><path d="M11.994 0C5.368 0 0 5.37 0 11.994..."/></svg>
+          BTC
+        </div>
+        <div class="coin-amount" id="btc-amount">0.000</div>
+      </article>
+
+      <article class="coin-card" aria-label="Ethereum (ETH)">
+        <div class="coin-name">
+          <svg viewBox="0 0 24 24" fill="#627eea"><path d="M12 0l-7 12 7 12 7-12-7-12z"/></svg>
+          ETH
+        </div>
+        <div class="coin-amount" id="eth-amount">0.000</div>
+      </article>
+
+      <article class="coin-card" aria-label="Litecoin (LTC)">
+        <div class="coin-name">
+          <svg viewBox="0 0 24 24" fill="#b8b8b8"><path d="M6 3h3.7l2.3 7H9v3h6v3H6v-3h3l2-6H6V3z"/></svg>
+          LTC
+        </div>
+        <div class="coin-amount" id="ltc-amount">0.000</div>
+      </article>
     </section>
+
+    <div class="particles" aria-hidden="true">
+      <span class="particle" style="width: 12px; height:12px; top: 10%; left: 15%; animation-delay: 0s;"></span>
+      <span class="particle" style="width: 8px; height:8px; top: 30%; left: 70%; animation-delay: 3s;"></span>
+      <span class="particle" style="width: 6px; height:6px; top: 55%; left: 40%; animation-delay: 6s;"></span>
+      <span class="particle" style="width: 14px; height:14px; top: 80%; left: 80%; animation-delay: 9s;"></span>
+      <span class="particle" style="width: 10px; height:10px; top: 75%; left: 20%; animation-delay: 12s;"></span>
+    </div>
   </main>
+
+  <script type="module">
+    import { db, ref, get } from './js/firebase.js';
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const usernameEl = document.getElementById("username");
+      const btcEl = document.getElementById("btc-amount");
+      const ethEl = document.getElementById("eth-amount");
+      const ltcEl = document.getElementById("ltc-amount");
+
+      const storedUser = localStorage.getItem("user");
+
+      if (!storedUser) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      usernameEl.textContent = storedUser;
+
+      try {
+        const snapshot = await get(ref(db, `users/${storedUser}/wallet`));
+        if (snapshot.exists()) {
+          const wallet = snapshot.val();
+          btcEl.textContent = wallet.BTC.toFixed(3);
+          ethEl.textContent = wallet.ETH.toFixed(3);
+          ltcEl.textContent = wallet.LTC.toFixed(3);
+        } else {
+          btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
+        }
+      } catch (error) {
+        console.error("Errore caricamento portafoglio:", error);
+        btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
+      }
+    });
+  </script>
 </body>
 </html>
