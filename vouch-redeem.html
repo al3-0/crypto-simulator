@@ -154,7 +154,7 @@
     <h1>Riscatta Vouch</h1>
 
     <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" />
-    <button onclick="redeemVouch()">Riscatta</button>
+    <button id="btnRedeem">Riscatta</button>
 
     <div id="redeemMsg"></div>
 
@@ -165,19 +165,32 @@
   </main>
 
   <script type="module">
-    import { db, ref, get, set, remove, update, push, child } from './js/firebase.js';
+    import { db, ref, get, set, remove, update, push } from './js/firebase.js';
+
+    function showMessage(msg) {
+      document.getElementById('redeemMsg').textContent = msg;
+    }
 
     async function redeemVouch() {
       const user = localStorage.getItem('user');
-      if (!user) return location.href = 'index.html';
+      if (!user) {
+        location.href = 'index.html';
+        return;
+      }
 
       const codeInput = document.getElementById('codeInput');
       const code = codeInput.value.trim().toUpperCase();
       const match = code.match(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
-      if (!match) return alert('Formato codice non valido.');
+      if (!match) {
+        alert('Formato codice non valido.');
+        return;
+      }
 
       const vouchSnap = await get(ref(db, 'vouch'));
-      if (!vouchSnap.exists()) return showMessage('Nessun codice valido.');
+      if (!vouchSnap.exists()) {
+        showMessage('Nessun codice valido.');
+        return;
+      }
       
       let found = false;
       let vouchOwner = null;
@@ -192,7 +205,10 @@
         }
       }
 
-      if (!found) return showMessage('Codice non valido o già usato.');
+      if (!found) {
+        showMessage('Codice non valido o già usato.');
+        return;
+      }
 
       // Aggiorna wallet utente
       const walletSnap = await get(ref(db, `users/${user}/wallet`));
@@ -234,12 +250,6 @@
       loadRedeemedList();
     }
 
-    function showMessage(msg) {
-      document.getElementById('redeemMsg').textContent = msg;
-    }
-
-    window.redeemVouch = redeemVouch;
-
     async function loadRedeemedList() {
       const user = localStorage.getItem('user');
       if (!user) return;
@@ -258,7 +268,10 @@
       }
     }
 
-    window.addEventListener('load', loadRedeemedList);
+    window.addEventListener('load', () => {
+      document.getElementById('btnRedeem').addEventListener('click', redeemVouch);
+      loadRedeemedList();
+    });
   </script>
 </body>
 </html>
