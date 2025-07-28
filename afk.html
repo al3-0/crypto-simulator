@@ -2,211 +2,232 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crypto Simulator - AFK Zone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AFK Zone</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
     body {
       margin: 0;
+      padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1f1f3f, #12122b);
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
       overflow: hidden;
     }
-    header {
-      background-color: #2a2a4f;
-      padding: 16px 32px;
+
+    header.navbar {
+      width: 100%;
+      background: #1c1c3aee;
+      padding: 14px 30px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+      backdrop-filter: blur(12px);
+    }
+
+    .navbar ul {
+      list-style: none;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
     }
-    header nav a {
-      color: #bb86fc;
+
+    .navbar a {
+      color: #eee;
+      font-weight: 600;
       text-decoration: none;
-      margin: 0 12px;
-      font-weight: bold;
-      transition: color 0.3s;
+      font-size: 1rem;
+      transition: color 0.3s ease, border-bottom 0.3s ease;
+      border-bottom: 2px solid transparent;
     }
-    header nav a:hover {
-      color: #fff;
+
+    .navbar a:hover {
+      color: #bb86fc;
+      border-bottom: 2px solid #bb86fc;
     }
+
     main {
+      margin-top: 100px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: calc(100vh - 80px);
+      padding: 40px 20px;
       text-align: center;
-      padding: 0 20px;
     }
+
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
+      font-size: 2.6rem;
       color: #bb86fc;
-    }
-    #btcEarned {
-      font-size: 2rem;
       margin-bottom: 10px;
-      color: #7e5fff;
+      animation: fadeInDown 1s ease-in-out;
     }
-    #afkStatus {
-      font-size: 1rem;
+
+    p.sub {
+      color: #ccc;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .counter {
+      font-size: 3rem;
+      font-weight: bold;
       margin-bottom: 20px;
-      color: #bbb;
+      animation: glow 2s infinite alternate;
+      color: #fff;
     }
-    #countdown {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      color: #f0f0f0;
+
+    .earned {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #a0e0ff;
     }
-    ul#sessionList {
-      list-style: none;
-      padding: 0;
+
+    ul.session-list {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #252546;
+      border-radius: 12px;
       max-height: 200px;
       overflow-y: auto;
-      background: rgba(42,42,79,0.4);
-      border-radius: 8px;
-      width: 300px;
-      margin-top: 20px;
+      box-shadow: 0 0 10px rgba(187, 134, 252, 0.2);
     }
-    ul#sessionList li {
-      padding: 10px;
-      border-bottom: 1px solid #333;
-    }
-    .floating {
+
+    .bubble {
       position: absolute;
-      width: 20px;
-      height: 20px;
-      background: rgba(187,134,252,0.3);
       border-radius: 50%;
-      animation: float 8s infinite ease-in-out;
+      background: rgba(187, 134, 252, 0.3);
+      animation: floatUp 20s linear infinite;
     }
-    @keyframes float {
-      0%   { transform: translateY(0); opacity: 1; }
-      50%  { transform: translateY(-100px); opacity: 0.5; }
-      100% { transform: translateY(0); opacity: 1; }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(0.5);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #bb86fc;
+      }
+      to {
+        text-shadow: 0 0 20px #bb86fc, 0 0 40px #bb86fc;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Crypto Simulator</h2>
+  <header class="navbar">
     <nav>
-      <a href="dashboard.html">Home</a>
-      <a href="exchange.html">Exchange</a>
-      <a href="vouch-create.html">Vouch Create</a>
-      <a href="vouch-redeem.html">Vouch Redeem</a>
-      <a href="afk.html">AFK Zone</a>
+      <ul>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+      </ul>
     </nav>
   </header>
+
   <main>
     <h1>AFK Zone</h1>
-    <div id="btcEarned">+0.000 BTC</div>
-    <div id="afkStatus">⛔ Guadagno in pausa (scheda non attiva)</div>
-    <div id="countdown">60</div>
-    <ul id="sessionList"></ul>
+    <p class="sub">Resta su questa pagina per guadagnare BTC ogni 60 secondi</p>
+    <div class="counter" id="counter">60</div>
+    <div class="earned">Guadagni sessione: <span id="btcEarned">0.000</span> BTC</div>
+    <ul class="session-list" id="btcList"></ul>
   </main>
+
+  <!-- Animazioni decorative -->
+  <script>
+    for (let i = 0; i < 25; i++) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      const size = Math.random() * 20 + 20;
+      bubble.style.width = size + 'px';
+      bubble.style.height = size + 'px';
+      bubble.style.left = Math.random() * 100 + 'vw';
+      bubble.style.animationDuration = (10 + Math.random() * 20) + 's';
+      document.body.appendChild(bubble);
+    }
+  </script>
+
+  <!-- Logica AFK -->
   <script type="module">
     import { db, ref, get, update } from './js/firebase.js';
 
-    let btc = 0;
-    let timer = null;
-    let countdownTimer = null;
-    let secondsLeft = 60;
+    let countdown = 60;
+    let interval = null;
+    let earned = 0;
+    let active = true;
 
-    const username = localStorage.getItem("user");
-    const counterEl = document.getElementById('btcEarned');
-    const statusEl = document.getElementById('afkStatus');
-    const listEl = document.getElementById('sessionList');
-    const countdownEl = document.getElementById('countdown');
+    const counterEl = document.getElementById('counter');
+    const earnedEl = document.getElementById('btcEarned');
+    const btcList = document.getElementById('btcList');
+    const user = localStorage.getItem('user');
 
-    function updateCountdown() {
-      countdownEl.textContent = secondsLeft;
+    if (!user) {
+      window.location.href = 'index.html';
     }
 
-    function startCountdown() {
-      if (countdownTimer) clearInterval(countdownTimer);
-      secondsLeft = 60;
-      updateCountdown();
+    function tick() {
+      if (!active) return;
 
-      countdownTimer = setInterval(() => {
-        secondsLeft--;
-        updateCountdown();
+      countdown--;
+      counterEl.textContent = countdown;
 
-        if (secondsLeft <= 0) {
-          addReward();
-          secondsLeft = 60;
-        }
-      }, 1000);
+      if (countdown <= 0) {
+        countdown = 60;
+        earned += 0.001;
+        earnedEl.textContent = earned.toFixed(3);
+
+        const li = document.createElement('li');
+        li.textContent = `+0.001 BTC - ${new Date().toLocaleTimeString()}`;
+        btcList.appendChild(li);
+
+        updateWallet(0.001);
+      }
     }
 
-    function stopCountdown() {
-      if (countdownTimer) clearInterval(countdownTimer);
-    }
-
-    async function addReward() {
-      if (!username) return;
-
-      btc += 0.001;
-      counterEl.textContent = `+${btc.toFixed(3)} BTC`;
-
-      const li = document.createElement('li');
-      const now = new Date().toLocaleTimeString();
-      li.textContent = `${now} – Guadagnato 0.001 BTC`;
-      listEl.prepend(li);
-
+    async function updateWallet(amount) {
       try {
-        const userRef = ref(db, `users/${username}`);
-        const snapshot = await get(userRef);
-        if (!snapshot.exists()) return;
-
-        const current = snapshot.val();
-        const newWallet = (parseFloat(current.wallet) || 0) + 0.001;
-
-        await update(userRef, { wallet: newWallet.toFixed(8) });
+        const walletRef = ref(db, `users/${user}/wallet`);
+        const snapshot = await get(walletRef);
+        let wallet = snapshot.exists() ? snapshot.val() : {};
+        wallet.BTC = (wallet.BTC || 0) + amount;
+        await update(walletRef, wallet);
       } catch (error) {
-        console.error("Errore aggiornamento wallet:", error);
+        console.error('Errore aggiornamento wallet:', error);
       }
     }
 
-    function startAFK() {
-      if (!timer) {
-        startCountdown();
-        statusEl.textContent = '✅ Guadagno attivo';
-      }
-    }
-
-    function stopAFK() {
-      stopCountdown();
-      timer = null;
-      statusEl.textContent = '⛔ Guadagno in pausa (scheda non attiva)';
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        startAFK();
-      } else {
-        stopAFK();
-      }
+    document.addEventListener("visibilitychange", () => {
+      active = document.visibilityState === "visible";
     });
 
     window.addEventListener('load', () => {
-      if (document.visibilityState === 'visible') {
-        startAFK();
-      }
+      interval = setInterval(tick, 1000);
     });
-  </script>
-  <script>
-    // animazioni decorative
-    for (let i = 0; i < 30; i++) {
-      const bubble = document.createElement('div');
-      bubble.className = 'floating';
-      bubble.style.left = `${Math.random() * 100}%`;
-      bubble.style.top = `${Math.random() * 100}%`;
-      bubble.style.animationDuration = `${4 + Math.random() * 6}s`;
-      document.body.appendChild(bubble);
-    }
   </script>
 </body>
 </html>
