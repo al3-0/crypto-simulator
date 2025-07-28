@@ -1,5 +1,3 @@
-// authCheck.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
@@ -19,7 +17,7 @@ const db = getDatabase(app);
 
 async function checkVoucherPermission(username) {
   try {
-    const response = await fetch('./js/wvouchers.json');
+    const response = await fetch('./js/wvouchers.json'); // <-- qui!
     if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
     const authorizedUsers = await response.json();
     return authorizedUsers.includes(username);
@@ -37,7 +35,7 @@ async function hideVoucherSectionIfNoPermission(username) {
     voucherSection.style.display = 'none';
     console.log("Voucher create section nascosta perché non autorizzato");
   } else {
-    voucherSection.style.display = ''; // Mostra se ha permessi
+    voucherSection.style.display = '';
   }
 }
 
@@ -46,7 +44,7 @@ async function redirectIfNoVoucherPermission(username, currentPath) {
     const hasPermission = await checkVoucherPermission(username);
     if (!hasPermission) {
       alert("Non sei autorizzato a creare vouchers!");
-      window.location.href = '/crypto-simulator/dashboard.html';
+      window.location.href = '/crypto-simulator/dashboard.html'; // redirect corretto
       return true;
     }
   }
@@ -58,7 +56,7 @@ async function checkAuth() {
   const currentPath = window.location.pathname;
 
   if (!username) {
-    window.location.href = '/crypto-simulator/index.html';  // redirect a login se non loggato
+    window.location.href = '/crypto-simulator/index.html';
     return;
   }
 
