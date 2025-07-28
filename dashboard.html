@@ -143,7 +143,6 @@
       font-size: 1.7rem;
       color: #e0d4ff;
       text-shadow: 0 0 4px #b68fffcc;
-      transition: opacity 0.3s ease;
     }
 
     @keyframes fadeInDown {
@@ -258,20 +257,26 @@
 
       <article class="coin-card" aria-label="Litecoin (LTC)">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#b8b8b8"><path d="M12 0l-6 12 6 12 6-12-6-12z"/></svg>
+          <svg viewBox="0 0 24 24" fill="#b8b8b8"><path d="M6 3h3.7l2.3 7H9v3h6v3H6v-3h3l2-6H6V3z"/></svg>
           LTC
         </div>
         <div class="coin-amount" id="ltc-amount">0.000</div>
       </article>
     </section>
 
-    <div class="particles" aria-hidden="true"></div>
+    <div class="particles" aria-hidden="true">
+      <span class="particle" style="width: 12px; height:12px; top: 10%; left: 15%; animation-delay: 0s;"></span>
+      <span class="particle" style="width: 8px; height:8px; top: 30%; left: 70%; animation-delay: 3s;"></span>
+      <span class="particle" style="width: 6px; height:6px; top: 55%; left: 40%; animation-delay: 6s;"></span>
+      <span class="particle" style="width: 14px; height:14px; top: 80%; left: 80%; animation-delay: 9s;"></span>
+      <span class="particle" style="width: 10px; height:10px; top: 75%; left: 20%; animation-delay: 12s;"></span>
+    </div>
   </main>
 
   <script type="module">
-    import { db, ref, onValue } from './js/firebase.js';
+    import { db, ref, get } from './js/firebase.js';
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       const usernameEl = document.getElementById("username");
       const btcEl = document.getElementById("btc-amount");
       const ethEl = document.getElementById("eth-amount");
@@ -286,37 +291,21 @@
 
       usernameEl.textContent = storedUser;
 
-      const walletRef = ref(db, `users/${storedUser}/wallet`);
-
-      onValue(walletRef, (snapshot) => {
+      try {
+        const snapshot = await get(ref(db, users/${storedUser}/wallet));
         if (snapshot.exists()) {
           const wallet = snapshot.val();
-
-          // Animazione semplice: fade out, aggiorna, fade in
-          [btcEl, ethEl, ltcEl].forEach(el => {
-            el.style.transition = 'opacity 0.3s ease';
-            el.style.opacity = 0;
-          });
-
-          setTimeout(() => {
-            btcEl.textContent = wallet.BTC.toFixed(3);
-            ethEl.textContent = wallet.ETH.toFixed(3);
-            ltcEl.textContent = wallet.LTC.toFixed(3);
-
-            [btcEl, ethEl, ltcEl].forEach(el => {
-              el.style.opacity = 1;
-            });
-          }, 300);
-
+          btcEl.textContent = wallet.BTC.toFixed(3);
+          ethEl.textContent = wallet.ETH.toFixed(3);
+          ltcEl.textContent = wallet.LTC.toFixed(3);
         } else {
           btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
         }
-      }, (error) => {
+      } catch (error) {
         console.error("Errore caricamento portafoglio:", error);
         btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
-      });
+      }
     });
   </script>
-
 </body>
 </html>
