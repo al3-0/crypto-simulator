@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Simulator - Account</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      color: #eee;
+    }
+
+    header.navbar {
+      width: 100%;
+      background: #1c1c3aee;
+      padding: 14px 30px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+      backdrop-filter: blur(12px);
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar a {
+      color: #eee;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s ease, border-bottom 0.3s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .navbar a:hover {
+      color: #bb86fc;
+      border-bottom: 2px solid #bb86fc;
+    }
+
+    main {
+      margin-top: 100px;
+      padding: 40px 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #2a2a4f;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+    }
+
+    h1 {
+      text-align: center;
+      color: #bb86fc;
+      margin-bottom: 30px;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .info div {
+      background: #3b3b65;
+      padding: 16px 20px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+
+    .info div:hover {
+      background: #4b4b7a;
+    }
+
+    .info label {
+      font-weight: 600;
+      color: #ccc;
+    }
+
+    .value {
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .toggle-password {
+      cursor: pointer;
+      margin-left: 10px;
+      color: #7e5fff;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <nav>
+      <ul>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Il tuo Account</h1>
+    <div class="info">
+      <div><label>Username:</label><span class="value" id="username">--</span></div>
+      <div>
+        <label>Password:</label>
+        <span class="value">
+          <span id="password">••••••</span>
+          <span class="toggle-password" onclick="togglePassword()">👁️</span>
+        </span>
+      </div>
+      <div><label>Bitcoin (BTC):</label><span class="value" id="btc">0.000</span></div>
+      <div><label>Ethereum (ETH):</label><span class="value" id="eth">0.000</span></div>
+      <div><label>Litecoin (LTC):</label><span class="value" id="ltc">0.000</span></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { db, ref, get } from './js/firebase.js';
+
+    const user = localStorage.getItem("user");
+    if (!user) window.location.href = "index.html";
+
+    document.getElementById("username").textContent = user;
+
+    const passwordEl = document.getElementById("password");
+    let passwordVisible = false;
+
+    async function loadData() {
+      try {
+        const snapshot = await get(ref(db, `users/${user}`));
+        if (!snapshot.exists()) return;
+
+        const data = snapshot.val();
+        passwordEl.textContent = passwordVisible ? data.password : "••••••";
+        document.getElementById("btc").textContent = (data.wallet?.BTC || 0).toFixed(3);
+        document.getElementById("eth").textContent = (data.wallet?.ETH || 0).toFixed(3);
+        document.getElementById("ltc").textContent = (data.wallet?.LTC || 0).toFixed(3);
+      } catch (e) {
+        console.error("Errore nel caricamento account:", e);
+      }
+    }
+
+    window.togglePassword = () => {
+      passwordVisible = !passwordVisible;
+      loadData();
+    };
+
+    loadData();
+  </script>
+</body>
+</html>
