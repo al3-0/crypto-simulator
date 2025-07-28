@@ -1,82 +1,72 @@
 import { db, ref, get } from './js/firebase.js';
 
-async function getIP() {
+async function checkVoucherPermission(username) {
   try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const data = await res.json();
-    return data.ip;
-  } catch {
-    return '0.0.0.0';
+    const response = await fetch('./wvouchers.json');
+    if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
+    const authorizedUsers = await response.json();
+
+    // authorizedUsers è un array di username autorizzati, es: ["user1", "user2", "admin"]
+    return authorizedUsers.includes(username);
+  } catch (error) {
+    console.error("Errore caricando wvouchers.json:", error);
+    return false; // per sicurezza se fallisce, nessuna autorizzazione
   }
+}
+
+async function hideVoucherSectionIfNoPermission(username) {
+  const voucherSection = document.getElementById('voucher-create-section');
+  if (!voucherSection) return; // se la sezione non esiste, niente da fare
+
+  const hasPermission = await checkVoucherPermission(username);
+  if (!hasPermission) {
+    voucherSection.style.display = 'none';
+  }
+}
+
+async function redirectIfNoVoucherPermission(username, currentPath) {
+  if (currentPath.endsWith('vouch-create.html')) {
+    const hasPermission = await checkVoucherPermission(username);
+    if (!hasPermission) {
+      alert("Non sei autorizzato a creare vouchers!");
+      window.location.href = '/index.html';
+      return true; // segnalare che abbiamo fatto redirect
+    }
+  }
+  return false; // nessun redirect fatto
 }
 
 async function checkAuth() {
   const username = localStorage.getItem('user');
   const currentPath = window.location.pathname;
 
-  // Pagine pubbliche dove NON deve essere presente l'utente loggato:
-  const publicPages = ['/', '/index.html', '/register.html'];
+  if (!username) {
+    // Non loggato → reindirizza sempre a login (index.html)
+    window.location.href = '/index.html';
+    return;
+  }
 
-  if (username) {
-    // Se ho username in localStorage, verifico che esista nel DB
-    try {
-      const snapshot = await get(ref(db, `users/${username}`));
-      if (!snapshot.exists()) {
-        // User non esiste, pulisco localStorage e redirect a login
-        localStorage.removeItem('user');
-        if (!publicPages.includes(currentPath)) {
-          window.location.href = '/index.html';
-        }
-        return;
-      }
-
-      // Se utente loggato e su pagina pubblica, mando alla dashboard
-      if (publicPages.includes(currentPath)) {
-        window.location.href = '/dashboard.html';
-      }
-
-      // Altrimenti utente loggato su pagina protetta: OK, nessun redirect
-    } catch (error) {
-      console.error('Errore connessione DB', error);
-      // In caso di errore meglio reindirizzare a login per sicurezza
+  try {
+    // Verifico se l'utente esiste nel DB Firebase
+    const snapshot = await get(ref(db, `users/${username}`));
+    if (!snapshot.exists()) {
       localStorage.removeItem('user');
-      if (!publicPages.includes(currentPath)) {
-        window.location.href = '/index.html';
-      }
-    }
-  } else {
-    // Non ho username in localStorage, provo a fare login automatico tramite IP su pagine pubbliche
-    if (publicPages.includes(currentPath)) {
-      try {
-        const ip = await getIP();
-        // Cerco utente con questo IP
-        // ATTENZIONE: questa funzione dipende da come sono strutturati i dati sul db
-        // Devi modificare in base a come fai la query nel tuo DB Firebase (firestore o realtime)
-        
-        // Esempio Realtime DB: cerca tutti gli utenti (attenzione a query in DB grande)
-        // Qui facciamo una scansione: NON efficiente ma d'esempio
-        const snapshot = await get(ref(db, 'users'));
-        if (snapshot.exists()) {
-          const users = snapshot.val();
-          for (const [userKey, userData] of Object.entries(users)) {
-            if (userData.ip === ip) {
-              // Found user with matching IP, log in automatically
-              localStorage.setItem('user', userKey);
-              window.location.href = '/dashboard.html';
-              return;
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Errore durante login automatico IP', error);
-      }
-      // Se non trovato o errore, resta su pagina pubblica
-    } else {
-      // Se non ho user e sono su pagina protetta, reindirizzo a login
       window.location.href = '/index.html';
+      return;
     }
+
+    // Se siamo nella pagina voucher-create.html, redirect se non autorizzati
+    const redirected = await redirectIfNoVoucherPermission(username, currentPath);
+    if (redirected) return;
+
+    // Se l'utente è su pagine dove appare la sezione voucher create, ma non ha permessi la nascondo:
+    await hideVoucherSectionIfNoPermission(username);
+
+  } catch (error) {
+    console.error("Errore durante l'autenticazione:", error);
+    localStorage.removeItem('user');
+    window.location.href = '/index.html';
   }
 }
 
-// Eseguo subito la verifica
 checkAuth();
