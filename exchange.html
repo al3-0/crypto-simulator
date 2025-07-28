@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Exchange</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 40px;
+    }
+
+    .navbar {
+      width: 100%;
+      background: #1c1c3aee;
+      padding: 14px 30px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+      backdrop-filter: blur(12px);
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar a {
+      color: #eee;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s ease, border-bottom 0.3s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .navbar a:hover {
+      color: #bb86fc;
+      border-bottom: 2px solid #bb86fc;
+    }
+
+    .exchange-container {
+      background: #2a2a4fdd;
+      border-radius: 16px;
+      max-width: 500px;
+      margin: auto;
+      padding: 40px;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.6);
+      backdrop-filter: blur(12px);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    h1 {
+      text-align: center;
+      color: #bb86fc;
+      font-size: 2.4rem;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin: 20px 0 8px;
+      font-weight: bold;
+      color: #ddd;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background-color: #1c1c3a;
+      color: #fff;
+      outline: none;
+    }
+
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 12px;
+      background: #bb86fc;
+      color: #1c1c3a;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #d3aaff;
+    }
+
+    .result {
+      text-align: center;
+      margin-top: 20px;
+      color: #bfbfff;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .exchange-container {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <nav>
+      <ul>
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account Info</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="exchange-container">
+    <h1>Exchange Criptovalute</h1>
+    
+    <label for="from">Da</label>
+    <select id="from">
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="LTC">Litecoin (LTC)</option>
+    </select>
+
+    <label for="to">A</label>
+    <select id="to">
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="LTC">Litecoin (LTC)</option>
+    </select>
+
+    <label for="amount">Quantità</label>
+    <input type="number" id="amount" min="0" step="0.001" placeholder="Es. 0.5" />
+
+    <button id="exchangeBtn">Converti</button>
+
+    <div class="result" id="resultMsg"></div>
+  </main>
+
+  <script type="module">
+    import { db, ref, get, set, update } from './js/firebase.js';
+
+    const fromEl = document.getElementById("from");
+    const toEl = document.getElementById("to");
+    const amountEl = document.getElementById("amount");
+    const resultEl = document.getElementById("resultMsg");
+    const button = document.getElementById("exchangeBtn");
+
+    const exchangeRates = {
+      BTC: { ETH: 15, LTC: 200 },
+      ETH: { BTC: 1 / 15, LTC: 13.33 },
+      LTC: { BTC: 1 / 200, ETH: 1 / 13.33 }
+    };
+
+    button.addEventListener("click", async () => {
+      const user = localStorage.getItem("user");
+      if (!user) return location.href = "index.html";
+
+      const from = fromEl.value;
+      const to = toEl.value;
+      const amount = parseFloat(amountEl.value);
+
+      if (from === to) return resultEl.textContent = "Scegli criptovalute diverse.";
+      if (!amount || amount <= 0) return resultEl.textContent = "Inserisci un valore valido.";
+
+      try {
+        const snapshot = await get(ref(db, `users/${user}/wallet`));
+        if (!snapshot.exists()) throw new Error("Wallet non trovato.");
+
+        const wallet = snapshot.val();
+        if (wallet[from] < amount) return resultEl.textContent = `Saldo ${from} insufficiente.`;
+
+        const rate = exchangeRates[from][to];
+        const converted = amount * rate;
+
+        wallet[from] -= amount;
+        wallet[to] += converted;
+
+        await update(ref(db, `users/${user}/wallet`), {
+          [from]: parseFloat(wallet[from].toFixed(6)),
+          [to]: parseFloat(wallet[to].toFixed(6))
+        });
+
+        resultEl.textContent = `Hai convertito ${amount} ${from} in ${converted.toFixed(3)} ${to}`;
+      } catch (err) {
+        console.error(err);
+        resultEl.textContent = "Errore durante la conversione.";
+      }
+    });
+  </script>
+</body>
+</html>
