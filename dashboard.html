@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto Simulator - Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/main.js" defer></script>
+</head>
+<body>
+  <div class="navbar">
+    <button onclick="showSection('exchange')">Exchange</button>
+    <button onclick="showSection('vouch-create')">Vouch Create</button>
+    <button onclick="showSection('vouch-redeem')">Vouch Redeem</button>
+    <button onclick="showSection('afk')">AFK Zone</button>
+    <button onclick="showSection('account')">Account Info</button>
+  </div>
+
+  <div id="content">
+    <section id="exchange" class="section hidden">
+      <h2>Exchange</h2>
+      <!-- Exchange logic -->
+    </section>
+    <section id="vouch-create" class="section hidden">
+      <h2>Vouch Create</h2>
+      <!-- Vouch create logic -->
+    </section>
+    <section id="vouch-redeem" class="section hidden">
+      <h2>Vouch Redeem</h2>
+      <!-- Vouch redeem logic -->
+    </section>
+    <section id="afk" class="section hidden">
+      <h2>AFK Zone</h2>
+      <p>Timer: <span id="afk-timer">60</span>s</p>
+    </section>
+    <section id="account" class="section hidden">
+      <h2>Account Info</h2>
+      <p>Username: <span id="acc-username"></span></p>
+      <p>Password: <span id="acc-password">******</span> <button onclick="togglePassword()">👁️</button></p>
+      <p>BTC: <span id="acc-btc">0</span></p>
+      <p>ETH: <span id="acc-eth">0</span></p>
+      <p>LTC: <span id="acc-ltc">0</span></p>
+    </section>
+  </div>
+</body>
+</html>
