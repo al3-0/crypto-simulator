@@ -78,6 +78,7 @@
   }
 </style>
 
+<!-- reCAPTCHA v3 script con tua chiave pubblica -->
 <script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
 <script type="module">
@@ -93,27 +94,32 @@
     }
   }
 
-  async function executeRecaptcha() {
-    return grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', {action: 'register'});
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById('register-form');
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
 
+      // Ottieni il token reCAPTCHA v3 prima di continuare
+      const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', {action: 'register'});
+
+      if (!token) {
+        alert("Errore nella verifica reCAPTCHA. Riprova.");
+        return;
+      }
+
+      // Puoi opzionalmente aggiungere qui la logica per inviare il token al backend e verificare lato server
+
       const username = form.username.value.trim();
       const password = form.password.value;
       const passwordConfirm = form.passwordConfirm.value;
 
-      // Basic validation
       if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
-        alert("Username deve essere 3-15 caratteri, solo lettere e numeri.");
+        alert("Username non valido. Solo lettere e numeri, 3-15 caratteri.");
         return;
       }
       if (password.length < 6) {
-        alert("La password deve contenere almeno 6 caratteri.");
+        alert("La password deve essere almeno di 6 caratteri.");
         return;
       }
       if (password !== passwordConfirm) {
@@ -122,33 +128,31 @@
       }
 
       try {
-        const token = await executeRecaptcha();
-        if (!token) {
-          alert("Errore nella verifica reCAPTCHA, riprova.");
-          return;
-        }
+        const userRef = ref(db, `users/${username}`);
+        const snapshot = await get(userRef);
 
-        // Verifica se utente esiste già
-        const snapshot = await get(ref(db, `users/${username}`));
         if (snapshot.exists()) {
-          alert("Username già utilizzato, scegli un altro.");
+          alert("Username già in uso.");
           return;
         }
 
         const ip = await getIP();
 
-        await set(ref(db, `users/${username}`), {
+        await set(userRef, {
           password,
-          createdAt: new Date().toISOString(),
           ip,
-          balance: 0
+          wallet: {
+            BTC: 0,
+            ETH: 0,
+            LTC: 0
+          },
+          recaptchaToken: token // salvo il token per eventuale verifica futura
         });
 
-        alert("Registrazione completata! Ora puoi effettuare il login.");
-        window.location.href = "login.html";
-
+        localStorage.setItem("user", username);
+        window.location.href = "dashboard.html";
       } catch (error) {
-        alert("Errore di connessione o server, riprova.");
+        alert("Errore durante la registrazione, riprova.");
         console.error(error);
       }
     });
@@ -157,15 +161,15 @@
 </head>
 <body>
   <main role="main" aria-label="Registrazione Crypto Simulator">
-    <h1>Crypto Simulator</h1>
+    <h1>Registrazione</h1>
     <form id="register-form" novalidate>
-      <input type="text" name="username" placeholder="Username (3-15 caratteri)" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri" autocomplete="username" />
-      <input type="password" name="password" placeholder="Password (min 6 caratteri)" required minlength="6" autocomplete="new-password" />
-      <input type="password" name="passwordConfirm" placeholder="Conferma Password" required minlength="6" autocomplete="new-password" />
+      <input type="text" name="username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri, max 15 caratteri" />
+      <input type="password" name="password" placeholder="Password" autocomplete="new-password" required minlength="6" />
+      <input type="password" name="passwordConfirm" placeholder="Conferma Password" autocomplete="new-password" required minlength="6" />
       <button type="submit" aria-label="Registrati">Registrati</button>
     </form>
     <p class="login-link">
-      Hai già un account? <a href="login.html">Accedi qui!</a>
+      Hai già un account? <a href="index.html">Accedi qui</a>
     </p>
   </main>
 </body>
