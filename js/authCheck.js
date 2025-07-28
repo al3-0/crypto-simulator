@@ -1,4 +1,4 @@
-// authCheck.js - modulo ES6 completo e standalone con Firebase inizializzato dentro
+// authCheck.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
@@ -14,13 +14,12 @@ const firebaseConfig = {
   measurementId: "G-QSY10CVX1F"
 };
 
-// Inizializza Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 async function checkVoucherPermission(username) {
   try {
-    const response = await fetch('./js/wvouchers.json');  // metti wvouchers.json nella cartella js
+    const response = await fetch('./js/wvouchers.json');
     if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
     const authorizedUsers = await response.json();
     return authorizedUsers.includes(username);
@@ -36,6 +35,9 @@ async function hideVoucherSectionIfNoPermission(username) {
   const hasPermission = await checkVoucherPermission(username);
   if (!hasPermission) {
     voucherSection.style.display = 'none';
+    console.log("Voucher create section nascosta perché non autorizzato");
+  } else {
+    voucherSection.style.display = ''; // Mostra se ha permessi
   }
 }
 
@@ -44,7 +46,7 @@ async function redirectIfNoVoucherPermission(username, currentPath) {
     const hasPermission = await checkVoucherPermission(username);
     if (!hasPermission) {
       alert("Non sei autorizzato a creare vouchers!");
-      window.location.href = '/index.html';
+      window.location.href = '/crypto-simulator/dashboard.html';
       return true;
     }
   }
@@ -56,7 +58,7 @@ async function checkAuth() {
   const currentPath = window.location.pathname;
 
   if (!username) {
-    window.location.href = '/index.html';
+    window.location.href = '/crypto-simulator/index.html';  // redirect a login se non loggato
     return;
   }
 
@@ -64,7 +66,7 @@ async function checkAuth() {
     const snapshot = await get(ref(db, `users/${username}`));
     if (!snapshot.exists()) {
       localStorage.removeItem('user');
-      window.location.href = '/index.html';
+      window.location.href = '/crypto-simulator/index.html';
       return;
     }
 
@@ -75,7 +77,7 @@ async function checkAuth() {
   } catch (error) {
     console.error("Errore durante l'autenticazione:", error);
     localStorage.removeItem('user');
-    window.location.href = '/index.html';
+    window.location.href = '/crypto-simulator/index.html';
   }
 }
 
