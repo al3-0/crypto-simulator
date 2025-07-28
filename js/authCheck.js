@@ -1,12 +1,28 @@
-import { db, ref, get } from './firebase.js'; // IMPORT CORRETTO SENZA 'js/js'
+// authCheck.js - modulo ES6 completo e standalone con Firebase inizializzato dentro
 
-// Funzione per controllare se l'utente ha permessi voucher
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+  authDomain: "coins-7104d.firebaseapp.com",
+  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+  projectId: "coins-7104d",
+  storageBucket: "coins-7104d.firebasestorage.app",
+  messagingSenderId: "893938643778",
+  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+  measurementId: "G-QSY10CVX1F"
+};
+
+// Inizializza Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 async function checkVoucherPermission(username) {
   try {
-    const response = await fetch('./wvouchers.json'); // json in js/
+    const response = await fetch('./js/wvouchers.json');  // metti wvouchers.json nella cartella js
     if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
     const authorizedUsers = await response.json();
-    // authorizedUsers è array tipo ["Ale", "admin", ...]
     return authorizedUsers.includes(username);
   } catch (error) {
     console.error("Errore caricando wvouchers.json:", error);
@@ -14,7 +30,6 @@ async function checkVoucherPermission(username) {
   }
 }
 
-// Nascondi sezione voucher se utente non autorizzato
 async function hideVoucherSectionIfNoPermission(username) {
   const voucherSection = document.getElementById('voucher-create-section');
   if (!voucherSection) return;
@@ -24,7 +39,6 @@ async function hideVoucherSectionIfNoPermission(username) {
   }
 }
 
-// Reindirizza se utente non autorizzato su pagina voucher-create
 async function redirectIfNoVoucherPermission(username, currentPath) {
   if (currentPath.endsWith('vouch-create.html')) {
     const hasPermission = await checkVoucherPermission(username);
@@ -37,7 +51,6 @@ async function redirectIfNoVoucherPermission(username, currentPath) {
   return false;
 }
 
-// Funzione principale di controllo autenticazione
 async function checkAuth() {
   const username = localStorage.getItem('user');
   const currentPath = window.location.pathname;
@@ -55,8 +68,7 @@ async function checkAuth() {
       return;
     }
 
-    const redirected = await redirectIfNoVoucherPermission(username, currentPath);
-    if (redirected) return;
+    if (await redirectIfNoVoucherPermission(username, currentPath)) return;
 
     await hideVoucherSectionIfNoPermission(username);
 
