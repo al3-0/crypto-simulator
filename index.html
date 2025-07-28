@@ -78,7 +78,7 @@
   }
 </style>
 
-<!-- Inserisco script reCAPTCHA -->
+<!-- reCAPTCHA v2 -->
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <script type="module">
@@ -90,7 +90,7 @@
     form.addEventListener('submit', async e => {
       e.preventDefault();
 
-      // reCAPTCHA v2 controllo
+      // Controllo reCAPTCHA
       const captchaResponse = grecaptcha.getResponse();
       if (!captchaResponse) {
         alert("Per favore, verifica il CAPTCHA.");
@@ -109,7 +109,7 @@
         const snapshot = await get(ref(db, `users/${username}`));
         if (!snapshot.exists()) {
           alert("Utente non trovato.");
-          grecaptcha.reset(); // reset CAPTCHA se fallito
+          grecaptcha.reset();
           return;
         }
         const userData = snapshot.val();
@@ -135,9 +135,9 @@
     <form id="login-form" novalidate>
       <input type="text" name="username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri, max 15 caratteri" />
       <input type="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6" />
-
+      
       <!-- reCAPTCHA -->
-      <div class="g-recaptcha" data-sitekey="LA_TUA_SITE_KEY"></div>
+      <div class="g-recaptcha" data-sitekey="6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></div>
 
       <button type="submit" aria-label="Accedi">Login</button>
     </form>
