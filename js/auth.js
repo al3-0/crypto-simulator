@@ -1,59 +1,62 @@
-import { db, ref, set, get, child } from './firebase.js';
+import { db, ref, get } from './firebase.js';
 
 async function getIP() {
-  const res = await fetch('https://api.ipify.org?format=json');
-  const data = await res.json();
-  return data.ip;
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip;
+  } catch {
+    return null;
+  }
 }
 
-window.register = async function() {
-  const username = document.getElementById('reg-username').value;
-  const password = document.getElementById('reg-password').value;
-  const ip = await getIP();
+async function checkAuth() {
+  const path = window.location.pathname.split('/').pop();
 
-  if (username.length > 15 || /[^a-zA-Z0-9]/.test(username)) {
-    alert("Username non valido.");
-    return;
-  }
+  if (path === 'index.html' || path === 'register.html' || path === '') {
+    // Se siamo su index o register, controlla IP per login automatico
+    const ip = await getIP();
+    if (!ip) return; // Se non prende IP, esce
 
-  const userRef = ref(db, 'users/' + username);
-  const snapshot = await get(userRef);
-  if (snapshot.exists()) {
-    alert("Username già in uso.");
-    return;
-  }
+    try {
+      // Cerca utenti con questo IP
+      // Per Firebase Realtime DB devi fare una query per tutti gli utenti e filtrarli:
+      const usersSnapshot = await get(ref(db, 'users'));
+      if (!usersSnapshot.exists()) return;
 
-  await set(userRef, {
-    password,
-    ip,
-    wallet: {
-      BTC: 0,
-      ETH: 0,
-      LTC: 0
+      const users = usersSnapshot.val();
+      for (const [username, userData] of Object.entries(users)) {
+        if (userData.ip === ip) {
+          // Utente trovato con stesso IP, login automatico
+          localStorage.setItem('user', username);
+          window.location.href = 'dashboard.html';
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('Errore durante controllo IP:', err);
     }
-  });
-
-  localStorage.setItem("user", username);
-  window.location.href = "dashboard.html";
-};
-
-window.login = async function() {
-  const username = document.getElementById('login-username').value;
-  const password = document.getElementById('login-password').value;
-  const userRef = ref(db, 'users/' + username);
-  const snapshot = await get(userRef);
-
-  if (!snapshot.exists()) {
-    alert("Utente non trovato.");
-    return;
+    // Se non trovato, non fare nulla, resta sulla pagina (index o register)
+  } else {
+    // Se siamo su pagina protetta, controlla user localStorage e DB
+    const username = localStorage.getItem('user');
+    if (!username) {
+      window.location.href = 'index.html';
+      return;
+    }
+    try {
+      const snapshot = await get(ref(db, `users/${username}`));
+      if (!snapshot.exists()) {
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+        return;
+      }
+    } catch (error) {
+      console.error('Errore controllo autenticazione:', error);
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    }
   }
+}
 
-  const data = snapshot.val();
-  if (data.password !== password) {
-    alert("Password errata.");
-    return;
-  }
-
-  localStorage.setItem("user", username);
-  window.location.href = "dashboard.html";
-};
+checkAuth();
