@@ -2,21 +2,21 @@ import { db, ref, get } from './js/firebase.js';
 
 async function checkVoucherPermission(username) {
   try {
-    const response = await fetch('./wvouchers.json');
+    const response = await fetch('./js/wvouchers.json'); // Aggiorna il path se serve
     if (!response.ok) throw new Error('Impossibile caricare wvouchers.json');
     const authorizedUsers = await response.json();
 
-    // authorizedUsers è un array di username autorizzati, es: ["user1", "user2", "admin"]
-    return authorizedUsers.includes(username);
+    // Controllo case-insensitive per username autorizzati
+    return authorizedUsers.some(user => user.toLowerCase() === username.toLowerCase());
   } catch (error) {
     console.error("Errore caricando wvouchers.json:", error);
-    return false; // per sicurezza se fallisce, nessuna autorizzazione
+    return false; // Se fallisce il fetch, nessuna autorizzazione
   }
 }
 
 async function hideVoucherSectionIfNoPermission(username) {
   const voucherSection = document.getElementById('voucher-create-section');
-  if (!voucherSection) return; // se la sezione non esiste, niente da fare
+  if (!voucherSection) return; // Se la sezione non esiste, niente da fare
 
   const hasPermission = await checkVoucherPermission(username);
   if (!hasPermission) {
@@ -25,15 +25,15 @@ async function hideVoucherSectionIfNoPermission(username) {
 }
 
 async function redirectIfNoVoucherPermission(username, currentPath) {
-  if (currentPath.endsWith('vouch-create.html')) {
+  if (currentPath.endsWith('vouch-create.html')) { // Controlla esatto nome file
     const hasPermission = await checkVoucherPermission(username);
     if (!hasPermission) {
       alert("Non sei autorizzato a creare vouchers!");
       window.location.href = '/index.html';
-      return true; // segnalare che abbiamo fatto redirect
+      return true; // Redirect effettuato
     }
   }
-  return false; // nessun redirect fatto
+  return false; // Nessun redirect fatto
 }
 
 async function checkAuth() {
@@ -47,7 +47,7 @@ async function checkAuth() {
   }
 
   try {
-    // Verifico se l'utente esiste nel DB Firebase
+    // Verifica se l'utente esiste nel DB Firebase
     const snapshot = await get(ref(db, `users/${username}`));
     if (!snapshot.exists()) {
       localStorage.removeItem('user');
@@ -55,11 +55,11 @@ async function checkAuth() {
       return;
     }
 
-    // Se siamo nella pagina voucher-create.html, redirect se non autorizzati
+    // Se siamo nella pagina vouch-create.html, redirect se non autorizzati
     const redirected = await redirectIfNoVoucherPermission(username, currentPath);
     if (redirected) return;
 
-    // Se l'utente è su pagine dove appare la sezione voucher create, ma non ha permessi la nascondo:
+    // Nascondi la sezione voucher-create se non autorizzato
     await hideVoucherSectionIfNoPermission(username);
 
   } catch (error) {
