@@ -333,57 +333,67 @@
       e.target.value = sanitizeCode(e.target.value);
     });
 
-    async function redeemCode() {
-      const code = codeInput.value.trim().toUpperCase();
-      redeemMsg.style.color = '#eee';
+   async function redeemCode() {
+  const code = codeInput.value.trim().toUpperCase();
+  redeemMsg.style.color = '#eee';
+  console.log("Provo a riscattare il codice:", code);
 
-      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
-        redeemMsg.textContent = "Formato codice non valido (esempio: XXXX-XXXX-XXXX)";
-        redeemMsg.style.color = "#e57373";
-        return;
-      }
+  if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+    redeemMsg.textContent = "Formato codice non valido (esempio: XXXX-XXXX-XXXX)";
+    redeemMsg.style.color = "#e57373";
+    console.log("Formato codice non valido");
+    return;
+  }
 
-      if (redeemedCodes.includes(code)) {
-        redeemMsg.textContent = "Hai già riscattato questo codice.";
-        redeemMsg.style.color = "#ffb74d";
-        return;
-      }
+  if (redeemedCodes.includes(code)) {
+    redeemMsg.textContent = "Hai già riscattato questo codice.";
+    redeemMsg.style.color = "#ffb74d";
+    console.log("Codice già riscattato localmente");
+    return;
+  }
 
-      try {
-        const codeRef = ref(db, `vouch/${code}`);
-        const snapshot = await get(codeRef);
+  try {
+    const codeRef = ref(db, `vouch/${code}`);
+    const snapshot = await get(codeRef);
 
-        if (!snapshot.exists()) {
-          redeemMsg.textContent = "Codice non trovato.";
-          redeemMsg.style.color = "#e57373";
-          return;
-        }
-
-        const codeData = snapshot.val();
-        if (codeData.redeemed) {
-          redeemMsg.textContent = "Codice già riscattato.";
-          redeemMsg.style.color = "#e57373";
-          return;
-        }
-
-        // Aggiorna il codice come riscattato
-        const updates = {};
-        updates[`vouch/${code}/redeemed`] = true;
-        await update(ref(db), updates);
-
-        redeemMsg.textContent = "Codice riscattato con successo!";
-        redeemMsg.style.color = "#90ee90";
-
-        redeemedCodes.push(code);
-        localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
-        renderRedeemedList();
-        codeInput.value = '';
-      } catch (error) {
-        redeemMsg.textContent = "Errore durante il riscatto, riprova.";
-        redeemMsg.style.color = "#e57373";
-        console.error(error);
-      }
+    if (!snapshot.exists()) {
+      redeemMsg.textContent = "Codice non trovato.";
+      redeemMsg.style.color = "#e57373";
+      console.log("Codice non trovato nel DB");
+      return;
     }
+
+    const codeData = snapshot.val();
+    console.log("Dati codice dal DB:", codeData);
+
+    if (codeData.redeemed) {
+      redeemMsg.textContent = "Codice già riscattato.";
+      redeemMsg.style.color = "#e57373";
+      console.log("Codice già riscattato nel DB");
+      return;
+    }
+
+    // Aggiorna il codice come riscattato nel database
+    const updates = {};
+    updates[`vouch/${code}/redeemed`] = true;
+    await update(ref(db), updates);
+
+    redeemMsg.textContent = "Codice riscattato con successo!";
+    redeemMsg.style.color = "#90ee90";
+
+    redeemedCodes.push(code);
+    localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
+    renderRedeemedList();
+    codeInput.value = '';
+
+    console.log("Codice aggiornato correttamente nel DB");
+
+  } catch (error) {
+    redeemMsg.textContent = "Errore durante il riscatto, riprova.";
+    redeemMsg.style.color = "#e57373";
+    console.error("Errore riscatto:", error);
+  }
+}
 
     // Navbar toggle
     const navToggle = document.getElementById('nav-toggle');
