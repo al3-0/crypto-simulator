@@ -15,11 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/**
- * Recupera dati utente dal Realtime Database Firebase.
- * @param {string} username
- * @returns {Promise<Object|null>} dati utente o null se non esiste
- */
 async function loadUserData(username) {
   if (!username) return null;
   try {
@@ -35,4 +30,4 @@ async function loadUserData(username) {
   }
 }
 
-export { db, ref, get, loadUserData };
+export { loadUserData };
