@@ -5,9 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Dashboard</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script type="module" src="./js/authCheck.js"></script>
   <script type="module">
-    import { db, ref, get } from './js/firebase.js';
+    // Firebase setup
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
     document.addEventListener('DOMContentLoaded', async () => {
       const username = localStorage.getItem('user');
@@ -26,6 +41,15 @@
       } catch (err) {
         console.error("Errore nel caricamento del wallet:", err);
         window.location.href = 'index.html';
+      }
+
+      // Tema salvato
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.getElementById('theme-toggle').textContent = '☀️';
+      } else {
+        document.getElementById('theme-toggle').textContent = '🌙';
       }
     });
   </script>
@@ -283,11 +307,33 @@
       .nav-toggle {
         display: block;
       }
-    }
-  </style>
+    }  </style>
 </head>
 <body>
-  <nav class="navbar"> ... </nav>
+  <!-- ✅ Navbar funzionante -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo-link" style="margin-right: auto; padding-left: 30px;">
+      <img src="logo.png" alt="CryptoSim Logo" class="logo-img" />
+    </a>
+    <div class="nav-container">
+      <button class="nav-toggle" aria-label="Apri menu" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li>
+          <button id="theme-toggle" title="Cambia tema">🌙</button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ✅ Contenuto principale -->
   <main>
     <h1>Benvenuto, <span id="username">...</span>!</h1>
     <p class="welcome">Ecco il riepilogo del tuo portafoglio criptovalute</p>
@@ -313,14 +359,26 @@
     </section>
     <div class="particles"></div>
   </main>
+
+  <!-- ✅ Script navbar + tema -->
   <script>
-    document.querySelector('.nav-toggle').addEventListener('click', () => {
-      const nav = document.getElementById('nav-menu');
-      nav.classList.toggle('show');
-    });
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-      document.body.classList.toggle('light-theme');
-    });
+    (() => {
+      const navToggle = document.querySelector('.nav-toggle');
+      const navMenu = document.querySelector('.nav-menu');
+      const themeToggleBtn = document.getElementById('theme-toggle');
+
+      navToggle.addEventListener('click', () => {
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
+        navMenu.classList.toggle('show');
+      });
+
+      themeToggleBtn.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        themeToggleBtn.textContent = isLight ? '☀️' : '🌙';
+      });
+    })();
   </script>
 </body>
 </html>
