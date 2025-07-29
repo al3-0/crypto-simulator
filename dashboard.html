@@ -6,7 +6,6 @@
   <title>Crypto Simulator - Dashboard</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* --- Stili base (semplificati) --- */
     body {
       margin: 0;
       font-family: sans-serif;
@@ -16,6 +15,7 @@
       padding-top: 80px;
       transition: background 0.3s, color 0.3s;
     }
+
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -25,41 +25,48 @@
     nav.navbar {
       position: fixed;
       top: 0;
+      left: 0;
       width: 100%;
       background: #1c1c3a;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       padding: 10px 30px;
       z-index: 1000;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
     }
-    .navbar .logo-link img {
+
+    .logo-link img {
       height: 36px;
     }
+
     .nav-menu {
       display: flex;
-      gap: 20px;
       justify-content: center;
-      flex: 1;
+      gap: 20px;
       list-style: none;
-      padding: 0;
       margin: 0;
+      padding: 0;
     }
+
     .nav-menu li a {
       color: #ddd;
       text-decoration: none;
       font-weight: 600;
+      transition: color 0.3s;
     }
+
     .nav-menu li a:hover {
       color: #fff;
     }
+
     #theme-toggle {
       background: none;
       border: none;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       cursor: pointer;
       color: #ddd;
+      transition: color 0.3s;
     }
 
     /* --- Main Content --- */
@@ -71,6 +78,7 @@
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
       backdrop-filter: blur(10px);
+      animation: fadeIn 0.8s ease-in-out;
     }
 
     h1 {
@@ -94,6 +102,11 @@
       font-weight: bold;
       font-size: 1.2rem;
       box-shadow: inset 0 0 10px #7e5fff88;
+      transition: transform 0.2s;
+    }
+
+    .coin-card:hover {
+      transform: scale(1.02);
     }
 
     .coin-name {
@@ -111,9 +124,25 @@
       font-family: monospace;
     }
 
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @media (max-width: 640px) {
       main {
         padding: 20px;
+      }
+      .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
       }
     }
   </style>
@@ -162,9 +191,8 @@
     </section>
   </main>
 
-  <!-- ✅ Script con Firebase + tema + navbar -->
+  <!-- ✅ Script con Firebase + logica tema -->
   <script type="module">
-    // Importa Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
@@ -204,14 +232,12 @@
         window.location.href = 'index.html';
       }
 
-      // Tema salvato
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
         document.getElementById('theme-toggle').textContent = '☀️';
       }
 
-      // Tema toggle
       document.getElementById('theme-toggle').addEventListener('click', () => {
         const isLight = document.body.classList.toggle('light-theme');
         localStorage.setItem('theme', isLight ? 'light' : 'dark');
