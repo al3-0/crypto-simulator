@@ -322,6 +322,22 @@
   });
 
       msg.textContent = `Vouch generato: ${code}`;
+     const copyBtn = document.createElement("button");
+copyBtn.textContent = "Copia codice";
+copyBtn.style.marginTop = "10px";
+copyBtn.style.padding = "8px 14px";
+copyBtn.style.borderRadius = "6px";
+copyBtn.style.border = "none";
+copyBtn.style.cursor = "pointer";
+copyBtn.style.backgroundColor = "#7b5fff";
+copyBtn.style.color = "#fff";
+
+copyBtn.onclick = () => {
+  navigator.clipboard.writeText(code);
+  copyBtn.textContent = "Copiato!";
+};
+
+msg.appendChild(copyBtn);
     });
 
     // Tema e hamburger
