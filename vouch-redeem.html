@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Riscatta Vouch</title>
   <link rel="stylesheet" href="css/style.css" />
   <script type="module" src="./js/authCheck.js"></script>
@@ -11,8 +11,9 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #1c1c3a, #12122b);
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
       overflow-x: hidden;
+      color: #eee;
     }
 
     .background {
@@ -47,149 +48,187 @@
       }
     }
 
+    /* Navbar identica alla dashboard */
     .navbar {
       width: 100%;
-      background: #1c1c3add;
-      padding: 14px 30px;
+      background: #22224a;
+      padding: 16px 30px;
       position: fixed;
       top: 0;
       left: 0;
       z-index: 1000;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      box-shadow: 0 3px 15px rgba(187, 134, 252, 0.6);
+      backdrop-filter: saturate(180%) blur(12px);
     }
 
     .navbar ul {
       list-style: none;
       display: flex;
-      justify-content: center;
-      gap: 30px;
+      gap: 35px;
       margin: 0;
       padding: 0;
     }
 
     .navbar a {
-      color: #eee;
+      color: #d8d8ff;
       font-weight: 600;
       text-decoration: none;
-      font-size: 1rem;
-      border-bottom: 2px solid transparent;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
+      font-size: 1.1rem;
+      padding-bottom: 4px;
+      border-bottom: 3px solid transparent;
+      transition: color 0.3s ease, border-color 0.3s ease;
     }
 
-    .navbar a:hover {
+    .navbar a:hover,
+    .navbar a.active {
       color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
+      border-bottom-color: #bb86fc;
     }
 
-    .redeem-container {
-      background: #2a2a4fcc;
-      border-radius: 16px;
-      max-width: 500px;
-      margin: 140px auto 40px;
-      padding: 40px;
+    main.redeem-container {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      max-width: 480px;
+      margin: 140px auto 50px;
+      padding: 36px 32px;
+      box-shadow: 0 0 35px rgba(187, 134, 252, 0.45);
+      backdrop-filter: blur(14px);
       color: #eee;
-      box-shadow: 0 0 30px rgba(187, 134, 252, 0.4);
-      backdrop-filter: blur(12px);
     }
 
-    h1 {
+    main.redeem-container h1 {
       text-align: center;
+      font-size: 2.3rem;
+      margin-bottom: 28px;
       color: #bb86fc;
-      font-size: 2.2rem;
-      margin-bottom: 30px;
+      user-select: none;
     }
 
-    input,
-    button {
+    main.redeem-container input[type="text"] {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
-      font-size: 1rem;
+      padding: 14px 16px;
+      font-size: 1.1rem;
+      border-radius: 10px;
       border: none;
-    }
-
-    input {
       background-color: #1c1c3a;
-      color: #fff;
+      color: #eee;
+      letter-spacing: 3px;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease;
+    }
+    main.redeem-container input[type="text"]:focus {
+      outline: none;
+      background-color: #29294d;
     }
 
-    button {
-      background: #bb86fc;
+    main.redeem-container button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      background-color: #bb86fc;
       color: #1c1c3a;
-      font-weight: bold;
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background-color 0.3s ease;
+      user-select: none;
     }
-
-    button:hover {
-      background: #d3aaff;
+    main.redeem-container button:hover {
+      background-color: #d3aaff;
     }
 
     #redeemMsg {
-      margin-top: 20px;
+      margin-top: 22px;
       text-align: center;
+      font-size: 1.15rem;
+      min-height: 28px;
+      user-select: none;
       color: #bfbfff;
-      font-size: 1.1rem;
     }
 
     #redeemedList {
-      margin-top: 40px;
+      margin-top: 45px;
       background-color: #1f1f3d;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+      border-radius: 14px;
+      padding: 24px 28px;
+      box-shadow: 0 0 12px rgba(187, 134, 252, 0.3);
+      max-height: 280px;
+      overflow-y: auto;
     }
 
     #redeemedList h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.35rem;
       color: #bb86fc;
-      margin-bottom: 15px;
-      font-size: 1.3rem;
+      user-select: none;
     }
 
-    li {
-      margin-bottom: 10px;
+    #redeemedList ol {
+      margin: 0;
+      padding-left: 20px;
       color: #ccc;
+      user-select: text;
+    }
+
+    #redeemedList li {
+      margin-bottom: 12px;
+      font-size: 1.05rem;
     }
   </style>
 </head>
 <body>
-  <!-- Bolle animate -->
   <div class="background" id="bubbles"></div>
 
-  <!-- Navbar identica alla dashboard -->
   <header class="navbar">
     <nav>
       <ul>
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
-        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="vouch-redeem.html" class="active">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
       </ul>
     </nav>
   </header>
 
-  <!-- Contenuto principale -->
-  <main class="redeem-container">
+  <main class="redeem-container" role="main" aria-label="Riscatta Vouch">
     <h1>Riscatta Vouch</h1>
+    <input
+      type="text"
+      id="codeInput"
+      placeholder="XXXX-XXXX-XXXX"
+      aria-label="Inserisci codice voucher"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="14"
+      inputmode="text"
+      pattern="[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}"
+    />
+    <button id="btnRedeem" aria-describedby="redeemMsg">Riscatta</button>
+    <div id="redeemMsg" role="alert" aria-live="polite"></div>
 
-    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" />
-    <button id="btnRedeem">Riscatta</button>
-
-    <div id="redeemMsg"></div>
-
-    <div id="redeemedList">
+    <section id="redeemedList" aria-label="Codici riscattati">
       <h2>Codici riscattati</h2>
       <ol id="listContainer"></ol>
-    </div>
+    </section>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-    import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      update,
+      remove,
+    } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -205,27 +244,32 @@
     const db = getDatabase(app);
 
     function showMessage(msg) {
-      document.getElementById('redeemMsg').textContent = msg;
+      const msgElem = document.getElementById("redeemMsg");
+      msgElem.textContent = msg;
     }
 
     async function redeemVouch() {
-      const user = localStorage.getItem('user');
+      const user = localStorage.getItem("user");
       if (!user) {
-        location.href = 'index.html';
+        // Non autenticato -> redirect
+        location.href = "index.html";
         return;
       }
 
-      const codeInput = document.getElementById('codeInput');
+      const codeInput = document.getElementById("codeInput");
       const code = codeInput.value.trim().toUpperCase();
-      const match = code.match(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
-      if (!match) {
-        alert('Formato codice non valido.');
+
+      // Controllo formato codice: 4x4x4 alfanumerico
+      const regex = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+      if (!regex.test(code)) {
+        alert("Formato codice non valido. Usa XXXX-XXXX-XXXX");
         return;
       }
 
-      const vouchSnap = await get(ref(db, 'vouch'));
+      // Recupero tutti i vouch disponibili
+      const vouchSnap = await get(ref(db, "vouch"));
       if (!vouchSnap.exists()) {
-        showMessage('Nessun codice valido.');
+        showMessage("Nessun codice valido.");
         return;
       }
 
@@ -233,53 +277,65 @@
       let vouchOwner = null;
       let vouchData = null;
 
-      for (const [owner, codes] of Object.entries(vouchSnap.val())) {
-        if (codes[code]) {
+      const vouchs = vouchSnap.val();
+
+      // Cerco il codice nel DB (vouch/{owner}/{code})
+      for (const owner in vouchs) {
+        if (vouchs[owner][code]) {
           vouchOwner = owner;
-          vouchData = codes[code];
+          vouchData = vouchs[owner][code];
           found = true;
           break;
         }
       }
 
       if (!found) {
-        showMessage('Codice non valido o già usato.');
+        showMessage("Codice non valido o già usato.");
         return;
       }
 
+      // Recupero wallet utente e aggiorno con crypto e amount
       const walletSnap = await get(ref(db, `users/${user}/wallet`));
       const wallet = walletSnap.exists() ? walletSnap.val() : {};
       const { crypto, amount } = vouchData;
 
       wallet[crypto] = (wallet[crypto] || 0) + parseFloat(amount);
+
       await update(ref(db, `users/${user}/wallet`), wallet);
 
-      const newKey = Date.now().toString();
-      await update(ref(db, `redeemed/${user}/${newKey}`), {
+      // Registro il codice come riscattato sotto redeemed/{user}
+      const timestamp = Date.now().toString();
+      await update(ref(db, `redeemed/${user}/${timestamp}`), {
         code,
         crypto,
         amount,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
+      // Rimuovo il codice dalla lista vouch originale
       await remove(ref(db, `vouch/${vouchOwner}/${code}`));
 
       showMessage(`✅ Hai riscattato ${amount} ${crypto} con codice ${code}`);
-      codeInput.value = '';
+      codeInput.value = "";
       loadRedeemedList();
     }
 
     async function loadRedeemedList() {
-      const user = localStorage.getItem('user');
+      const user = localStorage.getItem("user");
       if (!user) return;
 
-      const list = document.getElementById('listContainer');
-      list.innerHTML = '';
+      const list = document.getElementById("listContainer");
+      list.innerHTML = "";
 
       const snap = await get(ref(db, `redeemed/${user}`));
       if (snap.exists()) {
-        Object.values(snap.val()).forEach(item => {
-          const li = document.createElement('li');
+        // Ordino per timestamp discendente (più recente sopra)
+        const redeemedArr = Object.values(snap.val()).sort(
+          (a, b) => b.timestamp - a.timestamp
+        );
+
+        redeemedArr.forEach((item) => {
+          const li = document.createElement("li");
           li.textContent = `${item.code} - ${item.amount} ${item.crypto}`;
           list.appendChild(li);
         });
@@ -287,20 +343,22 @@
     }
 
     function generateBubbles() {
-      const container = document.getElementById('bubbles');
+      const container = document.getElementById("bubbles");
       for (let i = 0; i < 30; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
         bubble.style.left = `${Math.random() * 100}%`;
-        bubble.style.width = bubble.style.height = `${10 + Math.random() * 30}px`;
+        const size = 10 + Math.random() * 30;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
         bubble.style.animationDuration = `${10 + Math.random() * 10}s`;
         bubble.style.opacity = Math.random();
         container.appendChild(bubble);
       }
     }
 
-    window.addEventListener('load', () => {
-      document.getElementById('btnRedeem').addEventListener('click', redeemVouch);
+    window.addEventListener("load", () => {
+      document.getElementById("btnRedeem").addEventListener("click", redeemVouch);
       loadRedeemedList();
       generateBubbles();
     });
