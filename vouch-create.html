@@ -285,6 +285,95 @@
   const form = document.getElementById("vouch-form");
   const msg = document.getElementById("message");
 
+   const validVouchesContainer = document.createElement("div");
+validVouchesContainer.id = "valid-vouches";
+validVouchesContainer.style.marginTop = "30px";
+
+const expiredVouchesContainer = document.createElement("div");
+expiredVouchesContainer.id = "expired-vouches";
+expiredVouchesContainer.style.marginTop = "20px";
+
+form.parentNode.appendChild(validVouchesContainer);
+form.parentNode.appendChild(expiredVouchesContainer);
+
+// Funzione per caricare e mostrare i vouch
+async function loadUserVouches() {
+  try {
+    const vouchesRef = ref(db, 'vouches');
+    const snapshot = await get(vouchesRef);
+    const allVouches = snapshot.val() || {};
+
+    const now = Date.now();
+
+    // Divide i vouch per validi e scaduti
+    const validVouches = [];
+    const expiredVouches = [];
+
+    Object.entries(allVouches).forEach(([code, vouch]) => {
+      if (vouch.from === user) {
+        // Qui definiamo la scadenza:
+        // Se vouch.expired === true oppure expiryDate < now => scaduto, altrimenti valido
+        // Se non c’è info scadenza, lo consideriamo valido
+
+        if (vouch.expired === true) {
+          expiredVouches.push({ code, ...vouch });
+        } else if (vouch.expiryDate && vouch.expiryDate < now) {
+          expiredVouches.push({ code, ...vouch });
+        } else {
+          validVouches.push({ code, ...vouch });
+        }
+      }
+    });
+
+    // Mostra liste
+    validVouchesContainer.innerHTML = `<h3>Vouch Validi</h3>` + (validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
+      `<ul>${validVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`);
+
+    expiredVouchesContainer.innerHTML = `<h3>Vouch Scaduti</h3>` + (expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
+      `<ul>${expiredVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`);
+
+  } catch (e) {
+    console.error("Errore caricando i vouch:", e);
+  }
+}
+
+// Carica la lista quando si carica la pagina e anche dopo la generazione di un vouch nuovo
+loadUserVouches();
+
+// Modifica la parte di successo nella generazione vouch per ricaricare la lista
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (codeGenerated) return;
+
+  // ... (resto del codice invariato)
+
+  try {
+    // Controlli e aggiornamenti
+
+    await set(ref(db, `vouches/${code}`), {
+      from: user,
+      coin,
+      amount,
+      // opzionale: expiryDate: Date.now() + 7*24*3600*1000 (esempio 7 giorni)
+    });
+
+    await update(userWalletRef, {
+      [coin]: (wallet[coin] - amount)
+    });
+
+    msg.textContent = `Vouch generato: ${code}`;
+
+    // Bottone copia come prima ...
+
+    // Dopo aver generato e mostrato
+    loadUserVouches();
+
+  } catch (error) {
+    msg.textContent = "Errore durante la generazione del vouch.";
+    console.error(error);
+  }
+});
+
   let codeGenerated = false; // blocca nuova generazione dopo copia
 
   function generateCode() {
