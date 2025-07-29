@@ -6,10 +6,11 @@
   <title>Vouch Redeem</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    /* ==== BODY E MAIN ==== */
     body {
       margin: 0;
       min-height: 100vh;
-      padding: 100px 20px 20px;
+      padding: 100px 20px 40px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #eee;
       background: linear-gradient(135deg, #1c1c3a, #12122b);
@@ -40,46 +41,121 @@
       text-align: center;
     }
 
+    /* ==== FORM ==== */
     form {
       display: flex;
       flex-direction: column;
       gap: 20px;
       width: 100%;
+      position: relative;
     }
 
-    input, select, button {
-      padding: 12px 16px;
+    input {
+      padding: 14px 18px;
       border: none;
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 1.3rem;
       outline: none;
-    }
-
-    input, select {
       background: #38386a;
       color: #fff;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      text-transform: uppercase;
+      caret-color: #bb86fc;
     }
 
     button {
+      padding: 14px;
       background: #7b5fff;
       color: white;
       font-weight: bold;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s;
+      font-size: 1.1rem;
+      transition: background 0.3s ease;
     }
-
     button:hover {
       background: #a48fff;
     }
+    button:disabled {
+      background: #555177;
+      cursor: not-allowed;
+    }
 
+    /* ==== MESSAGGI ==== */
     .message {
       margin-top: 10px;
-      font-size: 1rem;
-      color: #90ee90;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.5em;
+    }
+    .message.error { color: #f44336; }
+    .message.success { color: #90ee90; }
+    .message.info { color: #bbb; }
+
+    /* ==== LOADING ANIMATION ==== */
+    .loading-bar {
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 0%;
+      height: 4px;
+      background: #bb86fc;
+      border-radius: 4px;
+      animation: loadingAnim 2s linear forwards;
+      display: none;
+    }
+    .loading-bar.active {
+      display: block;
+      animation: loadingAnim 2s linear forwards;
+    }
+    @keyframes loadingAnim {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    /* ==== CODICI RISCATTATI ==== */
+    #redeemed-list {
+      margin-top: 30px;
+      width: 100%;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #38386a;
+      border-radius: 12px;
+      padding: 20px;
+      box-sizing: border-box;
+      box-shadow: 0 0 15px rgba(123, 85, 255, 0.5);
+    }
+
+    #redeemed-list h2 {
+      margin: 0 0 12px;
+      font-size: 1.3rem;
+      color: #bb86fc;
       text-align: center;
     }
 
-    /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
+    #redeemed-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 1rem;
+      color: #ddd;
+    }
+
+    #redeemed-list ul li {
+      padding: 8px 12px;
+      border-bottom: 1px solid #555577;
+      display: flex;
+      justify-content: space-between;
+      font-family: monospace;
+    }
+    #redeemed-list ul li:last-child {
+      border-bottom: none;
+    }
+
+    /* ==== NAVBAR ==== */
     nav.navbar {
       position: fixed;
       top: 0;
@@ -206,32 +282,33 @@
       z-index: 1;
     }
 
+    /* TEMA CHIARO */
     body.light-theme {
       background: #f4f4f7;
       color: #222;
     }
-
     body.light-theme main {
       background: #fff;
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
-
-    body.light-theme input, body.light-theme select {
+    body.light-theme input {
       background: #f0f0f0;
       color: #111;
     }
-
     body.light-theme button {
       background: #7b5fff;
       color: white;
+    }
+    body.light-theme .message.info {
+      color: #555;
     }
   </style>
 </head>
 <body>
   <canvas id="bubble-canvas"></canvas>
 
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
     <div class="nav-container">
       <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
       <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
@@ -239,7 +316,7 @@
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
-        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="vouch-redeem.html" aria-current="page">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
         <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
@@ -249,16 +326,34 @@
 
   <main>
     <h1>Riscatta un Vouch</h1>
-    <form id="redeem-form">
-      <input type="text" id="vouch-code" placeholder="Inserisci codice vouch" required maxlength="12" minlength="12" />
-      <button type="submit">Riscatta</button>
-      <div class="message" id="message"></div>
+    <form id="redeem-form" autocomplete="off" spellcheck="false" novalidate>
+      <input
+        id="vouch-code"
+        name="vouch-code"
+        type="text"
+        placeholder="XXXX-XXXX-XXXX"
+        maxlength="14"
+        aria-describedby="message"
+        autocomplete="off"
+        required
+        pattern="^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$"
+      />
+      <button type="submit" disabled>Riscatta</button>
+      <div class="loading-bar" id="loading-bar"></div>
+      <div class="message info" id="message" role="alert" aria-live="polite"></div>
     </form>
+
+    <section id="redeemed-list" aria-live="polite" aria-label="Elenco vouch riscattati">
+      <h2>Vouch riscattati</h2>
+      <ul id="redeemed-codes">
+        <!-- Lista caricata dinamicamente -->
+      </ul>
+    </section>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, get, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -274,85 +369,161 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // Utente loggato (localStorage)
     const user = localStorage.getItem("user");
-    if (!user) window.location.href = "index.html";
+    if (!user) {
+      window.location.href = "index.html";
+      throw new Error("Utente non loggato");
+    }
 
     const form = document.getElementById("redeem-form");
+    const input = form['vouch-code'];
+    const button = form.querySelector("button[type=submit]");
     const msg = document.getElementById("message");
+    const loadingBar = document.getElementById("loading-bar");
+    const redeemedList = document.getElementById("redeemed-codes");
 
+    // FUNZIONE FORMATTAZIONE AUTOMATICA: Maiuscolo + inserisce trattini nel formato XXXX-XXXX-XXXX
+    function formatVouchCode(value) {
+      let clean = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (clean.length > 12) clean = clean.slice(0, 12);
+      // Inserisce trattini dopo ogni 4 caratteri
+      const parts = [];
+      for (let i = 0; i < clean.length; i += 4) {
+        parts.push(clean.substring(i, i + 4));
+      }
+      return parts.join("-");
+    }
+
+    input.addEventListener("input", e => {
+      const pos = input.selectionStart;
+      const oldVal = input.value;
+      const newVal = formatVouchCode(oldVal);
+      input.value = newVal;
+
+      // Mantieni la posizione del cursore ragionevole
+      let newPos = pos;
+      if (pos === oldVal.length) {
+        newPos = newVal.length;
+      } else if (oldVal[pos - 1] === "-" && newVal[pos - 1] !== "-") {
+        newPos = pos + 1;
+      }
+      input.setSelectionRange(newPos, newPos);
+
+      // Abilita/disabilita il bottone se il formato è corretto
+      button.disabled = !/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(newVal);
+      msg.textContent = "";
+      msg.className = "message info";
+    });
+
+    // Funzione per mostrare messaggi
+    function showMessage(text, type="info") {
+      msg.textContent = text;
+      msg.className = "message " + type;
+    }
+
+    // FUNZIONE PER CARICARE I CODICI RISCATTATI DELL'UTENTE
+    async function loadRedeemedCodes() {
+      redeemedList.innerHTML = "<li>Caricamento...</li>";
+      try {
+        const vouchesRef = ref(db, "vouches");
+        const snapshot = await get(vouchesRef);
+        const allVouches = snapshot.val() || {};
+
+        const redeemed = Object.entries(allVouches)
+          .filter(([code, v]) => v.expired && v.redeemedBy === user)
+          .map(([code, v]) => ({
+            code: code.toUpperCase(),
+            redeemedAt: v.redeemedAt || null
+          }))
+          .sort((a, b) => {
+            if (!a.redeemedAt) return 1;
+            if (!b.redeemedAt) return -1;
+            return b.redeemedAt.localeCompare(a.redeemedAt);
+          });
+
+        if (redeemed.length === 0) {
+          redeemedList.innerHTML = "<li>Non hai ancora riscattato vouch.</li>";
+          return;
+        }
+        redeemedList.innerHTML = redeemed
+          .map(v => `<li><span>${v.code}</span><span>${v.redeemedAt ? new Date(v.redeemedAt).toLocaleString() : ""}</span></li>`)
+          .join("");
+      } catch (err) {
+        redeemedList.innerHTML = "<li>Errore nel caricamento dei vouch.</li>";
+        console.error(err);
+      }
+    }
+
+    // RISCATTO
     form.addEventListener("submit", async e => {
       e.preventDefault();
-      const code = form['vouch-code'].value.trim().toUpperCase();
+      button.disabled = true;
+      showMessage("");
+      loadingBar.classList.add("active");
 
-      if (code.length !== 12) {
-        msg.textContent = "Il codice deve essere lungo 12 caratteri.";
-        msg.style.color = "#f44336"; // rosso
+      const code = input.value.toUpperCase();
+      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+        showMessage("Formato codice non valido.", "error");
+        button.disabled = false;
+        loadingBar.classList.remove("active");
         return;
       }
 
-      msg.textContent = "Verifica in corso...";
-      msg.style.color = "#90ee90";
+      const cleanCode = code.replace(/-/g, "");
 
       try {
-        const vouchRef = ref(db, `vouches/${code}`);
-        const snapshot = await get(vouchRef);
-        const vouch = snapshot.val();
+        const vouchRef = ref(db, `vouches/${cleanCode}`);
+        const snap = await get(vouchRef);
 
-        if (!vouch) {
-          msg.textContent = "Codice vouch non valido.";
-          msg.style.color = "#f44336";
+        if (!snap.exists()) {
+          showMessage("Codice non trovato.", "error");
           return;
         }
+
+        const vouch = snap.val();
 
         if (vouch.expired) {
-          msg.textContent = "Questo vouch è già stato riscattato o scaduto.";
-          msg.style.color = "#f44336";
+          showMessage("Codice già utilizzato.", "error");
           return;
         }
 
-        const now = Date.now();
-        if (vouch.expiryDate && vouch.expiryDate < now) {
-          msg.textContent = "Questo vouch è scaduto.";
-          msg.style.color = "#f44336";
-          return;
-        }
-
-        if (vouch.to && vouch.to !== user) {
-          msg.textContent = "Questo vouch non è valido per il tuo account.";
-          msg.style.color = "#f44336";
-          return;
-        }
-
-        // Segna il vouch come riscattato
+        // Aggiorna vouch come riscattato
         await update(vouchRef, {
           expired: true,
-          redeemedAt: now,
-          redeemedBy: user
+          redeemedBy: user,
+          redeemedAt: new Date().toISOString()
         });
 
-        msg.textContent = `Vouch riscattato con successo: ${vouch.amount} ${vouch.coin}`;
-        msg.style.color = "#90ee90";
+        showMessage("Vouch riscattato con successo!", "success");
+        input.value = "";
+        button.disabled = true;
 
-      } catch (error) {
-        console.error(error);
-        msg.textContent = "Errore durante il riscatto del vouch.";
-        msg.style.color = "#f44336";
+        // Ricarica lista
+        loadRedeemedCodes();
+
+      } catch (err) {
+        console.error(err);
+        showMessage("Errore durante il riscatto. Riprova.", "error");
+      } finally {
+        loadingBar.classList.remove("active");
+        button.disabled = false;
       }
     });
 
-    // NAVBAR TOGGLE
+    // NAV TOGGLE MOBILE
     const navToggle = document.getElementById("nav-toggle");
     const navMenu = document.getElementById("nav-menu");
 
     navToggle.addEventListener("click", () => {
-      navToggle.classList.toggle("open");
-      navMenu.classList.toggle("open");
       const expanded = navToggle.getAttribute("aria-expanded") === "true";
       navToggle.setAttribute("aria-expanded", !expanded);
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
     });
 
     navToggle.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
+      if(e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         navToggle.click();
       }
@@ -360,34 +531,28 @@
 
     // THEME TOGGLE
     const themeToggle = document.getElementById("theme-toggle");
-    const body = document.body;
-
-    function loadTheme() {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "light") {
-        body.classList.add("light-theme");
-        themeToggle.textContent = "🌙";
-      } else {
-        body.classList.remove("light-theme");
-        themeToggle.textContent = "☀️";
-      }
+    function applyTheme(theme) {
+      if (theme === "light") document.body.classList.add("light-theme");
+      else document.body.classList.remove("light-theme");
     }
-    loadTheme();
+    // carica tema da localStorage
+    let savedTheme = localStorage.getItem("theme") || "dark";
+    applyTheme(savedTheme);
+    themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
 
     themeToggle.addEventListener("click", () => {
-      body.classList.toggle("light-theme");
-      if (body.classList.contains("light-theme")) {
-        themeToggle.textContent = "🌙";
-        localStorage.setItem("theme", "light");
-      } else {
-        themeToggle.textContent = "☀️";
-        localStorage.setItem("theme", "dark");
-      }
+      savedTheme = savedTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", savedTheme);
+      applyTheme(savedTheme);
+      themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
     });
 
-    // BUBBLE CANVAS
-    const canvas = document.getElementById("bubble-canvas");
-    const ctx = canvas.getContext("2d");
+    // CARICA CODICI ALL'AVVIO
+    loadRedeemedCodes();
+
+    // CANVAS BUBBLES ANIMATION
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
     let width, height;
 
     function resize() {
@@ -397,28 +562,27 @@
       canvas.height = height;
     }
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener('resize', resize);
 
     class Bubble {
       constructor() {
+        this.reset();
+      }
+      reset() {
         this.x = Math.random() * width;
-        this.y = height + Math.random() * 200;
+        this.y = height + Math.random() * 100;
         this.radius = 5 + Math.random() * 15;
         this.speed = 1 + Math.random() * 2;
         this.alpha = 0.4 + Math.random() * 0.6;
-        this.angle = Math.random() * 2 * Math.PI;
-        this.angleSpeed = 0.01 + Math.random() * 0.02;
+        this.angle = Math.random() * Math.PI * 2;
+        this.angleSpeed = (Math.random() - 0.5) * 0.02;
       }
       update() {
         this.y -= this.speed;
         this.x += Math.sin(this.angle) * 0.5;
         this.angle += this.angleSpeed;
         if (this.y + this.radius < 0) {
-          this.x = Math.random() * width;
-          this.y = height + this.radius;
-          this.radius = 5 + Math.random() * 15;
-          this.speed = 1 + Math.random() * 2;
-          this.alpha = 0.4 + Math.random() * 0.6;
+          this.reset();
         }
       }
       draw() {
@@ -432,13 +596,13 @@
     }
 
     const bubbles = [];
-    for(let i=0; i<30; i++) bubbles.push(new Bubble());
+    for (let i=0; i<30; i++) bubbles.push(new Bubble());
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
-      for (const bubble of bubbles) {
-        bubble.update();
-        bubble.draw();
+      for (const b of bubbles) {
+        b.update();
+        b.draw();
       }
       requestAnimationFrame(animate);
     }
