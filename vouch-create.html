@@ -321,7 +321,8 @@
     [coin]: (wallet[coin] - amount)
   });
 
-      msg.textContent = `Vouch generato: ${code}`;
+msg.textContent = `Vouch generato: ${code}`;
+
 const copyBtn = document.createElement("button");
 copyBtn.textContent = "Copia codice";
 copyBtn.style.marginTop = "10px";
@@ -334,16 +335,19 @@ copyBtn.style.color = "#fff";
 copyBtn.style.transition = "opacity 0.3s ease";
 
 copyBtn.onclick = () => {
-  navigator.clipboard.writeText(code);
-  copyBtn.textContent = "Copiato!";
-  setTimeout(() => {
-    copyBtn.style.opacity = "0";
-    setTimeout(() => copyBtn.remove(), 300); // rimozione definitiva
-  }, 3000);
+  navigator.clipboard.writeText(code).then(() => {
+    copyBtn.textContent = "Copiato!";
+    copyBtn.disabled = true;
+    setTimeout(() => {
+      copyBtn.style.opacity = "0";
+      setTimeout(() => copyBtn.remove(), 300);
+    }, 3000);
+  }).catch(() => {
+    copyBtn.textContent = "Errore copia";
+  });
 };
 
 msg.appendChild(copyBtn);
-    });
 
     // Tema e hamburger
     const themeBtn = document.getElementById('theme-toggle');
