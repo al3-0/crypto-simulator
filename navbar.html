@@ -1,0 +1,188 @@
+<!-- navbar.html -->
+<style>
+  /* NAVBAR BASE */
+  .navbar {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--nav-bg, #1c1c3a);
+    color: var(--text-color, #fff);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .navbar .logo img {
+    height: 36px;
+    width: auto;
+  }
+
+  .navbar nav {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .navbar a {
+    color: var(--text-color, #fff);
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    padding: 8px;
+    transition: color 0.3s;
+  }
+
+  .navbar a:hover::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background: #bb86fc;
+  }
+
+  /* THEME TOGGLE BUTTON */
+  .theme-toggle {
+    cursor: pointer;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 1.4rem;
+    color: var(--text-color, #fff);
+    transition: transform 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    transform: rotate(20deg);
+  }
+
+  /* HAMBURGER MENU */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 4px;
+  }
+
+  .hamburger span {
+    width: 24px;
+    height: 3px;
+    background: var(--text-color, #fff);
+    border-radius: 3px;
+  }
+
+  .mobile-nav {
+    display: none;
+    flex-direction: column;
+    background: var(--nav-bg, #1c1c3a);
+    position: absolute;
+    top: 60px;
+    right: 24px;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .mobile-nav a {
+    padding: 8px 0;
+  }
+
+  @media (max-width: 768px) {
+    .navbar nav {
+      display: none;
+    }
+
+    .hamburger {
+      display: flex;
+    }
+
+    .mobile-nav.show {
+      display: flex;
+    }
+  }
+</style>
+
+<header class="navbar">
+  <a class="logo" href="dashboard.html">
+    <img src="logo.png" alt="Logo" />
+  </a>
+
+  <nav class="desktop-nav">
+    <a href="dashboard.html">Home</a>
+    <a href="exchange.html">Exchange</a>
+    <a href="vouch-create.html" id="vouch-link">Vouch Create</a>
+    <a href="vouch-redeem.html">Vouch Redeem</a>
+    <a href="afk.html">AFK Zone</a>
+    <a href="account.html">Account</a>
+    <button class="theme-toggle" id="theme-toggle" title="Cambia tema">🌙</button>
+  </nav>
+
+  <div class="hamburger" id="hamburger" aria-label="Apri menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="dashboard.html">Home</a>
+    <a href="exchange.html">Exchange</a>
+    <a href="vouch-create.html" id="vouch-link-mobile">Vouch Create</a>
+    <a href="vouch-redeem.html">Vouch Redeem</a>
+    <a href="afk.html">AFK Zone</a>
+    <a href="account.html">Account</a>
+    <button class="theme-toggle" id="theme-toggle-mobile" title="Cambia tema">🌙</button>
+  </div>
+</header>
+
+<script>
+  // === Hamburger Menu Toggle ===
+  document.getElementById("hamburger").addEventListener("click", () => {
+    document.getElementById("mobile-nav").classList.toggle("show");
+  });
+
+  // === Theme Toggle ===
+  const toggleTheme = () => {
+    const isDark = document.body.classList.toggle("light-theme");
+
+    document.documentElement.style.setProperty(
+      "--nav-bg",
+      isDark ? "#ffffffdd" : "#1c1c3add"
+    );
+    document.documentElement.style.setProperty(
+      "--text-color",
+      isDark ? "#222" : "#fff"
+    );
+
+    const icons = document.querySelectorAll(".theme-toggle");
+    icons.forEach(i => i.textContent = isDark ? "☀️" : "🌙");
+  };
+
+  document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+  document.getElementById("theme-toggle-mobile").addEventListener("click", toggleTheme);
+
+  // === Permessi "Ale" ===
+  const user = localStorage.getItem("user");
+  if (user !== "Ale") {
+    const vouchDesktop = document.getElementById("vouch-link");
+    const vouchMobile = document.getElementById("vouch-link-mobile");
+    if (vouchDesktop) vouchDesktop.style.display = "none";
+    if (vouchMobile) vouchMobile.style.display = "none";
+  }
+
+  // === Tema iniziale (dark di default) ===
+  document.documentElement.style.setProperty("--nav-bg", "#1c1c3add");
+  document.documentElement.style.setProperty("--text-color", "#fff");
+</script>
