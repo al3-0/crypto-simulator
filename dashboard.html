@@ -273,39 +273,39 @@
     </div>
   </main>
 
-  <script type="module">
-    import { db, ref, get } from './js/firebase.js';
+<script type="module">
+  import { db, ref, get } from './js/firebase.js';
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const usernameEl = document.getElementById("username");
-      const btcEl = document.getElementById("btc-amount");
-      const ethEl = document.getElementById("eth-amount");
-      const ltcEl = document.getElementById("ltc-amount");
+  document.addEventListener("DOMContentLoaded", async () => {
+    const usernameEl = document.getElementById("username");
+    const btcEl = document.getElementById("btc-amount");
+    const ethEl = document.getElementById("eth-amount");
+    const ltcEl = document.getElementById("ltc-amount");
 
-      const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-      if (!storedUser) {
-        window.location.href = "index.html";
-        return;
-      }
+    if (!storedUser) {
+      window.location.href = "index.html"; // o "dashboard.html" se intendevi questo
+      return;
+    }
 
-      usernameEl.textContent = storedUser;
+    usernameEl.textContent = storedUser;
 
-      try {
-        const snapshot = await get(ref(db, users/${storedUser}/wallet));
-        if (snapshot.exists()) {
-          const wallet = snapshot.val();
-          btcEl.textContent = wallet.BTC.toFixed(3);
-          ethEl.textContent = wallet.ETH.toFixed(3);
-          ltcEl.textContent = wallet.LTC.toFixed(3);
-        } else {
-          btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
-        }
-      } catch (error) {
-        console.error("Errore caricamento portafoglio:", error);
+    try {
+      const snapshot = await get(ref(db, `users/${storedUser}/wallet`));
+      if (snapshot.exists()) {
+        const wallet = snapshot.val();
+        btcEl.textContent = (wallet.BTC ?? 0).toFixed(3);
+        ethEl.textContent = (wallet.ETH ?? 0).toFixed(3);
+        ltcEl.textContent = (wallet.LTC ?? 0).toFixed(3);
+      } else {
         btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
       }
-    });
-  </script>
+    } catch (error) {
+      console.error("Errore caricamento portafoglio:", error);
+      btcEl.textContent = ethEl.textContent = ltcEl.textContent = "0.000";
+    }
+  });
+</script>
 </body>
 </html>
