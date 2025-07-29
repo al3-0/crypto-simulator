@@ -3,470 +3,393 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AFK Zone</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Crypto Simulator - AFK Zone</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    /* Base */
+    /* ==== BODY & MAIN ==== */
     body {
-      margin: 0; padding: 0;
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: radial-gradient(ellipse at center, #12122b 0%, #0a0a16 90%);
       color: #eee;
-      overflow: hidden;
-      user-select: none;
-      cursor: default;
-    }
-    header.navbar {
-      width: 100%;
-      background: #1c1c3aee;
-      padding: 14px 30px;
-      position: fixed;
-      top: 0; left: 0; z-index: 999;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(12px);
-    }
-    .navbar ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      margin: 0; padding: 0;
-    }
-    .navbar a {
-      color: #eee;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
-      border-bottom: 2px solid transparent;
-    }
-    .navbar a:hover {
-      color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
-    }
-    main {
-      margin-top: 100px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
-      text-align: center;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
       position: relative;
-      z-index: 10;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    h1 {
-      font-size: 2.8rem;
-      color: #bb86fc;
-      margin-bottom: 10px;
-      animation: fadeInDown 1s ease-in-out;
-      user-select: none;
-    }
-    p.sub {
-      color: #ccc;
-      margin-bottom: 30px;
-      font-size: 1.1rem;
-      user-select: none;
-    }
-    .counter {
-      font-size: 4rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-      animation: glow 2s infinite alternate;
-      color: #fff;
-      user-select: none;
-    }
-    .earned {
-      margin-top: 20px;
-      font-size: 1.3rem;
-      color: #a0e0ff;
-      user-select: none;
-    }
-    ul.session-list {
-      margin-top: 20px;
-      padding: 12px 20px;
-      background: #252546cc;
-      border-radius: 12px;
-      max-height: 220px;
-      overflow-y: auto;
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.3);
-      font-family: monospace;
-      user-select: none;
-    }
-    ul.session-list li {
-      margin-bottom: 8px;
-      font-size: 0.95rem;
-      color: #ddd;
-      transition: color 0.3s ease;
-    }
-    ul.session-list li.bonus {
-      color: #7fff7f;
-      font-weight: 700;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* Floating stars & comets background */
-    #starfield {
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 16px;
+      font-weight: 800;
+      color: #bb86fc;
+      animation: fadeInDown 1s ease forwards;
+      opacity: 0;
+    }
+
+    #countdown {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #e0d4ff;
+      margin-bottom: 40px;
+      animation: fadeIn 1.5s ease forwards;
+      opacity: 0;
+    }
+
+    button#fun-btn {
+      background: #4b3ca7;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 0 20px #7e5fffcc;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      outline-offset: 2px;
+    }
+    button#fun-btn:hover {
+      background-color: #6e5ffe;
+      box-shadow: 0 0 30px #a48fffcc;
+    }
+
+    /* ==== NAVBAR ==== */
+    nav.navbar {
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+      user-select: none;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+    #nav-toggle span:nth-child(1) {
+      top: 0;
+    }
+    #nav-toggle span:nth-child(2) {
+      top: 9px;
+    }
+    #nav-toggle span:nth-child(3) {
+      top: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #nav-toggle {
+        display: block;
+      }
+      #theme-toggle {
+        margin-left: 0;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* ==== ANIMAZIONI ==== */
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==== CANVAS PARTICELLE ==== */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
       z-index: 1;
-      overflow: hidden;
-      background: transparent;
     }
-
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      filter: drop-shadow(0 0 2px #fff);
-      animation: twinkle linear infinite alternate;
-    }
-    .star.small { width: 1.5px; height: 1.5px; animation-duration: 2s; }
-    .star.medium { width: 2.5px; height: 2.5px; animation-duration: 3s; }
-    .star.large { width: 4px; height: 4px; animation-duration: 4s; }
-
-    @keyframes twinkle {
-      from { opacity: 0.4; }
-      to { opacity: 1; }
-    }
-
-    .comet {
-      position: absolute;
-      width: 3px;
-      height: 80px;
-      background: linear-gradient(45deg, #bb86fc, transparent);
-      border-radius: 50% / 100%;
-      filter: drop-shadow(0 0 6px #bb86fc);
-      animation: comet-move linear forwards;
-      pointer-events: auto;
-      cursor: pointer;
-      user-select: none;
-    }
-    @keyframes comet-move {
-      from { transform: translateX(0) translateY(0) rotate(45deg); opacity: 1; }
-      to { transform: translateX(100vw) translateY(-100vh) rotate(45deg); opacity: 0; }
-    }
-
-    /* Particles (mouse-follow) */
-    #particle-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    /* Clickable stars */
-    .click-star {
-      position: absolute;
-      border-radius: 50%;
-      background: #bb86fc;
-      box-shadow:
-        0 0 6px #bb86fc,
-        0 0 12px #bb86fc;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.2s ease;
-      animation: starPulse 2s infinite ease-in-out;
-    }
-    .click-star:hover {
-      transform: scale(1.3);
-      box-shadow:
-        0 0 10px #7fff7f,
-        0 0 20px #7fff7f;
-    }
-    @keyframes starPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-    }
-
-    /* Animations */
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 10px #bb86fc;
-      }
-      to {
-        text-shadow: 0 0 20px #bb86fc, 0 0 40px #bb86fc;
-      }
-    }
-
-    /* Bonus flash effect */
-    .bonus-flash {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #7fff7f;
-      font-size: 3rem;
-      font-weight: 900;
-      pointer-events: none;
-      text-shadow:
-        0 0 8px #7fff7f,
-        0 0 16px #7fff7f,
-        0 0 32px #7fff7f;
-      opacity: 1;
-      animation: bonusFade 1s forwards;
-      z-index: 1000;
-      user-select: none;
-    }
-    @keyframes bonusFade {
-      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -150%) scale(1.5); }
-    }
-
   </style>
-
-  <script type="module" src="./js/authCheck.js"></script>
 </head>
 <body>
+  <!-- PARTICLES CANVAS -->
+  <canvas id="particles-canvas"></canvas>
 
-<header class="navbar">
-  <nav>
-    <ul>
-      <li><a href="dashboard.html">Home</a></li>
-      <li><a href="exchange.html">Exchange</a></li>
-      <li><a href="vouch-create.html">Vouch Create</a></li>
-      <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
-      <li><a href="afk.html">AFK Zone</a></li>
-      <li><a href="account.html">Account</a></li>
-    </ul>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
+        <img src="logo.png" alt="CryptoSim Logo" />
+      </a>
+
+      <!-- HAMBURGER -->
+      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
+      </ul>
+    </div>
   </nav>
-</header>
 
-<!-- Starfield & interactive canvas -->
-<div id="starfield"></div>
-<canvas id="particle-canvas"></canvas>
+  <main>
+    <h1>AFK Zone</h1>
+    <div id="countdown" aria-live="polite" aria-atomic="true">Caricamento countdown...</div>
+    <button id="fun-btn" aria-label="Divertiti con le particelle">Fai partire le particelle!</button>
+  </main>
 
-<main>
-  <h1>AFK Zone</h1>
-  <p class="sub">Resta su questa pagina per guadagnare BTC ogni 60 secondi</p>
-  <div class="counter" id="counter">60</div>
-  <div class="earned">Guadagni sessione: <span id="btcEarned">0.000</span> BTC</div>
-  <ul class="session-list" id="btcList" aria-live="polite" aria-relevant="additions"></ul>
-  <p style="margin-top: 24px; font-size: 0.9rem; color: #999;">Clicca sulle stelle viola per un bonus extra!</p>
-</main>
-
-<script type="module">
-  import { db, ref, get, update } from './js/firebase.js';
-
-  const user = localStorage.getItem('user');
-  if (!user) {
-    window.location.href = 'index.html';
-  }
-
-  // Timer & earnings logic
-  let countdown = 60;
-  let interval = null;
-  let earned = 0;
-  let active = true;
-
-  const counterEl = document.getElementById('counter');
-  const earnedEl = document.getElementById('btcEarned');
-  const btcList = document.getElementById('btcList');
-
-  function addEarning(amount, type='auto') {
-    earned += amount;
-    earnedEl.textContent = earned.toFixed(3);
-
-    const li = document.createElement('li');
-    li.textContent = `+${amount.toFixed(3)} BTC - ${new Date().toLocaleTimeString()}`;
-    if (type === 'bonus') li.classList.add('bonus');
-    btcList.appendChild(li);
-    btcList.scrollTop = btcList.scrollHeight;
-
-    // Update wallet in Firebase
-    updateWallet(amount);
-  }
-
-  async function updateWallet(amount) {
-    try {
-      const walletRef = ref(db, `users/${user}/wallet`);
-      const snapshot = await get(walletRef);
-      let wallet = snapshot.exists() ? snapshot.val() : {};
-      wallet.BTC = (wallet.BTC || 0) + amount;
-      await update(walletRef, wallet);
-    } catch (error) {
-      console.error('Errore aggiornamento wallet:', error);
-    }
-  }
-
-  function tick() {
-    if (!active) return;
-    countdown--;
-    counterEl.textContent = countdown;
-    if (countdown <= 0) {
-      countdown = 60;
-      addEarning(0.001);
-      showBonusFlash("+0.001 BTC");
-    }
-  }
-
-  document.addEventListener("visibilitychange", () => {
-    active = document.visibilityState === "visible";
-  });
-
-  window.addEventListener('load', () => {
-    interval = setInterval(tick, 1000);
-  });
-
-
-  // --- Starfield animation and interactive stars (clickable for bonus) ---
-
-  const starfield = document.getElementById('starfield');
-  const maxStars = 120;
-  const stars = [];
-  const clickableStars = [];
-
-  function randomRange(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  // Create twinkling stars
-  for (let i = 0; i < maxStars; i++) {
-    const star = document.createElement('div');
-    star.classList.add('star');
-    const sizeClass = i % 3 === 0 ? 'large' : i % 2 === 0 ? 'medium' : 'small';
-    star.classList.add(sizeClass);
-    star.style.top = Math.random() * 100 + 'vh';
-    star.style.left = Math.random() * 100 + 'vw';
-    star.style.animationDuration = (2 + Math.random() * 3) + 's';
-    starfield.appendChild(star);
-    stars.push(star);
-  }
-
-  // Create clickable stars that give bonus BTC
-  function createClickableStar() {
-    const star = document.createElement('div');
-    star.classList.add('click-star');
-    const size = randomRange(18, 28);
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
-    star.style.top = randomRange(10, 80) + 'vh';
-    star.style.left = randomRange(10, 90) + 'vw';
-    star.title = "Clicca per guadagnare +0.005 BTC!";
-    starfield.appendChild(star);
-    clickableStars.push(star);
-
-    star.addEventListener('click', () => {
-      addEarning(0.005, 'bonus');
-      showBonusFlash("+0.005 BTC!");
-      // Move star to new random position
-      star.style.top = randomRange(10, 80) + 'vh';
-      star.style.left = randomRange(10, 90) + 'vw';
+  <script>
+    // NAVBAR TOGGLE
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('open');
+      navMenu.classList.toggle('open');
+      const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', String(!expanded));
     });
-  }
-  // Create 6 clickable stars
-  for(let i=0; i<6; i++) createClickableStar();
-
-  // --- Comets periodically shooting across the screen ---
-
-  function createComet() {
-    const comet = document.createElement('div');
-    comet.classList.add('comet');
-    // Start somewhere at bottom left-ish
-    comet.style.top = randomRange(60, 90) + 'vh';
-    comet.style.left = '-100px';
-    comet.style.animationDuration = randomRange(3,6) + 's';
-    starfield.appendChild(comet);
-
-    comet.addEventListener('animationend', () => {
-      comet.remove();
-      setTimeout(createComet, randomRange(5000, 15000));
+    navToggle.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navToggle.click();
+      }
     });
-  }
-
-  // Start first comet after a random delay
-  setTimeout(createComet, 3000);
-
-
-  // --- Particle canvas: mouse-follow glowing dots ---
-
-  const canvas = document.getElementById('particle-canvas');
-  const ctx = canvas.getContext('2d');
-  let cw, ch;
-  let particles = [];
-
-  function resizeCanvas() {
-    cw = window.innerWidth;
-    ch = window.innerHeight;
-    canvas.width = cw;
-    canvas.height = ch;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  class Particle {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-      this.radius = Math.random() * 3 + 1;
-      this.alpha = 1;
-      this.fadeSpeed = 0.02 + Math.random() * 0.02;
-      this.dx = (Math.random() - 0.5) * 1.5;
-      this.dy = (Math.random() - 0.5) * 1.5;
-    }
-    update() {
-      this.x += this.dx;
-      this.y += this.dy;
-      this.alpha -= this.fadeSpeed;
-      if(this.alpha < 0) this.alpha = 0;
-    }
-    draw() {
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(187, 134, 252, ${this.alpha})`;
-      ctx.shadowColor = `rgba(187, 134, 252, ${this.alpha})`;
-      ctx.shadowBlur = 6;
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function animateParticles() {
-    ctx.clearRect(0, 0, cw, ch);
-    particles = particles.filter(p => p.alpha > 0);
-    particles.forEach(p => {
-      p.update();
-      p.draw();
+    navMenu.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('click', () => {
+        if(navMenu.classList.contains('open')) {
+          navToggle.click();
+        }
+      });
     });
-    requestAnimationFrame(animateParticles);
-  }
-  animateParticles();
 
-  window.addEventListener('mousemove', e => {
-    // Add particles around mouse
-    for(let i=0; i<3; i++) {
-      particles.push(new Particle(e.clientX + (Math.random()*20-10), e.clientY + (Math.random()*20-10)));
+    // THEME TOGGLE
+    const themeBtn = document.getElementById('theme-toggle');
+    if(localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light-theme');
+      themeBtn.textContent = '☀️';
     }
-  });
+    themeBtn.addEventListener('click', () => {
+      if(document.body.classList.toggle('light-theme')) {
+        localStorage.setItem('theme', 'light');
+        themeBtn.textContent = '☀️';
+      } else {
+        localStorage.setItem('theme', 'dark');
+        themeBtn.textContent = '🌙';
+      }
+    });
 
-  // --- Bonus flash visual effect ---
-  function showBonusFlash(text) {
-    const flash = document.createElement('div');
-    flash.className = 'bonus-flash';
-    flash.textContent = text;
-    document.body.appendChild(flash);
-    setTimeout(() => {
-      flash.remove();
-    }, 1000);
-  }
+    // COUNTDOWN TIMER
+    const countdownEl = document.getElementById('countdown');
+    // Impostiamo un timer 5 minuti nel futuro da ora, solo come esempio:
+    const countdownTarget = new Date(Date.now() + 5 * 60 * 1000);
 
-</script>
+    function updateCountdown() {
+      const now = new Date();
+      const diff = countdownTarget - now;
+      if(diff <= 0) {
+        countdownEl.textContent = "Il tempo è scaduto!";
+        clearInterval(countdownInterval);
+        return;
+      }
+      const minutes = Math.floor(diff / 1000 / 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      countdownEl.textContent = `Tempo rimasto: ${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
 
+    // PARTICLES ANIMATION (semplice effetto particelle che partono dal centro)
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 3 + 2;
+        this.color = `rgba(187,134,252,${Math.random() * 0.8 + 0.3})`;
+        this.speedX = (Math.random() - 0.5) * 6;
+        this.speedY = (Math.random() - 0.5) * 6;
+        this.life = 60;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.life--;
+        this.radius *= 0.95;
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 8;
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    let particles = [];
+    let animating = false;
+
+    function animate() {
+      if (!animating) return;
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach((p, i) => {
+        p.update();
+        p.draw(ctx);
+        if (p.life <= 0 || p.radius < 0.1) {
+          particles.splice(i, 1);
+        }
+      });
+      if (particles.length > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        animating = false;
+        ctx.clearRect(0, 0, w, h);
+      }
+    }
+
+    document.getElementById('fun-btn').addEventListener('click', () => {
+      if(animating) return; // non sovrapporre animazioni
+      const centerX = w / 2;
+      const centerY = h / 2;
+      for(let i=0; i<50; i++) {
+        particles.push(new Particle(centerX, centerY));
+      }
+      animating = true;
+      animate();
+    });
+  </script>
 </body>
 </html>
