@@ -1,188 +1,196 @@
-<!-- navbar.html -->
+<header class="navbar">
+  <nav>
+    <ul>
+      <li><a href="dashboard.html" aria-current="page">Home</a></li>
+      <li><a href="exchange.html">Exchange</a></li>
+      <li><a href="vouch-create.html" id="vouch-create">Vouch Create</a></li>
+      <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+      <li><a href="afk.html">AFK Zone</a></li>
+      <li><a href="account.html">Account</a></li>
+      <li><button id="theme-toggle" aria-label="Toggle tema">🌓</button></li>
+      <li class="hamburger" aria-label="Menu mobile" aria-expanded="false" aria-controls="nav-menu" role="button" tabindex="0">☰</li>
+    </ul>
+  </nav>
+</header>
+
 <style>
-  /* NAVBAR BASE */
+  /* Navbar base */
   .navbar {
-    width: 100%;
     position: fixed;
-    top: 0;
-    left: 0;
-    background: var(--nav-bg, #1c1c3a);
-    color: var(--text-color, #fff);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 24px;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-
-  .navbar .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-  }
-
-  .navbar .logo img {
-    height: 36px;
-    width: auto;
-  }
-
-  .navbar nav {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-  }
-
-  .navbar a {
-    color: var(--text-color, #fff);
-    text-decoration: none;
-    font-weight: 600;
-    position: relative;
-    padding: 8px;
-    transition: color 0.3s;
-  }
-
-  .navbar a:hover::after {
-    content: "";
-    position: absolute;
-    bottom: 4px;
-    left: 0;
-    height: 2px;
+    top: 0; left: 0;
     width: 100%;
-    background: #bb86fc;
+    background: #1c1c3aee;
+    padding: 14px 30px;
+    box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
   }
 
-  /* THEME TOGGLE BUTTON */
-  .theme-toggle {
-    cursor: pointer;
+  .navbar nav ul {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 25px;
+  }
+
+  .navbar nav ul li {
+    position: relative;
+  }
+
+  .navbar nav ul li a,
+  .navbar nav ul li button {
+    color: #eee;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
     background: none;
     border: none;
-    outline: none;
-    font-size: 1.4rem;
-    color: var(--text-color, #fff);
-    transition: transform 0.3s ease;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
-  .theme-toggle:hover {
-    transform: rotate(20deg);
+  .navbar nav ul li a:hover,
+  .navbar nav ul li button:hover {
+    color: #bb86fc;
+    border-bottom: 2px solid #bb86fc;
   }
 
-  /* HAMBURGER MENU */
+  /* Evidenziare pagina corrente */
+  .navbar nav ul li a[aria-current="page"] {
+    color: #bb86fc;
+    border-bottom: 2px solid #bb86fc;
+  }
+
+  /* Hamburger menu per mobile */
   .hamburger {
     display: none;
-    flex-direction: column;
-    cursor: pointer;
-    gap: 4px;
+    font-size: 1.8rem;
+    user-select: none;
   }
 
-  .hamburger span {
-    width: 24px;
-    height: 3px;
-    background: var(--text-color, #fff);
-    border-radius: 3px;
+  /* Tema chiaro */
+  body.light .navbar {
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
 
-  .mobile-nav {
-    display: none;
-    flex-direction: column;
-    background: var(--nav-bg, #1c1c3a);
-    position: absolute;
-    top: 60px;
-    right: 24px;
-    padding: 12px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  body.light .navbar nav ul li a,
+  body.light .navbar nav ul li button {
+    color: #222;
   }
 
-  .mobile-nav a {
-    padding: 8px 0;
+  body.light .navbar nav ul li a:hover,
+  body.light .navbar nav ul li button:hover,
+  body.light .navbar nav ul li a[aria-current="page"] {
+    color: #6200ea;
+    border-bottom-color: #6200ea;
   }
 
+  /* Responsive */
   @media (max-width: 768px) {
-    .navbar nav {
-      display: none;
+    .navbar nav ul {
+      justify-content: flex-start;
+      gap: 0;
+      flex-direction: column;
+      background: #1c1c3aee;
+      position: fixed;
+      top: 60px; left: 0;
+      width: 100%;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      border-top: 1px solid #bb86fc55;
+      padding-left: 0;
+      z-index: 998;
+    }
+
+    .navbar nav ul.show {
+      max-height: 500px; /* abbastanza alto per tutte le voci */
+      overflow-y: auto;
+    }
+
+    .navbar nav ul li {
+      width: 100%;
+      text-align: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #bb86fc22;
+    }
+
+    .navbar nav ul li a,
+    .navbar nav ul li button {
+      font-size: 1.2rem;
+      padding: 12px 0;
+      display: block;
+      width: 100%;
     }
 
     .hamburger {
-      display: flex;
+      display: block;
+      color: #eee;
+      position: absolute;
+      top: 14px;
+      right: 30px;
+      cursor: pointer;
+      z-index: 9999;
     }
 
-    .mobile-nav.show {
-      display: flex;
+    /* Nascondi toggle tema in lista, lo mostriamo sempre in header */
+    .navbar nav ul li button#theme-toggle {
+      font-size: 1.5rem;
+      padding: 0;
+      border: none;
+      background: none;
+      color: #eee;
+      width: auto;
+      display: inline-block;
     }
   }
 </style>
 
-<header class="navbar">
-  <a class="logo" href="dashboard.html">
-    <img src="logo.png" alt="Logo" />
-  </a>
-
-  <nav class="desktop-nav">
-    <a href="dashboard.html">Home</a>
-    <a href="exchange.html">Exchange</a>
-    <a href="vouch-create.html" id="vouch-link">Vouch Create</a>
-    <a href="vouch-redeem.html">Vouch Redeem</a>
-    <a href="afk.html">AFK Zone</a>
-    <a href="account.html">Account</a>
-    <button class="theme-toggle" id="theme-toggle" title="Cambia tema">🌙</button>
-  </nav>
-
-  <div class="hamburger" id="hamburger" aria-label="Apri menu">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-
-  <div class="mobile-nav" id="mobile-nav">
-    <a href="dashboard.html">Home</a>
-    <a href="exchange.html">Exchange</a>
-    <a href="vouch-create.html" id="vouch-link-mobile">Vouch Create</a>
-    <a href="vouch-redeem.html">Vouch Redeem</a>
-    <a href="afk.html">AFK Zone</a>
-    <a href="account.html">Account</a>
-    <button class="theme-toggle" id="theme-toggle-mobile" title="Cambia tema">🌙</button>
-  </div>
-</header>
-
 <script>
-  // === Hamburger Menu Toggle ===
-  document.getElementById("hamburger").addEventListener("click", () => {
-    document.getElementById("mobile-nav").classList.toggle("show");
+  document.addEventListener("DOMContentLoaded", () => {
+    const hamburger = document.querySelector(".hamburger");
+    const navMenu = document.querySelector(".navbar nav ul");
+    const themeToggle = document.getElementById("theme-toggle");
+    const vouchCreate = document.getElementById("vouch-create");
+
+    // Controllo utente per nascondere "Vouch Create"
+    const storedUser = localStorage.getItem("user");
+    if (storedUser !== "Ale" && vouchCreate) {
+      vouchCreate.style.display = "none";
+    }
+
+    // Toggle menu mobile
+    hamburger.addEventListener("click", () => {
+      const expanded = hamburger.getAttribute("aria-expanded") === "true";
+      hamburger.setAttribute("aria-expanded", !expanded);
+      navMenu.classList.toggle("show");
+    });
+
+    // Supporto tastiera per hamburger
+    hamburger.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        hamburger.click();
+      }
+    });
+
+    // Toggle tema
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      document.body.classList.add("light");
+    }
+
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("light");
+      const newTheme = document.body.classList.contains("light") ? "light" : "dark";
+      localStorage.setItem("theme", newTheme);
+    });
   });
-
-  // === Theme Toggle ===
-  const toggleTheme = () => {
-    const isDark = document.body.classList.toggle("light-theme");
-
-    document.documentElement.style.setProperty(
-      "--nav-bg",
-      isDark ? "#ffffffdd" : "#1c1c3add"
-    );
-    document.documentElement.style.setProperty(
-      "--text-color",
-      isDark ? "#222" : "#fff"
-    );
-
-    const icons = document.querySelectorAll(".theme-toggle");
-    icons.forEach(i => i.textContent = isDark ? "☀️" : "🌙");
-  };
-
-  document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
-  document.getElementById("theme-toggle-mobile").addEventListener("click", toggleTheme);
-
-  // === Permessi "Ale" ===
-  const user = localStorage.getItem("user");
-  if (user !== "Ale") {
-    const vouchDesktop = document.getElementById("vouch-link");
-    const vouchMobile = document.getElementById("vouch-link-mobile");
-    if (vouchDesktop) vouchDesktop.style.display = "none";
-    if (vouchMobile) vouchMobile.style.display = "none";
-  }
-
-  // === Tema iniziale (dark di default) ===
-  document.documentElement.style.setProperty("--nav-bg", "#1c1c3add");
-  document.documentElement.style.setProperty("--text-color", "#fff");
 </script>
