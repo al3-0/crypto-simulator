@@ -265,6 +265,7 @@
     }
   </style>
 
+  <!-- authCheck.js all'inizio come nei vecchi codici -->
   <script type="module" src="./js/authCheck.js"></script>
 </head>
 
@@ -330,58 +331,51 @@
 <script type="module">
   import { db, ref, get } from './js/firebase.js';
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    const username = localStorage.getItem("user");
-    if (!username) {
-      window.location.href = "index.html";
-      return;
+  window.addEventListener('DOMContentLoaded', () => {
+    const navToggle = document.querySelector('.nav-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+
+    if (navToggle && navMenu) {
+      navToggle.addEventListener('click', () => {
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
+        navMenu.classList.toggle('show');
+      });
     }
 
-    try {
-      const snapshot = await get(ref(db, `users/${username}`));
-      if (!snapshot.exists()) {
-        alert("Dati utente non trovati");
-        window.location.href = "index.html";
-        return;
-      }
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) return;
 
-      const userData = snapshot.val();
-
-      // aggiorna UI
-      document.getElementById("username").textContent = username;
-      document.getElementById("btc-amount").textContent = (userData.wallet?.BTC || 0).toFixed(3);
-      document.getElementById("eth-amount").textContent = (userData.wallet?.ETH || 0).toFixed(3);
-      document.getElementById("ltc-amount").textContent = (userData.wallet?.LTC || 0).toFixed(3);
-    } catch (err) {
-      console.error(err);
-      window.location.href = "index.html";
-    }
-
-    // THEME TOGGLE
-    const themeToggle = document.getElementById('theme-toggle');
-    const currentTheme = localStorage.getItem('theme') || 'dark';
-    document.body.classList.toggle('light-theme', currentTheme === 'light');
-    themeToggle.textContent = currentTheme === 'light' ? '☀️' : '🌙';
-
-    themeToggle.addEventListener('click', () => {
+    function toggleTheme() {
       const isLight = document.body.classList.toggle('light-theme');
       localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      themeToggle.textContent = isLight ? '☀️' : '🌙';
-    });
-
-    // PARTICLES GENERATOR
-    const particlesContainer = document.querySelector('.particles');
-    for(let i=0; i<30; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.width = `${5 + Math.random() * 10}px`;
-      p.style.height = p.style.width;
-      p.style.left = `${Math.random() * 100}%`;
-      p.style.top = `${Math.random() * 100}%`;
-      p.style.animationDelay = `${Math.random() * 12}s`;
-      particlesContainer.appendChild(p);
+      themeToggleBtn.textContent = isLight ? '☀️' : '🌙';
     }
+
+    // Ripristina tema salvato
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-theme');
+      themeToggleBtn.textContent = '☀️';
+    } else {
+      themeToggleBtn.textContent = '🌙';
+    }
+
+    themeToggleBtn.addEventListener('click', toggleTheme);
   });
+
+  // PARTICLES GENERATOR
+  const particlesContainer = document.querySelector('.particles');
+  for(let i=0; i<30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.width = `${5 + Math.random() * 10}px`;
+    p.style.height = p.style.width;
+    p.style.left = `${Math.random() * 100}%`;
+    p.style.top = `${Math.random() * 100}%`;
+    p.style.animationDelay = `${Math.random() * 12}s`;
+    particlesContainer.appendChild(p);
+  }
 </script>
 </body>
 </html>
