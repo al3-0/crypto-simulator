@@ -350,6 +350,9 @@ nav.navbar {
         document.getElementById('nav-menu').classList.toggle('show');
       });
     });
+    if (document.body.scrollHeight <= window.innerHeight) {
+  document.body.style.overflowY = 'hidden';
+}
   </script>
 </body>
 </html>
