@@ -8,22 +8,24 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((data) => {
       document.getElementById("navbar").innerHTML = data;
 
-      // Attiva funzionalità hamburger
+      // Abilita toggle navbar
       const navToggle = document.querySelector(".nav-toggle");
       const navMenu = document.querySelector(".nav-menu");
+
       navToggle?.addEventListener("click", () => {
         const expanded = navToggle.getAttribute("aria-expanded") === "true";
-        navToggle.setAttribute("aria-expanded", !expanded);
+        navToggle.setAttribute("aria-expanded", String(!expanded));
         navMenu.classList.toggle("show");
       });
 
-      // Attiva toggle tema
+      // Gestione tema chiaro/scuro
       const themeToggleBtn = document.getElementById("theme-toggle");
       const savedTheme = localStorage.getItem("theme");
       if (savedTheme === "light") {
         document.body.classList.add("light-theme");
         themeToggleBtn.textContent = "☀️";
       }
+
       themeToggleBtn?.addEventListener("click", () => {
         const isLight = document.body.classList.toggle("light-theme");
         localStorage.setItem("theme", isLight ? "light" : "dark");
