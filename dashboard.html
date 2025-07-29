@@ -2,196 +2,297 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Dashboard</title>
+  <link rel="icon" href="logo.png" type="image/png">
   <link rel="stylesheet" href="css/style.css" />
   <style>
+    /* === STILE COMPLETO PER DASHBOARD E NAVBAR === */
     body {
-      margin: 0;
-      font-family: sans-serif;
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
       min-height: 100vh;
-      padding-top: 80px;
-      transition: background 0.3s, color 0.3s;
+      padding: 100px 20px 20px;
+      overflow-x: hidden;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      font-weight: 800;
+      color: #bb86fc;
+      text-align: center;
+      animation: fadeInDown 1s ease forwards;
+      opacity: 0;
+    }
+    p.welcome {
+      font-size: 1.1rem;
+      color: #ccc;
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 40px;
+      animation: fadeIn 1.5s ease forwards;
+      opacity: 0;
+    }
+    .wallet {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeInUp 1.8s ease forwards;
+      opacity: 0;
+    }
+    .coin-card {
+      background: linear-gradient(145deg, #3b3b6a, #2a2a4f);
+      border-radius: 16px;
+      padding: 20px 30px;
+      box-shadow:
+        inset 0 0 12px #7e5fff88,
+        0 6px 18px rgba(123, 85, 255, 0.4);
+      color: #f0e6ff;
+      font-weight: 700;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .coin-name {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.5rem;
+      text-shadow: 0 0 6px #bb86fcaa;
+    }
+    .coin-amount {
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 2px;
+      font-size: 1.7rem;
+      color: #e0d4ff;
+      text-shadow: 0 0 4px #b68fffcc;
+    }
+    .coin-card:hover {
+      transform: scale(1.05);
+      box-shadow:
+        inset 0 0 16px #a48fffcc,
+        0 10px 30px rgba(123, 85, 255, 0.7);
+    }
+    .coin-name svg {
+      width: 36px;
+      height: 36px;
+      filter: drop-shadow(0 0 2px #a08aff);
     }
 
-    body.light-theme {
-      background: #f4f4f7;
-      color: #222;
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* --- Navbar --- */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      background: #bb86fc88;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: drift 12s linear infinite;
+      filter: drop-shadow(0 0 3px #a48aff);
+    }
+    @keyframes drift {
+      0% { transform: translateY(0) translateX(0); opacity: 0.6; }
+      50% { opacity: 0.2; }
+      100% { transform: translateY(-150px) translateX(20px); opacity: 0.6; }
+    }
+
     nav.navbar {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       background: #1c1c3a;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-      padding: 10px 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
       z-index: 1000;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-    }
-
-    .logo-link img {
-      height: 36px;
-    }
-
-    .nav-menu {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
     }
-
-    .nav-menu li a {
-      color: #ddd;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s;
-    }
-
-    .nav-menu li a:hover {
-      color: #fff;
-    }
-
-    #theme-toggle {
-      background: none;
-      border: none;
-      font-size: 1.3rem;
-      cursor: pointer;
-      color: #ddd;
-      transition: color 0.3s;
-    }
-
-    /* --- Main Content --- */
-    main {
-      max-width: 600px;
-      margin: auto;
-      background: #2a2a4fdd;
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.8s ease-in-out;
-    }
-
-    h1 {
-      text-align: center;
-      color: #bb86fc;
-    }
-
-    .wallet {
-      margin-top: 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .coin-card {
-      background: #3b3b6a;
-      padding: 20px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      font-size: 1.2rem;
-      box-shadow: inset 0 0 10px #7e5fff88;
-      transition: transform 0.2s;
-    }
-
-    .coin-card:hover {
-      transform: scale(1.02);
-    }
-
-    .coin-name {
+    .nav-container {
+      max-width: 1200px;
+      width: 100%;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
     }
-
-    .coin-name svg {
-      width: 24px;
-      height: 24px;
+    .logo-link img.logo-img {
+      height: 36px;
     }
-
-    .coin-amount {
-      font-family: monospace;
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 0;
     }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
     }
-
-    @media (max-width: 640px) {
-      main {
-        padding: 20px;
-      }
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+    #theme-toggle {
+      margin-left: 6px;
+    }
+    @media (max-width: 768px) {
       .nav-menu {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
+        flex-direction: column;
+        position: fixed;
+        top: 56px;
+        right: 0;
+        background: #1c1c3a;
+        padding: 20px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        width: 220px;
+        height: calc(100vh - 56px);
+        box-shadow: -4px 0 12px rgba(0,0,0,0.6);
       }
+      .nav-menu.show {
+        transform: translateX(0);
+      }
+      .nav-toggle {
+        display: block;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 6px;
+      }
+      .nav-toggle .hamburger,
+      .nav-toggle .hamburger::before,
+      .nav-toggle .hamburger::after {
+        display: block;
+        background-color: #ddd;
+        height: 2px;
+        width: 24px;
+        border-radius: 2px;
+        position: relative;
+      }
+      .nav-toggle .hamburger::before,
+      .nav-toggle .hamburger::after {
+        content: "";
+        position: absolute;
+        left: 0;
+      }
+      .nav-toggle .hamburger::before { top: -7px; }
+      .nav-toggle .hamburger::after { top: 7px; }
+    }
+
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
   </style>
 </head>
 <body>
-
-  <!-- ✅ Navbar -->
+  <!-- NAVBAR -->
   <nav class="navbar">
-    <a href="dashboard.html" class="logo-link">
-      <img src="logo.png" alt="Logo">
+    <a href="dashboard.html" class="logo-link" style="margin-right: auto; padding-left: 30px;">
+      <img src="logo.png" alt="CryptoSim Logo" class="logo-img" />
     </a>
-    <ul class="nav-menu">
-      <li><a href="dashboard.html">Home</a></li>
-      <li><a href="exchange.html">Exchange</a></li>
-      <li><a href="vouch-create.html">Vouch Create</a></li>
-      <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
-      <li><a href="afk.html">AFK Zone</a></li>
-      <li><a href="account.html">Account</a></li>
-    </ul>
-    <button id="theme-toggle" title="Cambia tema">🌙</button>
+    <div class="nav-container">
+      <button class="nav-toggle" aria-label="Apri menu" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle">🌙</button></li>
+      </ul>
+    </div>
   </nav>
 
-  <!-- ✅ Contenuto principale -->
+  <!-- CONTENUTO -->
   <main>
     <h1>Benvenuto, <span id="username">...</span>!</h1>
-    <p class="welcome">Ecco il tuo portafoglio:</p>
-    <section class="wallet">
-      <div class="coin-card">
+    <p class="welcome">Questo è il tuo wallet criptovalute simulato.</p>
+    <div class="wallet">
+      <div class="coin-card" title="Bitcoin">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#f7931a"><circle cx="12" cy="12" r="10"/></svg> BTC
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#f2a900" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10.0114 10.0114 0 0012 2zm1.9167 14.5h-1.9167v1.25h-2.0833v-1.25H8.75v-2.5h1.1667v-3.75H8.75v-2.5h1.1667v-1.25h2.0833v1.25H13.9167v2.5h-1.25v3.75h1.25zm.6666-5.4167h1.5v1.25h-1.5zm0 3.75h1.5v1.25h-1.5z"/></svg>
+          Bitcoin (BTC)
         </div>
         <div class="coin-amount" id="btc-amount">0.000</div>
       </div>
-      <div class="coin-card">
+      <div class="coin-card" title="Ethereum">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#627eea"><polygon points="12,2 2,22 22,22"/></svg> ETH
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#3c3cbd" viewBox="0 0 24 24"><path d="M12 2L6 12l6 10 6-10z"/></svg>
+          Ethereum (ETH)
         </div>
         <div class="coin-amount" id="eth-amount">0.000</div>
       </div>
-      <div class="coin-card">
+      <div class="coin-card" title="Litecoin">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#b8b8b8"><rect x="4" y="4" width="16" height="16"/></svg> LTC
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#b8b8b8" viewBox="0 0 24 24"><path d="M14.07 10.41L11 10l1-3-2.5 0 0 2.9-2.66-0.4L7.94 14l2.14 0.33-1.11 3L14.07 10.41z"/></svg>
+          Litecoin (LTC)
         </div>
         <div class="coin-amount" id="ltc-amount">0.000</div>
       </div>
-    </section>
+    </div>
+    <div class="particles">
+      <div class="particle" style="width: 8px; height: 8px; top: 10%; left: 15%; animation-delay: 0s;"></div>
+      <div class="particle" style="width: 10px; height: 10px; top: 30%; left: 50%; animation-delay: 4s;"></div>
+      <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 80%; animation-delay: 2s;"></div>
+      <div class="particle" style="width: 9px; height: 9px; top: 80%; left: 35%; animation-delay: 6s;"></div>
+      <div class="particle" style="width: 7px; height: 7px; top: 45%; left: 20%; animation-delay: 1s;"></div>
+    </div>
   </main>
 
-  <!-- ✅ Script con Firebase + logica tema -->
+  <!-- JS FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -212,36 +313,42 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const username = localStorage.getItem('user');
-      if (!username) {
-        window.location.href = 'index.html';
-        return;
-      }
+      if (!username) return window.location.href = 'index.html';
 
       document.getElementById('username').textContent = username;
 
       try {
         const snapshot = await get(ref(db, `users/${username}/wallet`));
-        if (!snapshot.exists()) throw new Error("Wallet non trovato");
+        if (!snapshot.exists()) throw new Error('Wallet non trovato');
 
         const wallet = snapshot.val();
         document.getElementById("btc-amount").textContent = (wallet.BTC || 0).toFixed(3);
         document.getElementById("eth-amount").textContent = (wallet.ETH || 0).toFixed(3);
         document.getElementById("ltc-amount").textContent = (wallet.LTC || 0).toFixed(3);
       } catch (err) {
-        console.error("Errore caricamento dati:", err);
+        console.error("Errore nel caricamento:", err);
         window.location.href = 'index.html';
       }
 
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
+      const themeBtn = document.getElementById('theme-toggle');
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') {
         document.body.classList.add('light-theme');
-        document.getElementById('theme-toggle').textContent = '☀️';
+        themeBtn.textContent = '☀️';
       }
 
-      document.getElementById('theme-toggle').addEventListener('click', () => {
-        const isLight = document.body.classList.toggle('light-theme');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        document.getElementById('theme-toggle').textContent = isLight ? '☀️' : '🌙';
+      themeBtn.addEventListener('click', () => {
+        if (document.body.classList.toggle('light-theme')) {
+          localStorage.setItem('theme', 'light');
+          themeBtn.textContent = '☀️';
+        } else {
+          localStorage.setItem('theme', 'dark');
+          themeBtn.textContent = '🌙';
+        }
+      });
+
+      document.querySelector('.nav-toggle')?.addEventListener('click', () => {
+        document.getElementById('nav-menu').classList.toggle('show');
       });
     });
   </script>
