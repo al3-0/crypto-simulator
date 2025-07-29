@@ -6,59 +6,198 @@
   <title>Crypto Simulator - Exchange</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
-      color: #eee;
       min-height: 100vh;
+      padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
       overflow-x: hidden;
       position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
     }
+
     main {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      text-align: center;
-      max-width: 500px;
-      margin: 140px auto 40px;
-      padding: 40px;
       background: #2a2a4fdd;
       border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
       position: relative;
       z-index: 2;
+      text-align: center;
     }
+
     h1 {
       font-size: 2.5rem;
+      margin-bottom: 30px;
       color: #bb86fc;
-      margin-bottom: 20px;
     }
-    label, select, input, button {
+
+    select, input, button {
+      padding: 12px;
       font-size: 1rem;
-      margin: 10px 0;
-      padding: 10px;
       border-radius: 8px;
       border: none;
+      margin: 10px 0;
       width: 100%;
+      max-width: 400px;
     }
-    select, input {
-      background: #3a3a6a;
-      color: #eee;
-    }
+
     button {
-      background: #bb86fc;
-      color: #12122b;
-      font-weight: bold;
+      background-color: #6a4bbd;
+      color: white;
       cursor: pointer;
-      transition: background 0.3s;
+      font-weight: bold;
+      transition: background 0.3s ease;
     }
+
     button:hover {
-      background: #a678f0;
+      background-color: #5a3daa;
     }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+      user-select: none;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+
     #bubble-canvas {
       position: fixed;
       top: 0;
@@ -72,17 +211,11 @@
 </head>
 <body>
   <canvas id="bubble-canvas"></canvas>
-  
-  <!-- NAVBAR -->
-  <!-- Copiata da dashboard, esattamente identica -->
+
   <nav class="navbar">
     <div class="nav-container">
-      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
-        <img src="logo.png" alt="CryptoSim Logo" />
-      </a>
-      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </div>
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle"><span></span><span></span><span></span></div>
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
@@ -96,108 +229,97 @@
   </nav>
 
   <main>
-    <h1>Exchange</h1>
-    <label for="from">Da:</label>
-    <select id="from">
+    <h1>Exchange Criptovalute</h1>
+    <select id="from-coin">
       <option value="BTC">Bitcoin (BTC)</option>
       <option value="ETH">Ethereum (ETH)</option>
       <option value="LTC">Litecoin (LTC)</option>
     </select>
-    <label for="to">A:</label>
-    <select id="to">
-      <option value="BTC">Bitcoin (BTC)</option>
+    <select id="to-coin">
       <option value="ETH">Ethereum (ETH)</option>
+      <option value="BTC">Bitcoin (BTC)</option>
       <option value="LTC">Litecoin (LTC)</option>
     </select>
-    <label for="amount">Importo da scambiare:</label>
-    <input type="number" id="amount" step="0.001" min="0.001" />
+    <input type="number" id="amount" placeholder="Quantità da scambiare" min="0" />
     <button id="exchange-btn">Scambia</button>
+    <div id="result"></div>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    const app = initializeApp({
+    const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
       authDomain: "coins-7104d.firebaseapp.com",
       databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
       projectId: "coins-7104d",
       storageBucket: "coins-7104d.appspot.com",
       messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb"
-    });
-
-    const db = getDatabase(app);
-    const user = localStorage.getItem('user');
-    if (!user) {
-      window.location.href = "index.html";
-    }
-
-    const rates = {
-      BTC: { ETH: 15, LTC: 100 },
-      ETH: { BTC: 1/15, LTC: 6.7 },
-      LTC: { BTC: 1/100, ETH: 1/6.7 }
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
     };
 
-    document.getElementById('exchange-btn').addEventListener('click', async () => {
-      const from = document.getElementById('from').value;
-      const to = document.getElementById('to').value;
-      const amount = parseFloat(document.getElementById('amount').value);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      if (from === to || isNaN(amount) || amount <= 0) {
-        alert("Operazione non valida");
-        return;
-      }
+    const username = localStorage.getItem("user");
+    if (!username) window.location.href = "index.html";
 
-      const userRef = ref(db, `users/${user}/wallet`);
-      const snapshot = await get(userRef);
+    const rates = { BTC: 1, ETH: 15, LTC: 100 };
+
+    document.getElementById("exchange-btn").addEventListener("click", async () => {
+      const from = document.getElementById("from-coin").value;
+      const to = document.getElementById("to-coin").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const result = document.getElementById("result");
+
+      if (from === to) return result.textContent = "Scegli due valute diverse.";
+      if (isNaN(amount) || amount <= 0) return result.textContent = "Inserisci una quantità valida.";
+
+      const walletRef = ref(db, `users/${username}/wallet`);
+      const snapshot = await get(walletRef);
       const wallet = snapshot.val() || {};
 
-      if ((wallet[from] || 0) < amount) {
-        alert("Fondi insufficienti");
+      if (!wallet[from] || wallet[from] < amount) {
+        result.textContent = "Fondi insufficienti.";
         return;
       }
 
-      const exchanged = amount * rates[from][to];
+      const converted = amount * (rates[from] / rates[to]);
       wallet[from] -= amount;
-      wallet[to] = (wallet[to] || 0) + exchanged;
+      wallet[to] = (wallet[to] || 0) + converted;
 
-      await update(userRef, wallet);
-      alert(`Scambiati ${amount.toFixed(3)} ${from} in ${exchanged.toFixed(3)} ${to}`);
-      document.getElementById('amount').value = '';
+      await set(walletRef, wallet);
+      result.textContent = `Scambio completato! Hai ricevuto ${converted.toFixed(3)} ${to}.`;
     });
 
-    // NAVBAR hamburger
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-    function toggleMenu() {
-      navToggle.classList.toggle('open');
-      navMenu.classList.toggle('open');
-    }
-    navToggle.addEventListener('click', toggleMenu);
-
-    // THEME toggle
-    const themeBtn = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      document.body.classList.add('light-theme');
-      themeBtn.textContent = '☀️';
-    }
-    themeBtn.addEventListener('click', () => {
-      if (document.body.classList.toggle('light-theme')) {
-        localStorage.setItem('theme', 'light');
-        themeBtn.textContent = '☀️';
-      } else {
-        localStorage.setItem('theme', 'dark');
-        themeBtn.textContent = '🌙';
-      }
+    // Hamburger menu
+    const toggle = document.getElementById("nav-toggle");
+    const menu = document.getElementById("nav-menu");
+    toggle.addEventListener("click", () => {
+      toggle.classList.toggle("open");
+      menu.classList.toggle("open");
     });
 
-    // CANVAS BUBBLES
-    const canvas = document.getElementById('bubble-canvas');
-    const ctx = canvas.getContext('2d');
-    let width, height, bubbles = [];
+    // Theme toggle
+    const themeToggle = document.getElementById("theme-toggle");
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      document.body.classList.add("light-theme");
+      themeToggle.textContent = "☀️";
+    }
+
+    themeToggle.addEventListener("click", () => {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("theme", isLight ? "light" : "dark");
+      themeToggle.textContent = isLight ? "☀️" : "🌙";
+    });
+
+    // Canvas bubbles
+    const canvas = document.getElementById("bubble-canvas");
+    const ctx = canvas.getContext("2d");
+    let width, height, bubbles;
 
     class Bubble {
       constructor() { this.reset(); }
@@ -205,10 +327,9 @@
         this.x = Math.random() * width;
         this.y = height + Math.random() * 100;
         this.radius = 8 + Math.random() * 12;
-        this.speed = 0.5 + Math.random() * 1.5;
+        this.speed = 0.5 + Math.random();
         this.alpha = 0.1 + Math.random() * 0.3;
         this.phase = Math.random() * 2 * Math.PI;
-        this.amplitude = 15 + Math.random() * 15;
       }
       update() {
         this.y -= this.speed;
@@ -216,13 +337,13 @@
         this.phase += 0.03;
         if (this.y + this.radius < 0) this.reset();
       }
-      draw() {
+      draw(ctx) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        const grad = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
-        grad.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
-        grad.addColorStop(1, 'rgba(187,134,252,0)');
-        ctx.fillStyle = grad;
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        gradient.addColorStop(1, 'rgba(187,134,252,0)');
+        ctx.fillStyle = gradient;
         ctx.fill();
       }
     }
@@ -233,20 +354,23 @@
       canvas.width = width;
       canvas.height = height;
     }
+
     function animate() {
       ctx.clearRect(0, 0, width, height);
-      for (let b of bubbles) {
+      for (const b of bubbles) {
         b.update();
-        b.draw();
+        b.draw(ctx);
       }
       requestAnimationFrame(animate);
     }
+
     function init() {
       resize();
       bubbles = Array.from({ length: 50 }, () => new Bubble());
       animate();
     }
-    window.addEventListener('resize', resize);
+
+    window.addEventListener("resize", resize);
     init();
   </script>
 </body>
