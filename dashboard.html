@@ -6,10 +6,8 @@
   <title>Crypto Simulator - Dashboard</title>
 
   <link rel="stylesheet" href="css/style.css" />
-
   <style>
-    /* --- Stessi stili di prima --- */
-    body {
+  body {
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -265,22 +263,18 @@
     }
   </style>
 
-  <!-- authCheck.js all'inizio come nei vecchi codici -->
+  <!-- authCheck.js solo per redirect login, niente fetch -->
   <script type="module" src="./js/authCheck.js"></script>
 </head>
-
 <body>
-
   <nav class="navbar" role="navigation" aria-label="Menu principale">
     <div class="nav-container">
       <a href="dashboard.html" class="logo-link" aria-label="Crypto Simulator Home">
         <img src="logo.png" alt="CryptoSim Logo" class="logo-img" />
       </a>
-
       <button class="nav-toggle" aria-label="Apri menu" aria-expanded="false" aria-controls="nav-menu">
         <span class="hamburger"></span>
       </button>
-
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
@@ -288,9 +282,7 @@
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
-        <li>
-          <button id="theme-toggle" aria-label="Cambia tema" title="Cambia tema">🌙</button>
-        </li>
+        <li><button id="theme-toggle" aria-label="Cambia tema" title="Cambia tema">🌙</button></li>
       </ul>
     </div>
   </nav>
@@ -328,54 +320,57 @@
     <div class="particles" aria-hidden="true"></div>
   </main>
 
-<script type="module">
-  import { db, ref, get } from './js/firebase.js';
+  <script type="module">
+    import { db, ref, onValue } from './js/firebase.js';
 
-  window.addEventListener('DOMContentLoaded', () => {
+    // Verifica user loggato (dovrebbe essere già fatto in authCheck.js)
+    const user = localStorage.getItem("user");
+    if (!user) {
+      window.location.href = "index.html";
+    } else {
+      document.getElementById("username").textContent = user;
+    }
+
+    // Funzione per aggiornare valori wallet nella UI
+    function updateWallet(data) {
+      const wallet = data?.wallet || {};
+      document.getElementById("btc-amount").textContent = (wallet.BTC || 0).toFixed(3);
+      document.getElementById("eth-amount").textContent = (wallet.ETH || 0).toFixed(3);
+      document.getElementById("ltc-amount").textContent = (wallet.LTC || 0).toFixed(3);
+    }
+
+    // Listener realtime per aggiornare dati appena cambiano nel db
+    const userRef = ref(db, `users/${user}`);
+    onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        updateWallet(snapshot.val());
+      }
+    });
+
+    // Navbar toggle e tema (come da prima)
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.querySelector('.nav-menu');
 
     if (navToggle && navMenu) {
       navToggle.addEventListener('click', () => {
         const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', String(!expanded));
-        navMenu.classList.toggle('show');
+        navToggle.setAttribute('aria-expanded', !expanded);
+        navMenu.classList.toggle('nav-menu_visible');
       });
     }
 
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (!themeToggleBtn) return;
-
-    function toggleTheme() {
-      const isLight = document.body.classList.toggle('light-theme');
-      localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      themeToggleBtn.textContent = isLight ? '☀️' : '🌙';
-    }
-
-    // Ripristina tema salvato
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      document.body.classList.add('light-theme');
-      themeToggleBtn.textContent = '☀️';
-    } else {
-      themeToggleBtn.textContent = '🌙';
-    }
-
-    themeToggleBtn.addEventListener('click', toggleTheme);
-  });
-
-  // PARTICLES GENERATOR
-  const particlesContainer = document.querySelector('.particles');
-  for(let i=0; i<30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.width = `${5 + Math.random() * 10}px`;
-    p.style.height = p.style.width;
-    p.style.left = `${Math.random() * 100}%`;
-    p.style.top = `${Math.random() * 100}%`;
-    p.style.animationDelay = `${Math.random() * 12}s`;
-    particlesContainer.appendChild(p);
-  }
-</script>
+    // Tema toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+      const body = document.body;
+      if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        themeToggle.textContent = '🌙';
+      } else {
+        body.classList.add('dark');
+        themeToggle.textContent = '☀️';
+      }
+    });
+  </script>
 </body>
 </html>
