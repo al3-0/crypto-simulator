@@ -6,227 +6,119 @@
   <title>Crypto Simulator - Exchange</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    :root {
-      --primary: #bb86fc;
-      --bg: #1c1c3a;
-      --bg-light: #2a2a4fdd;
-      --text: #eee;
-    }
-
-    * {
-      box-sizing: border-box;
+    html, body {
       margin: 0;
       padding: 0;
-    }
-
-    body {
-      margin: 0;
-      height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, var(--bg), #12122b);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    header.navbar {
-      width: 100%;
-      background: #1c1c3add;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      padding: 16px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-    }
-
-    .navbar .logo {
-      font-weight: bold;
-      font-size: 1.3rem;
-      color: var(--primary);
-    }
-
-    .navbar ul {
-      display: flex;
-      gap: 25px;
-      list-style: none;
-    }
-
-    .navbar a {
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s, border-bottom 0.3s;
-      border-bottom: 2px solid transparent;
-    }
-
-    .navbar a:hover {
-      color: var(--primary);
-      border-bottom: 2px solid var(--primary);
-    }
-
-    .menu-toggle {
-      display: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-      color: var(--text);
-    }
-
-    @media (max-width: 768px) {
-      .navbar ul {
-        display: none;
-        position: absolute;
-        top: 60px;
-        right: 30px;
-        flex-direction: column;
-        background: #1c1c3add;
-        padding: 20px;
-        border-radius: 12px;
-      }
-
-      .navbar ul.show {
-        display: flex;
-      }
-
-      .menu-toggle {
-        display: block;
-      }
-    }
-
-    main {
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      color: #eee;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 20px 40px;
+      overflow-x: hidden;
+      position: relative;
     }
-
-    .exchange-box {
-      background: var(--bg-light);
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      max-width: 500px;
+      margin: 140px auto 40px;
       padding: 40px;
+      background: #2a2a4fdd;
       border-radius: 20px;
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
-      width: 100%;
-      max-width: 500px;
+      position: relative;
       z-index: 2;
     }
-
-    h2 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 30px;
-      color: var(--primary);
+    h1 {
+      font-size: 2.5rem;
+      color: #bb86fc;
+      margin-bottom: 20px;
     }
-
-    label {
-      display: block;
-      margin-top: 16px;
-      font-weight: bold;
-    }
-
-    select, input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      margin-top: 8px;
+    label, select, input, button {
       font-size: 1rem;
-      background: #1c1c3a;
-      color: #fff;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 30px;
-      padding: 12px;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
       border: none;
-      background: var(--primary);
-      color: #1c1c3a;
+      width: 100%;
+    }
+    select, input {
+      background: #3a3a6a;
+      color: #eee;
+    }
+    button {
+      background: #bb86fc;
+      color: #12122b;
       font-weight: bold;
-      font-size: 1.1rem;
-      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s;
     }
-
     button:hover {
-      background: #9d6bff;
+      background: #a678f0;
     }
-
-    #message {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: 500;
-    }
-
-    canvas {
+    #bubble-canvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      z-index: 0;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="logo">CryptoSim</div>
-    <nav>
-      <div class="menu-toggle" id="menu-toggle">☰</div>
-      <ul id="nav-links">
+  <canvas id="bubble-canvas"></canvas>
+  
+  <!-- NAVBAR -->
+  <!-- Copiata da dashboard, esattamente identica -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
+        <img src="logo.png" alt="CryptoSim Logo" />
+      </a>
+      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </div>
+      <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account Info</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle">🌙</button></li>
       </ul>
-    </nav>
-  </header>
-
-  <!-- Bubbles Background -->
-  <canvas id="bubble-canvas"></canvas>
-
-  <!-- Main Content -->
-  <main>
-    <div class="exchange-box">
-      <h2>Scambia Criptovalute</h2>
-      <label for="from-coin">Da:</label>
-      <select id="from-coin">
-        <option value="BTC">Bitcoin (BTC)</option>
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="LTC">Litecoin (LTC)</option>
-      </select>
-
-      <label for="to-coin">A:</label>
-      <select id="to-coin">
-        <option value="BTC">Bitcoin (BTC)</option>
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="LTC">Litecoin (LTC)</option>
-      </select>
-
-      <label for="amount">Importo:</label>
-      <input type="number" id="amount" min="0" step="0.001" />
-
-      <button id="exchange-btn">Scambia</button>
-
-      <div id="message"></div>
     </div>
+  </nav>
+
+  <main>
+    <h1>Exchange</h1>
+    <label for="from">Da:</label>
+    <select id="from">
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="LTC">Litecoin (LTC)</option>
+    </select>
+    <label for="to">A:</label>
+    <select id="to">
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="LTC">Litecoin (LTC)</option>
+    </select>
+    <label for="amount">Importo da scambiare:</label>
+    <input type="number" id="amount" step="0.001" min="0.001" />
+    <button id="exchange-btn">Scambia</button>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    const firebaseConfig = {
+    const app = initializeApp({
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
       authDomain: "coins-7104d.firebaseapp.com",
       databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
@@ -234,62 +126,77 @@
       storageBucket: "coins-7104d.appspot.com",
       messagingSenderId: "893938643778",
       appId: "1:893938643778:web:30cdef9cfbc2776c77cedb"
+    });
+
+    const db = getDatabase(app);
+    const user = localStorage.getItem('user');
+    if (!user) {
+      window.location.href = "index.html";
+    }
+
+    const rates = {
+      BTC: { ETH: 15, LTC: 100 },
+      ETH: { BTC: 1/15, LTC: 6.7 },
+      LTC: { BTC: 1/100, ETH: 1/6.7 }
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    document.getElementById('exchange-btn').addEventListener('click', async () => {
+      const from = document.getElementById('from').value;
+      const to = document.getElementById('to').value;
+      const amount = parseFloat(document.getElementById('amount').value);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const user = localStorage.getItem("user");
-      if (!user) {
-        window.location.href = "index.html";
+      if (from === to || isNaN(amount) || amount <= 0) {
+        alert("Operazione non valida");
         return;
       }
 
-      document.getElementById("exchange-btn").addEventListener("click", async () => {
-        const from = document.getElementById("from-coin").value;
-        const to = document.getElementById("to-coin").value;
-        const amount = parseFloat(document.getElementById("amount").value);
-        const message = document.getElementById("message");
+      const userRef = ref(db, `users/${user}/wallet`);
+      const snapshot = await get(userRef);
+      const wallet = snapshot.val() || {};
 
-        if (from === to) return message.textContent = "Le valute devono essere diverse.";
-        if (!amount || amount <= 0) return message.textContent = "Inserisci un importo valido.";
+      if ((wallet[from] || 0) < amount) {
+        alert("Fondi insufficienti");
+        return;
+      }
 
-        try {
-          const walletRef = ref(db, `users/${user}/wallet`);
-          const snapshot = await get(walletRef);
-          const wallet = snapshot.val() || {};
+      const exchanged = amount * rates[from][to];
+      wallet[from] -= amount;
+      wallet[to] = (wallet[to] || 0) + exchanged;
 
-          if ((wallet[from] || 0) < amount) {
-            return message.textContent = `Fondi ${from} insufficienti.`;
-          }
-
-          const rate = 1; // 1:1 per semplicità
-          const updatedWallet = {
-            ...wallet,
-            [from]: (wallet[from] || 0) - amount,
-            [to]: (wallet[to] || 0) + amount * rate
-          };
-
-          await set(walletRef, updatedWallet);
-          message.textContent = "Scambio effettuato con successo!";
-        } catch (err) {
-          console.error(err);
-          message.textContent = "Errore durante lo scambio.";
-        }
-      });
-
-      // Hamburger menu toggle
-      const toggle = document.getElementById("menu-toggle");
-      const links = document.getElementById("nav-links");
-      toggle.addEventListener("click", () => {
-        links.classList.toggle("show");
-      });
+      await update(userRef, wallet);
+      alert(`Scambiati ${amount.toFixed(3)} ${from} in ${exchanged.toFixed(3)} ${to}`);
+      document.getElementById('amount').value = '';
     });
 
-    // Bubbles animation
-    const canvas = document.getElementById("bubble-canvas");
-    const ctx = canvas.getContext("2d");
+    // NAVBAR hamburger
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    function toggleMenu() {
+      navToggle.classList.toggle('open');
+      navMenu.classList.toggle('open');
+    }
+    navToggle.addEventListener('click', toggleMenu);
+
+    // THEME toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-theme');
+      themeBtn.textContent = '☀️';
+    }
+    themeBtn.addEventListener('click', () => {
+      if (document.body.classList.toggle('light-theme')) {
+        localStorage.setItem('theme', 'light');
+        themeBtn.textContent = '☀️';
+      } else {
+        localStorage.setItem('theme', 'dark');
+        themeBtn.textContent = '🌙';
+      }
+    });
+
+    // CANVAS BUBBLES
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
     let width, height, bubbles = [];
 
     class Bubble {
@@ -297,52 +204,50 @@
       reset() {
         this.x = Math.random() * width;
         this.y = height + Math.random() * 100;
-        this.radius = 6 + Math.random() * 10;
-        this.speed = 0.5 + Math.random() * 1.2;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.5 + Math.random() * 1.5;
         this.alpha = 0.1 + Math.random() * 0.3;
-        this.phase = Math.random() * Math.PI * 2;
+        this.phase = Math.random() * 2 * Math.PI;
+        this.amplitude = 15 + Math.random() * 15;
       }
       update() {
         this.y -= this.speed;
-        this.x += Math.sin(this.phase) * 0.5;
+        this.x += Math.sin(this.phase) * 0.3;
         this.phase += 0.03;
         if (this.y + this.radius < 0) this.reset();
       }
-      draw(ctx) {
+      draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
-        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
-        gradient.addColorStop(1, "rgba(187,134,252,0)");
-        ctx.fillStyle = gradient;
+        const grad = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        grad.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        grad.addColorStop(1, 'rgba(187,134,252,0)');
+        ctx.fillStyle = grad;
         ctx.fill();
       }
     }
 
-    function resizeCanvas() {
+    function resize() {
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
     }
-
     function animate() {
       ctx.clearRect(0, 0, width, height);
-      for (const bubble of bubbles) {
-        bubble.update();
-        bubble.draw(ctx);
+      for (let b of bubbles) {
+        b.update();
+        b.draw();
       }
       requestAnimationFrame(animate);
     }
-
-    function initCanvas() {
-      resizeCanvas();
-      bubbles = Array.from({ length: 40 }, () => new Bubble());
+    function init() {
+      resize();
+      bubbles = Array.from({ length: 50 }, () => new Bubble());
       animate();
     }
-
-    window.addEventListener("resize", resizeCanvas);
-    initCanvas();
+    window.addEventListener('resize', resize);
+    init();
   </script>
 </body>
 </html>
