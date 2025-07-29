@@ -249,7 +249,7 @@
       background: #7b5fff;
       color: white;
     }
-  </style>
+    </style>
 </head>
 <body>
   <canvas id="bubble-canvas"></canvas>
@@ -287,14 +287,14 @@
     import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-    authDomain: "coins-7104d.firebaseapp.com",
-    databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-    projectId: "coins-7104d",
-    storageBucket: "coins-7104d.appspot.com",
-    messagingSenderId: "893938643778",
-    appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-    measurementId: "G-QSY10CVX1F"
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -305,7 +305,7 @@
     const redeemMsg = document.getElementById('redeemMsg');
     const redeemedList = document.getElementById('listContainer');
 
-    // Carica codici riscattati da localStorage
+    // INIZIALIZZA LA VARIABILE redeemedCodes come array (anche se nulla in localStorage)
     let redeemedCodes = JSON.parse(localStorage.getItem('redeemedCodes')) || [];
     renderRedeemedList();
 
@@ -333,67 +333,57 @@
       e.target.value = sanitizeCode(e.target.value);
     });
 
-   async function redeemCode() {
-  const code = codeInput.value.trim().toUpperCase();
-  redeemMsg.style.color = '#eee';
-  console.log("Provo a riscattare il codice:", code);
+    async function redeemCode() {
+      const code = codeInput.value.trim().toUpperCase();
+      redeemMsg.style.color = '#eee';
 
-  if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
-    redeemMsg.textContent = "Formato codice non valido (esempio: XXXX-XXXX-XXXX)";
-    redeemMsg.style.color = "#e57373";
-    console.log("Formato codice non valido");
-    return;
-  }
+      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+        redeemMsg.textContent = "Formato codice non valido (esempio: XXXX-XXXX-XXXX)";
+        redeemMsg.style.color = "#e57373";
+        return;
+      }
 
-  if (redeemedCodes.includes(code)) {
-    redeemMsg.textContent = "Hai già riscattato questo codice.";
-    redeemMsg.style.color = "#ffb74d";
-    console.log("Codice già riscattato localmente");
-    return;
-  }
+      if (redeemedCodes.includes(code)) {
+        redeemMsg.textContent = "Hai già riscattato questo codice.";
+        redeemMsg.style.color = "#ffb74d";
+        return;
+      }
 
-  try {
-    const codeRef = ref(db, `vouch/${code}`);
-    const snapshot = await get(codeRef);
+      try {
+        const codeRef = ref(db, `vouch/${code}`);
+        const snapshot = await get(codeRef);
 
-    if (!snapshot.exists()) {
-      redeemMsg.textContent = "Codice non trovato.";
-      redeemMsg.style.color = "#e57373";
-      console.log("Codice non trovato nel DB");
-      return;
+        if (!snapshot.exists()) {
+          redeemMsg.textContent = "Codice non trovato.";
+          redeemMsg.style.color = "#e57373";
+          return;
+        }
+
+        const codeData = snapshot.val();
+        if (codeData.redeemed) {
+          redeemMsg.textContent = "Codice già riscattato.";
+          redeemMsg.style.color = "#e57373";
+          return;
+        }
+
+        // Aggiorna il codice come riscattato
+        const updates = {};
+        updates[`vouch/${code}/redeemed`] = true;
+        await update(ref(db), updates);
+
+        redeemMsg.textContent = "Codice riscattato con successo!";
+        redeemMsg.style.color = "#90ee90";
+
+        redeemedCodes.push(code);
+        localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
+        renderRedeemedList();
+        codeInput.value = '';
+      } catch (error) {
+        redeemMsg.textContent = "Errore durante il riscatto, riprova.";
+        redeemMsg.style.color = "#e57373";
+        console.error(error);
+      }
     }
-
-    const codeData = snapshot.val();
-    console.log("Dati codice dal DB:", codeData);
-
-    if (codeData.redeemed) {
-      redeemMsg.textContent = "Codice già riscattato.";
-      redeemMsg.style.color = "#e57373";
-      console.log("Codice già riscattato nel DB");
-      return;
-    }
-
-    // Aggiorna il codice come riscattato nel database
-    const updates = {};
-    updates[`vouch/${code}/redeemed`] = true;
-    await update(ref(db), updates);
-
-    redeemMsg.textContent = "Codice riscattato con successo!";
-    redeemMsg.style.color = "#90ee90";
-
-    redeemedCodes.push(code);
-    localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
-    renderRedeemedList();
-    codeInput.value = '';
-
-    console.log("Codice aggiornato correttamente nel DB");
-
-  } catch (error) {
-    redeemMsg.textContent = "Errore durante il riscatto, riprova.";
-    redeemMsg.style.color = "#e57373";
-    console.error("Errore riscatto:", error);
-  }
-}
 
     // Navbar toggle
     const navToggle = document.getElementById('nav-toggle');
