@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/style.css" />
 
   <style>
+    /* --- Stessi stili di prima --- */
     body {
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
@@ -18,7 +19,6 @@
       overflow-x: hidden;
       transition: background 0.3s ease, color 0.3s ease;
     }
-
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
@@ -31,7 +31,6 @@
       overflow: hidden;
       transition: background 0.3s ease, color 0.3s ease;
     }
-
     h1 {
       font-size: 2.8rem;
       margin-bottom: 8px;
@@ -42,7 +41,6 @@
       animation: fadeInDown 1s ease forwards;
       opacity: 0;
     }
-
     p.welcome {
       font-size: 1.1rem;
       color: #ccc;
@@ -52,7 +50,6 @@
       animation: fadeIn 1.5s ease forwards;
       opacity: 0;
     }
-
     .wallet {
       display: flex;
       flex-direction: column;
@@ -60,7 +57,6 @@
       animation: fadeInUp 1.8s ease forwards;
       opacity: 0;
     }
-
     .coin-card {
       background: linear-gradient(145deg, #3b3b6a, #2a2a4f);
       border-radius: 16px;
@@ -77,14 +73,12 @@
       cursor: default;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
     .coin-card:hover {
       transform: scale(1.05);
       box-shadow:
         inset 0 0 16px #a48fffcc,
         0 10px 30px rgba(123, 85, 255, 0.7);
     }
-
     .coin-name {
       display: flex;
       align-items: center;
@@ -92,18 +86,15 @@
       font-size: 1.5rem;
       text-shadow: 0 0 6px #bb86fcaa;
     }
-
     .coin-name svg {
       width: 36px;
       height: 36px;
       filter: drop-shadow(0 0 2px #a08aff);
       transition: filter 0.3s ease;
     }
-
     .coin-card:hover .coin-name svg {
       filter: drop-shadow(0 0 6px #d0bfff);
     }
-
     .coin-amount {
       font-family: 'Courier New', Courier, monospace;
       letter-spacing: 2px;
@@ -111,22 +102,18 @@
       color: #e0d4ff;
       text-shadow: 0 0 4px #b68fffcc;
     }
-
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-30px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-
     @keyframes fadeInUp {
       0% { opacity: 0; transform: translateY(30px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
     .particles {
       position: absolute;
       top: 0;
@@ -136,7 +123,6 @@
       pointer-events: none;
       z-index: 0;
     }
-
     .particle {
       position: absolute;
       background: #bb86fc88;
@@ -145,13 +131,11 @@
       animation: drift 12s linear infinite;
       filter: drop-shadow(0 0 3px #a48aff);
     }
-
     @keyframes drift {
       0% { transform: translateY(0) translateX(0); opacity: 0.6; }
       50% { opacity: 0.2; }
       100% { transform: translateY(-150px) translateX(20px); opacity: 0.6; }
     }
-
     @media (max-width: 640px) {
       main {
         padding: 30px 20px;
@@ -167,7 +151,6 @@
         font-size: 2.2rem;
       }
     }
-
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -177,7 +160,6 @@
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
-
     nav.navbar {
       position: fixed;
       top: 0;
@@ -190,7 +172,6 @@
       justify-content: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
     .nav-container {
       max-width: 1200px;
       width: 100%;
@@ -199,12 +180,10 @@
       align-items: center;
       justify-content: space-between;
     }
-
     .logo-link img.logo-img {
       height: 36px;
       width: auto;
     }
-
     .nav-menu {
       list-style: none;
       display: flex;
@@ -213,7 +192,6 @@
       margin: 0;
       padding: 0;
     }
-
     .nav-menu li a,
     #theme-toggle {
       color: #ddd;
@@ -227,13 +205,11 @@
       border-radius: 6px;
       transition: background-color 0.3s ease;
     }
-
     .nav-menu li a:hover,
     #theme-toggle:hover {
       background-color: #4b3ca7;
       color: white;
     }
-
     .nav-toggle {
       display: none;
       background: none;
@@ -242,7 +218,6 @@
       padding: 8px;
       border-radius: 6px;
     }
-
     .nav-toggle .hamburger,
     .nav-toggle .hamburger::before,
     .nav-toggle .hamburger::after {
@@ -254,22 +229,18 @@
       position: relative;
       transition: all 0.3s ease;
     }
-
     .nav-toggle .hamburger::before,
     .nav-toggle .hamburger::after {
       content: "";
       position: absolute;
       left: 0;
     }
-
     .nav-toggle .hamburger::before {
       top: -7px;
     }
-
     .nav-toggle .hamburger::after {
       top: 7px;
     }
-
     @media (max-width: 768px) {
       .nav-menu {
         position: fixed;
@@ -285,11 +256,9 @@
         transition: transform 0.3s ease;
         box-shadow: -4px 0 12px rgba(0,0,0,0.6);
       }
-
       .nav-menu.show {
         transform: translateX(0);
       }
-
       .nav-toggle {
         display: block;
       }
@@ -348,29 +317,23 @@
 
       <article class="coin-card" aria-label="Litecoin (LTC)">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#b8b8b8" aria-hidden="true"><path d="M6 3h3.7l2.3 7H9v3h6v3H6v-3h3l2-6H6V3z"/></svg>
+          <svg viewBox="0 0 24 24" fill="#b8b8b8" aria-hidden="true"><path d="M6 3h3.7l2.2 8.6 2.2-8.6h3.7l-4.7 16H7z"/></svg>
           LTC
         </div>
         <div class="coin-amount" id="ltc-amount">0.000</div>
       </article>
     </section>
 
-    <div class="particles" aria-hidden="true">
-      <span class="particle" style="width: 12px; height:12px; top: 10%; left: 15%; animation-delay: 0s;"></span>
-      <span class="particle" style="width: 8px; height:8px; top: 30%; left: 70%; animation-delay: 3s;"></span>
-      <span class="particle" style="width: 6px; height:6px; top: 55%; left: 40%; animation-delay: 6s;"></span>
-      <span class="particle" style="width: 14px; height:14px; top: 80%; left: 80%; animation-delay: 9s;"></span>
-      <span class="particle" style="width: 10px; height:10px; top: 75%; left: 20%; animation-delay: 12s;"></span>
-    </div>
+    <div class="particles" aria-hidden="true"></div>
   </main>
 
   <script type="module">
-    import { db, ref, get } from './js/firebase.js';
+    import { loadUserData } from './js/database.js';
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // Navbar toggle
+      // NAVBAR hamburger toggle
       const navToggle = document.querySelector('.nav-toggle');
-      const navMenu = document.querySelector('.nav-menu');
+      const navMenu = document.getElementById('nav-menu');
 
       navToggle.addEventListener('click', () => {
         const expanded = navToggle.getAttribute('aria-expanded') === 'true';
@@ -378,62 +341,76 @@
         navMenu.classList.toggle('show');
       });
 
-      // Theme toggle
-      const themeToggleBtn = document.getElementById('theme-toggle');
-      const body = document.body;
+      // THEME TOGGLE
+      const themeToggle = document.getElementById('theme-toggle');
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      document.body.classList.toggle('light-theme', currentTheme === 'light');
+      themeToggle.textContent = currentTheme === 'light' ? '☀️' : '🌙';
 
-      function updateThemeIcon() {
-        themeToggleBtn.textContent = body.classList.contains('light-theme') ? '🌙' : '☀️';
-      }
-
-      themeToggleBtn.addEventListener('click', () => {
-        body.classList.toggle('light-theme');
-        localStorage.setItem('theme', body.classList.contains('light-theme') ? 'light' : 'dark');
-        updateThemeIcon();
+      themeToggle.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        themeToggle.textContent = isLight ? '☀️' : '🌙';
       });
 
-      // Set initial theme from localStorage
-      if (localStorage.getItem('theme') === 'light') {
-        body.classList.add('light-theme');
-      } else {
-        body.classList.remove('light-theme');
+      // PARTICLES SIMPLE GENERATOR
+      const particlesContainer = document.querySelector('.particles');
+      for(let i=0; i<30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.width = `${5 + Math.random() * 10}px`;
+        p.style.height = p.style.width;
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.top = `${Math.random() * 100}%`;
+        p.style.animationDelay = `${Math.random() * 12}s`;
+        particlesContainer.appendChild(p);
       }
-      updateThemeIcon();
 
-      // Load user data
+      // USER DATA LOAD & FALLBACK
+
       const usernameEl = document.getElementById("username");
       const btcEl = document.getElementById("btc-amount");
       const ethEl = document.getElementById("eth-amount");
       const ltcEl = document.getElementById("ltc-amount");
 
       try {
-        // Supponiamo che l'uid sia salvato in localStorage per demo
-        const uid = localStorage.getItem('uid');
-        if (!uid) throw new Error('Utente non autenticato');
+        let userData = await loadUserData(); // Funzione da database.js che ritorna dati o null
 
-        // Recupera dati utente da Firebase
-        const userSnapshot = await get(ref(db, `users/${uid}`));
-        if (!userSnapshot.exists()) {
-          throw new Error('Utente non trovato nel database');
+        if (!userData) {
+          // Se non autenticato, prova fallback IP
+          userData = await fetchUserByIP();
         }
 
-        const userData = userSnapshot.val();
-        usernameEl.textContent = userData.name || 'Utente';
+        if (!userData) {
+          // Se ancora niente, redirect al login
+          window.location.href = 'login.html';
+          return;
+        }
 
-        // Carica portafoglio criptovalute, valori arrotondati a 3 decimali
+        usernameEl.textContent = userData.name || 'Utente';
         btcEl.textContent = Number(userData.btc || 0).toFixed(3);
         ethEl.textContent = Number(userData.eth || 0).toFixed(3);
         ltcEl.textContent = Number(userData.ltc || 0).toFixed(3);
 
-      } catch (error) {
-        usernameEl.textContent = "ospite";
-        btcEl.textContent = "0.000";
-        ethEl.textContent = "0.000";
-        ltcEl.textContent = "0.000";
-        console.error(error);
+      } catch (err) {
+        console.error(err);
+        // In caso di errore grave, manda al login
+        window.location.href = 'login.html';
       }
     });
-  </script>
 
+    // Esempio fallback fetchUserByIP
+    async function fetchUserByIP() {
+      try {
+        // Sostituisci URL con la tua API per risalire utente da IP
+        const response = await fetch('https://api.example.com/userByIP');
+        if (!response.ok) throw new Error('IP fallback failed');
+        const data = await response.json();
+        return data; // { name, btc, eth, ltc }
+      } catch {
+        return null;
+      }
+    }
+  </script>
 </body>
 </html>
