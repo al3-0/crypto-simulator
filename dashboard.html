@@ -43,18 +43,20 @@
         window.location.href = 'index.html';
       }
 
-      // Tema salvato
+      // Imposta tema salvato
       const savedTheme = localStorage.getItem('theme');
+      const themeToggleBtn = document.getElementById('theme-toggle');
       if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
-        document.getElementById('theme-toggle').textContent = '☀️';
+        themeToggleBtn.textContent = '☀️';
       } else {
-        document.getElementById('theme-toggle').textContent = '🌙';
+        themeToggleBtn.textContent = '🌙';
       }
     });
   </script>
   <style>
-  body {
+    /* Inserisco qui il tuo CSS personalizzato */
+    body {
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -307,10 +309,11 @@
       .nav-toggle {
         display: block;
       }
-    }  </style>
+    }
+  </style>
 </head>
 <body>
-  <!-- ✅ Navbar funzionante -->
+  <!-- Navbar -->
   <nav class="navbar">
     <a href="dashboard.html" class="logo-link" style="margin-right: auto; padding-left: 30px;">
       <img src="logo.png" alt="CryptoSim Logo" class="logo-img" />
@@ -333,52 +336,67 @@
     </div>
   </nav>
 
-  <!-- ✅ Contenuto principale -->
+  <!-- Contenuto principale -->
   <main>
     <h1>Benvenuto, <span id="username">...</span>!</h1>
-    <p class="welcome">Ecco il riepilogo del tuo portafoglio criptovalute</p>
-    <section class="wallet">
-      <article class="coin-card">
+    <p class="welcome">Questo è il tuo wallet criptovalute simulato.</p>
+    <div class="wallet">
+      <div class="coin-card" title="Bitcoin">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#f7931a"><circle cx="12" cy="12" r="10"/></svg> BTC
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#f2a900" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10.0114 10.0114 0 0012 2zm1.9167 14.5h-1.9167v1.25h-2.0833v-1.25H8.75v-2.5h1.1667v-3.75H8.75v-2.5h1.1667v-1.25h2.0833v1.25H13.9167v2.5h-1.25v3.75h1.25zm.6666-5.4167h1.5v1.25h-1.5zm0 3.75h1.5v1.25h-1.5z"/></svg>
+          Bitcoin (BTC)
         </div>
         <div class="coin-amount" id="btc-amount">0.000</div>
-      </article>
-      <article class="coin-card">
+      </div>
+      <div class="coin-card" title="Ethereum">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#627eea"><polygon points="12,2 2,22 22,22"/></svg> ETH
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#3c3cbd" viewBox="0 0 24 24"><path d="M12 2L6 12l6 10 6-10z"/></svg>
+          Ethereum (ETH)
         </div>
         <div class="coin-amount" id="eth-amount">0.000</div>
-      </article>
-      <article class="coin-card">
+      </div>
+      <div class="coin-card" title="Litecoin">
         <div class="coin-name">
-          <svg viewBox="0 0 24 24" fill="#b8b8b8"><rect x="4" y="4" width="16" height="16"/></svg> LTC
+          <svg xmlns="http://www.w3.org/2000/svg" fill="#b8b8b8" viewBox="0 0 24 24"><path d="M14.07 10.41L11 10l1-3-2.5 0 0 2.9-2.66-0.4L7.94 14l2.14 0.33-1.11 3L14.07 10.41z"/></svg>
+          Litecoin (LTC)
         </div>
         <div class="coin-amount" id="ltc-amount">0.000</div>
-      </article>
-    </section>
-    <div class="particles"></div>
+      </div>
+    </div>
+
+    <div class="particles" aria-hidden="true">
+      <div class="particle" style="width: 8px; height: 8px; top: 10%; left: 15%; animation-delay: 0s;"></div>
+      <div class="particle" style="width: 10px; height: 10px; top: 30%; left: 50%; animation-delay: 4s;"></div>
+      <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 80%; animation-delay: 2s;"></div>
+      <div class="particle" style="width: 9px; height: 9px; top: 80%; left: 35%; animation-delay: 6s;"></div>
+      <div class="particle" style="width: 7px; height: 7px; top: 45%; left: 20%; animation-delay: 1s;"></div>
+    </div>
   </main>
 
-  <!-- ✅ Script navbar + tema -->
   <script>
-    (() => {
-      const navToggle = document.querySelector('.nav-toggle');
-      const navMenu = document.querySelector('.nav-menu');
-      const themeToggleBtn = document.getElementById('theme-toggle');
+    // Navbar toggle mobile
+    const navToggle = document.querySelector('.nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
 
-      navToggle.addEventListener('click', () => {
-        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', String(!expanded));
-        navMenu.classList.toggle('show');
-      });
+    navToggle.addEventListener('click', () => {
+      const expanded = navToggle.getAttribute('aria-expanded') === 'true' || false;
+      navToggle.setAttribute('aria-expanded', !expanded);
+      navMenu.classList.toggle('show');
+    });
 
-      themeToggleBtn.addEventListener('click', () => {
-        const isLight = document.body.classList.toggle('light-theme');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        themeToggleBtn.textContent = isLight ? '☀️' : '🌙';
-      });
-    })();
+    // Tema toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn.addEventListener('click', () => {
+      if (document.body.classList.contains('light-theme')) {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+        themeToggleBtn.textContent = '🌙';
+      } else {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+        themeToggleBtn.textContent = '☀️';
+      }
+    });
   </script>
 </body>
 </html>
