@@ -4,342 +4,430 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Exchange</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    /* ==== BODY & MAIN ==== */
     body {
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
-      color: #eee;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       min-height: 100vh;
-      padding: 100px 20px 40px;
+      padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
       overflow-x: hidden;
       position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* Animazione bolle */
-    .bubbles {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 1;
-    }
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: rgba(187, 134, 252, 0.3);
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: rise 10s linear infinite;
-    }
-    @keyframes rise {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.6;
-      }
-      100% {
-        transform: translateY(-110vh) scale(0.5);
-        opacity: 0;
-      }
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      color: #eee;
     }
 
-    /* Navbar base */
-    .navbar {
-      width: 100%;
-      background: #1c1c3aee;
-      padding: 14px 30px;
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      font-weight: 800;
+      color: #bb86fc;
+      text-align: center;
+      animation: fadeInDown 1s ease forwards;
+      opacity: 0;
+    }
+
+    .exchange-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeInUp 1.8s ease forwards;
+      opacity: 0;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    select, input[type="number"] {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #3b3b6a;
+      color: #eee;
+      box-shadow: inset 0 0 8px #7e5fff88;
+      transition: background-color 0.3s ease;
+    }
+    select:hover, input[type="number"]:hover {
+      background: #4b4b7a;
+    }
+
+    button.exchange-btn {
+      background: #bb86fc;
+      color: #222;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px #bb86fccc;
+      transition: background-color 0.3s ease;
+    }
+    button.exchange-btn:hover {
+      background: #9a68e3;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      color: #ccc;
+      min-height: 2rem;
+    }
+
+    /* ==== NAVBAR ==== */
+    nav.navbar {
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 9999;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(12px);
-      display: flex;
-      justify-content: center;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+      user-select: none;
     }
 
-    nav {
-      width: 100%;
-      max-width: 900px;
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: relative;
     }
 
-    .nav-links {
-      display: flex;
-      justify-content: center;
-      flex: 1;
-      gap: 30px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .nav-links li {
-      white-space: nowrap;
-    }
-
-    .nav-links a {
-      color: #eee;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
-      border-bottom: 2px solid transparent;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
-    }
-
-    /* Hamburger menu per mobile */
-    .hamburger {
-      display: none;
-      flex-direction: column;
+    .logo-link img {
+      height: 36px;
       cursor: pointer;
-      gap: 5px;
-      width: 25px;
-      height: 20px;
-      z-index: 10001;
-    }
-    .hamburger div {
-      background-color: #eee;
-      height: 3px;
-      border-radius: 2px;
-      transition: all 0.3s ease;
     }
 
-    /* Mobile menu */
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    /* ==== RESPONSIVE ==== */
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+    #nav-toggle span:nth-child(1) {
+      top: 0;
+    }
+    #nav-toggle span:nth-child(2) {
+      top: 9px;
+    }
+    #nav-toggle span:nth-child(3) {
+      top: 18px;
+    }
+
     @media (max-width: 768px) {
-      .nav-links {
+      .nav-menu {
         position: fixed;
         top: 60px;
-        right: -100%;
-        background: #1c1c3aee;
-        height: calc(100vh - 60px);
-        width: 200px;
-        flex-direction: column;
-        gap: 20px;
-        padding: 20px;
-        transition: right 0.3s ease;
-        box-shadow: -2px 0 10px rgba(187, 134, 252, 0.3);
-      }
-
-      .nav-links.open {
+        left: 0;
         right: 0;
-      }
-
-      .hamburger {
-        display: flex;
-      }
-    }
-
-    .exchange-container {
-      background: #2a2a4fdd;
-      border-radius: 16px;
-      max-width: 500px;
-      margin: auto;
-      padding: 40px;
-      box-shadow: 0 0 30px rgba(187, 134, 252, 0.6);
-      backdrop-filter: blur(12px);
-      animation: fadeInUp 1s ease forwards;
-      position: relative;
-      z-index: 10;
-    }
-
-    h1 {
-      text-align: center;
-      color: #bb86fc;
-      font-size: 2.4rem;
-      margin-bottom: 30px;
-    }
-
-    label {
-      display: block;
-      margin: 20px 0 8px;
-      font-weight: bold;
-      color: #ddd;
-    }
-
-    select, input[type="number"] {
-      width: 100%;
-      padding: 10px 15px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      background-color: #1c1c3a;
-      color: #fff;
-      outline: none;
-    }
-
-    button {
-      margin-top: 30px;
-      width: 100%;
-      padding: 12px;
-      background: #bb86fc;
-      color: #1c1c3a;
-      border: none;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background: #d3aaff;
-    }
-
-    .result {
-      text-align: center;
-      margin-top: 20px;
-      color: #bfbfff;
-      font-weight: 500;
-    }
-
-    @keyframes fadeInUp {
-      from {
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
         opacity: 0;
-        transform: translateY(30px);
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
       }
-      to {
-        opacity: 1;
+      .nav-menu.open {
         transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
       }
+      #nav-toggle {
+        display: block;
+      }
+      #theme-toggle {
+        margin-left: 0;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* ==== ANIMAZIONI ==== */
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
   </style>
-    
-  <script type="module" src="./js/authCheck.js"></script>
-
 </head>
 <body>
-  <!-- Animazione bolle -->
-  <div class="bubbles"></div>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
+        <img src="logo.png" alt="CryptoSim Logo" />
+      </a>
 
-  <header class="navbar">
-    <nav>
-      <div class="hamburger" id="hamburger" aria-label="Menu">
-        <div></div>
-        <div></div>
-        <div></div>
+      <!-- HAMBURGER -->
+      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="dashboard.html" class="">Home</a></li>
-        <li><a href="exchange.html" class="active">Exchange</a></li>
+
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account Info</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
       </ul>
-    </nav>
-  </header>
+    </div>
+  </nav>
 
-  <main class="exchange-container">
+  <!-- CONTENUTO PRINCIPALE -->
+  <main>
     <h1>Exchange Criptovalute</h1>
-    
-    <label for="from">Da</label>
-    <select id="from">
-      <option value="BTC">Bitcoin (BTC)</option>
-      <option value="ETH">Ethereum (ETH)</option>
-      <option value="LTC">Litecoin (LTC)</option>
-    </select>
+    <form class="exchange-form" id="exchange-form">
+      <div>
+        <label for="from-coin">Da:</label>
+        <select id="from-coin" required>
+          <option value="" disabled selected>Seleziona criptovaluta</option>
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="LTC">Litecoin (LTC)</option>
+        </select>
+      </div>
+      <div>
+        <label for="to-coin">A:</label>
+        <select id="to-coin" required>
+          <option value="" disabled selected>Seleziona criptovaluta</option>
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="LTC">Litecoin (LTC)</option>
+        </select>
+      </div>
+      <div>
+        <label for="amount">Importo:</label>
+        <input type="number" id="amount" min="0.001" step="0.001" placeholder="0.000" required />
+      </div>
+      <button type="submit" class="exchange-btn">Scambia</button>
+    </form>
 
-    <label for="to">A</label>
-    <select id="to">
-      <option value="BTC">Bitcoin (BTC)</option>
-      <option value="ETH">Ethereum (ETH)</option>
-      <option value="LTC">Litecoin (LTC)</option>
-    </select>
-
-    <label for="amount">Quantità</label>
-    <input type="number" id="amount" min="0" step="0.001" placeholder="Es. 0.5" />
-
-    <button id="exchangeBtn">Converti</button>
-
-    <div class="result" id="resultMsg"></div>
+    <div class="result" id="exchange-result"></div>
   </main>
 
+  <!-- SCRIPT JS -->
   <script type="module">
-    // Bubbles animation setup
-    const bubblesContainer = document.querySelector('.bubbles');
-    const bubbleCount = 30;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    for(let i = 0; i < bubbleCount; i++){
-      const bubble = document.createElement('div');
-      bubble.classList.add('bubble');
-      const size = Math.random() * 40 + 10 + 'px';
-      bubble.style.width = size;
-      bubble.style.height = size;
-      bubble.style.left = Math.random() * 100 + 'vw';
-      bubble.style.animationDuration = (5 + Math.random() * 10) + 's';
-      bubble.style.animationDelay = (Math.random() * 10) + 's';
-      bubblesContainer.appendChild(bubble);
-    }
-
-    // Hamburger menu toggle
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-
-    hamburger.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-      hamburger.classList.toggle('open');
-    });
-
-    // Exchange script
-    import { db, ref, get, update } from './js/firebase.js';
-
-    const fromEl = document.getElementById("from");
-    const toEl = document.getElementById("to");
-    const amountEl = document.getElementById("amount");
-    const resultEl = document.getElementById("resultMsg");
-    const button = document.getElementById("exchangeBtn");
-
-    const exchangeRates = {
-      BTC: { ETH: 15, LTC: 200 },
-      ETH: { BTC: 1 / 15, LTC: 13.33 },
-      LTC: { BTC: 1 / 200, ETH: 1 / 13.33 }
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
     };
 
-    button.addEventListener("click", async () => {
-      const user = localStorage.getItem("user");
-      if (!user) return location.href = "index.html";
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      const from = fromEl.value;
-      const to = toEl.value;
-      const amount = parseFloat(amountEl.value);
-
-      if (from === to) return resultEl.textContent = "Scegli criptovalute diverse.";
-      if (!amount || amount <= 0) return resultEl.textContent = "Inserisci un valore valido.";
-
-      try {
-        const snapshot = await get(ref(db, `users/${user}/wallet`));
-        if (!snapshot.exists()) throw new Error("Wallet non trovato.");
-
-        const wallet = snapshot.val();
-        if (wallet[from] < amount) return resultEl.textContent = `Saldo ${from} insufficiente.`;
-
-        const rate = exchangeRates[from][to];
-        const converted = amount * rate;
-
-        wallet[from] -= amount;
-        wallet[to] += converted;
-
-        await update(ref(db, `users/${user}/wallet`), {
-          [from]: parseFloat(wallet[from].toFixed(6)),
-          [to]: parseFloat(wallet[to].toFixed(6))
-        });
-
-        resultEl.textContent = `Hai convertito ${amount} ${from} in ${converted.toFixed(3)} ${to}`;
-      } catch (err) {
-        console.error(err);
-        resultEl.textContent = "Errore durante la conversione.";
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Controllo utente loggato
+      const username = localStorage.getItem('user');
+      if (!username) {
+        window.location.href = "index.html";
+        return;
       }
-    });
-  </script>
+
+      // Theme toggle
+      const themeBtn = document.getElementById('theme-toggle');
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeBtn.textContent = '☀️';
+      }
+
+      themeBtn.addEventListener('click', () => {
+        if (document.body.classList.toggle('light-theme')) {
+          localStorage.setItem('theme', 'light');
+          themeBtn.textContent = '☀️';
+        } else {
+          localStorage.setItem('theme', 'dark');
+          themeBtn.textContent = '🌙';
+        }
+      });
+
+      // Hamburger menu toggle
+      const navToggle = document.getElementById('nav-toggle');
+      const navMenu = document.getElementById('nav-menu');
+
+      function toggleMenu() {
+        navToggle.classList.toggle('open');
+        navMenu.classList.toggle('open');
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
+      }
+
+      navToggle.addEventListener('click', toggleMenu);
+      navToggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleMenu();
+        }
+      });
+
+      navMenu.querySelectorAll('a, button').forEach(link => {
+        link.addEventListener('click', () => {
+          if (navMenu.classList.contains('open')) {
+            toggleMenu();
+          }
+        });
+      });
+
+      // Exchange form logic
+      const form = document.getElementById('exchange-form');
+      const resultDiv = document.getElementById('exchange-result');
+
+      // Semplice tasso di cambio fittizio (per esempio)
+      const rates = {
+        BTC: { BTC: 1, ETH: 15, LTC: 250 },
+        ETH: { BTC: 1/15, ETH: 1, LTC: 16.6 },
+        LTC: { BTC: 1/250, ETH: 1/16.6, LTC: 1 },
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fromCoin = form['from-coin'].value;
+        const toCoin = form['to-coin'].value;
+        const amount = parseFloat(form['amount'].value);
+
+        if (fromCoin === toCoin) {
+          resultDiv.textContent = "Seleziona due criptovalute differenti.";
+          return;
+        }
+
+        if (amount <= 0 || isNaN(amount)) {
+          resultDiv.textContent = "Inserisci un importo valido.";
+          return;
+        }
+
+        resultDiv.textContent = "Elaborazione...";
+
+        try {
+          // Prendo wallet attuale
+          const walletRef = ref(db, `users/${username}/wallet`);
+          const walletSnap = await get(walletRef);
+          const wallet = walletSnap.val() || {};
+
+          if ((wallet[fromCoin] || 0) < amount) {
+            resultDiv.textContent = `Saldo insufficiente in ${fromCoin}.`;
+            return;
+          }
+
+          // Calcolo importo convertito
+          const convertedAmount = amount * rates[fromCoin][toCoin];
+
+          // Aggiorno il database
+          const updates = {};
+          updates[`users/${username}/wallet/${fromCoin}`] = (wallet[fromCoin] || 0) - amount;
+          updates[`users/${username}/wallet/${toCoin}`] = (wallet[toCoin] || 0) + convertedAmount;
+
+          await update(ref(db), updates);
+
+          resultDiv.textContent = Scambiati ${amount.toFixed(3)} ${fromCoin} per ${convertedAmount.toFixed(3)} ${toCoin}.;
+              } catch (err) {
+      console.error(err);
+      resultDiv.textContent = "Errore durante lo scambio.";
+    }
+  });
+});
+</script>
 </body>
 </html>
