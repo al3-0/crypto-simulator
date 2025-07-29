@@ -1,153 +1,157 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Crypto Simulator - Login</title>
-<link rel="stylesheet" href="css/style.css" />
-<style>
-  /* Styling specifico login */
-  body {
-    background: linear-gradient(135deg, #1f1f3f, #12122b);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #eee;
-  }
-  main {
-    background: #2a2a4f;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
-    width: 350px;
-  }
-  h1 {
-    margin-bottom: 24px;
-    font-weight: 700;
-    text-align: center;
-    color: #bb86fc;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  input {
-    padding: 12px 14px;
-    border-radius: 8px;
-    border: none;
-    font-size: 1rem;
-    background: #3b3b65;
-    color: #f0f0f0;
-    transition: background 0.3s ease;
-  }
-  input:focus {
-    background: #5849a3;
-    outline: none;
-  }
-  button {
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: #bb86fc;
-    color: #1a1a2e;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background-color: #9a68e2;
-  }
-  p.register-link {
-    margin-top: 18px;
-    font-size: 0.9rem;
-    text-align: center;
-    color: #bbb;
-  }
-  p.register-link a {
-    color: #7e5fff;
-    text-decoration: none;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  p.register-link a:hover {
-    text-decoration: underline;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #1f1f3f, #12122b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+    }
+    main {
+      background: #2a2a4f;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
+      width: 350px;
+    }
+    h1 {
+      margin-bottom: 24px;
+      font-weight: 700;
+      text-align: center;
+      color: #bb86fc;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    input {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #3b3b65;
+      color: #f0f0f0;
+      transition: background 0.3s ease;
+    }
+    input:focus {
+      background: #5849a3;
+      outline: none;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #bb86fc;
+      color: #1a1a2e;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #9a68e2;
+    }
+    p.register-link {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #bbb;
+    }
+    p.register-link a {
+      color: #7e5fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    p.register-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
 
-<script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
-<script type="module">
-  import { db, ref, get } from './js/firebase.js';
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  async function executeRecaptcha() {
-    return grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', {action: 'login'});
-  }
+    const firebaseConfig = {
+  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+  authDomain: "coins-7104d.firebaseapp.com",
+  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+  projectId: "coins-7104d",
+  storageBucket: "coins-7104d.firebasestorage.app",
+  messagingSenderId: "893938643778",
+  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+  measurementId: "G-QSY10CVX1F"
+    };
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById('login-form');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
+    async function executeRecaptcha() {
+      return grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'login' });
+    }
 
-      const username = form.username.value.trim();
-      const password = form.password.value;
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById('login-form');
 
-      if (!username || !password) {
-        alert("Inserisci username e password.");
-        return;
-      }
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
 
-      try {
-        // Ottieni token reCAPTCHA v3
+        const username = form.username.value.trim();
+        const password = form.password.value;
+
+        if (!username || !password) {
+          alert("Inserisci username e password.");
+          return;
+        }
+
         const token = await executeRecaptcha();
-
-        // Verifica token lato server qui (simulazione in frontend)
-        // In un sistema reale, fai POST al tuo backend con username, password e token
-        // e il backend verifica token con chiave segreta Google.
-
-        // Esempio: se vuoi, puoi creare endpoint /verifyRecaptcha
-
-        // Per ora proseguiamo solo se token esiste
         if (!token) {
-          alert("Errore nella verifica reCAPTCHA, riprova.");
+          alert("Errore nella verifica reCAPTCHA.");
           return;
         }
 
-        const snapshot = await get(ref(db, `users/${username}`));
-        if (!snapshot.exists()) {
-          alert("Utente non trovato.");
-          return;
+        try {
+          const snapshot = await get(ref(db, `users/${username}`));
+          if (!snapshot.exists()) {
+            alert("Utente non trovato.");
+            return;
+          }
+
+          const user = snapshot.val();
+          if (user.password !== password) {
+            alert("Password errata.");
+            return;
+          }
+
+          localStorage.setItem("user", username);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          console.error(error);
+          alert("Errore di connessione.");
         }
-        const userData = snapshot.val();
-        if (userData.password !== password) {
-          alert("Password errata.");
-          return;
-        }
-        localStorage.setItem("user", username);
-        window.location.href = "dashboard.html";
-      } catch (error) {
-        alert("Errore di connessione, riprova.");
-        console.error(error);
-      }
+      });
     });
-  });
-</script>
+  </script>
 </head>
 <body>
   <main role="main" aria-label="Login Crypto Simulator">
     <h1>Crypto Simulator</h1>
     <form id="login-form" novalidate>
-      <input type="text" name="username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri, max 15 caratteri" />
-      <input type="password" name="password" placeholder="Password" autocomplete="current-password" required minlength="6" />
-      <button type="submit" aria-label="Accedi">Login</button>
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <button type="submit">Login</button>
     </form>
-    <p class="register-link">
-      Se non sei registrato, <a href="register.html">clicca qui!</a>
-    </p>
+    <p class="register-link">Se non sei registrato, <a href="register.html">clicca qui!</a></p>
   </main>
 </body>
 </html>
