@@ -1,176 +1,183 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Crypto Simulator - Registrazione</title>
-<link rel="stylesheet" href="css/style.css" />
-<style>
-  /* Stile simile a login con sfumatura diversa */
-  body {
-    background: linear-gradient(135deg, #2b2b4f, #161630);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #eee;
-  }
-  main {
-    background: #3b3b6a;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(187, 134, 252, 0.8);
-    width: 380px;
-  }
-  h1 {
-    margin-bottom: 24px;
-    font-weight: 700;
-    text-align: center;
-    color: #bb86fc;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  input {
-    padding: 12px 14px;
-    border-radius: 8px;
-    border: none;
-    font-size: 1rem;
-    background: #4b4b87;
-    color: #f0f0f0;
-    transition: background 0.3s ease;
-  }
-  input:focus {
-    background: #7a68e2;
-    outline: none;
-  }
-  button {
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: #bb86fc;
-    color: #1a1a2e;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background-color: #9a68e2;
-  }
-  p.login-link {
-    margin-top: 18px;
-    font-size: 0.9rem;
-    text-align: center;
-    color: #ccc;
-  }
-  p.login-link a {
-    color: #7e5fff;
-    text-decoration: none;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  p.login-link a:hover {
-    text-decoration: underline;
-  }
-</style>
-
-<!-- reCAPTCHA v3 script con tua chiave pubblica -->
-<script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
-
-<script type="module">
-  import { db, ref, get, set } from './js/firebase.js';
-
-  async function getIP() {
-    try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      return data.ip;
-    } catch {
-      return '0.0.0.0';
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Registrazione</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2b2b4f, #161630);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
     }
-  }
+    main {
+      background: #3b3b6a;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(187, 134, 252, 0.8);
+      width: 380px;
+    }
+    h1 {
+      margin-bottom: 24px;
+      font-weight: 700;
+      text-align: center;
+      color: #bb86fc;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    input {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #4b4b87;
+      color: #f0f0f0;
+      transition: background 0.3s ease;
+    }
+    input:focus {
+      background: #7a68e2;
+      outline: none;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #bb86fc;
+      color: #1a1a2e;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #9a68e2;
+    }
+    p.login-link {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #ccc;
+    }
+    p.login-link a {
+      color: #7e5fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    p.login-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById('register-form');
+  <script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
+  <!-- Import Firebase con ESM inline -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-      // Ottieni il token reCAPTCHA v3 prima di continuare
-      const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', {action: 'register'});
+    const firebaseConfig = {
+  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+  authDomain: "coins-7104d.firebaseapp.com",
+  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+  projectId: "coins-7104d",
+  storageBucket: "coins-7104d.firebasestorage.app",
+  messagingSenderId: "893938643778",
+  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+  measurementId: "G-QSY10CVX1F"
+    };
 
-      if (!token) {
-        alert("Errore nella verifica reCAPTCHA. Riprova.");
-        return;
-      }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      // Puoi opzionalmente aggiungere qui la logica per inviare il token al backend e verificare lato server
-
-      const username = form.username.value.trim();
-      const password = form.password.value;
-      const passwordConfirm = form.passwordConfirm.value;
-
-      if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
-        alert("Username non valido. Solo lettere e numeri, 3-15 caratteri.");
-        return;
-      }
-      if (password.length < 6) {
-        alert("La password deve essere almeno di 6 caratteri.");
-        return;
-      }
-      if (password !== passwordConfirm) {
-        alert("Le password non corrispondono.");
-        return;
-      }
-
+    async function getIP() {
       try {
-        const userRef = ref(db, `users/${username}`);
-        const snapshot = await get(userRef);
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        return data.ip;
+      } catch {
+        return '0.0.0.0';
+      }
+    }
 
-        if (snapshot.exists()) {
-          alert("Username già in uso.");
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById('register-form');
+
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'register' });
+        if (!token) {
+          alert("Errore nella verifica reCAPTCHA. Riprova.");
           return;
         }
 
-        const ip = await getIP();
+        const username = form.username.value.trim();
+        const password = form.password.value;
+        const passwordConfirm = form.passwordConfirm.value;
 
-        await set(userRef, {
-          password,
-          ip,
-          wallet: {
-            BTC: 0,
-            ETH: 0,
-            LTC: 0
-          },
-          recaptchaToken: token // salvo il token per eventuale verifica futura
-        });
+        if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
+          alert("Username non valido.");
+          return;
+        }
+        if (password.length < 6) {
+          alert("La password deve essere almeno di 6 caratteri.");
+          return;
+        }
+        if (password !== passwordConfirm) {
+          alert("Le password non corrispondono.");
+          return;
+        }
 
-        localStorage.setItem("user", username);
-        window.location.href = "dashboard.html";
-      } catch (error) {
-        alert("Errore durante la registrazione, riprova.");
-        console.error(error);
-      }
+        try {
+          const userRef = ref(db, `users/${username}`);
+          const snapshot = await get(userRef);
+
+          if (snapshot.exists()) {
+            alert("Username già in uso.");
+            return;
+          }
+
+          const ip = await getIP();
+
+          await set(userRef, {
+            password,
+            ip,
+            wallet: {
+              BTC: 0,
+              ETH: 0,
+              LTC: 0
+            },
+            recaptchaToken: token
+          });
+
+          localStorage.setItem("user", username);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          console.error(error);
+          alert("Errore durante la registrazione.");
+        }
+      });
     });
-  });
-</script>
+  </script>
 </head>
 <body>
   <main role="main" aria-label="Registrazione Crypto Simulator">
     <h1>Registrazione</h1>
     <form id="register-form" novalidate>
-      <input type="text" name="username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="15" pattern="[a-zA-Z0-9]+" title="Solo lettere e numeri, max 15 caratteri" />
-      <input type="password" name="password" placeholder="Password" autocomplete="new-password" required minlength="6" />
-      <input type="password" name="passwordConfirm" placeholder="Conferma Password" autocomplete="new-password" required minlength="6" />
-      <button type="submit" aria-label="Registrati">Registrati</button>
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <input type="password" name="passwordConfirm" placeholder="Conferma Password" required />
+      <button type="submit">Registrati</button>
     </form>
-    <p class="login-link">
-      Hai già un account? <a href="index.html">Accedi qui</a>
-    </p>
+    <p class="login-link">Hai già un account? <a href="index.html">Accedi qui</a></p>
   </main>
 </body>
 </html>
