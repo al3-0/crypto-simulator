@@ -113,6 +113,9 @@
     input {
       background-color: #1c1c3a;
       color: #fff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
     }
 
     button {
@@ -176,7 +179,7 @@
   <main class="redeem-container">
     <h1>Riscatta Vouch</h1>
 
-    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" />
+    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" maxlength="14" />
     <button id="btnRedeem">Riscatta</button>
 
     <div id="redeemMsg"></div>
@@ -207,6 +210,26 @@
     function showMessage(msg) {
       document.getElementById('redeemMsg').textContent = msg;
     }
+
+    // Funzione per formattare automaticamente il codice in XXXX-XXXX-XXXX maiuscolo
+    function formatCode(input) {
+      // Rimuove tutto tranne lettere e numeri
+      let val = input.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
+      // Inserisce trattini dopo ogni 4 caratteri, massimo 12 caratteri
+      if (val.length > 4 && val.length <= 8) {
+        val = val.slice(0,4) + '-' + val.slice(4);
+      } else if (val.length > 8) {
+        val = val.slice(0,4) + '-' + val.slice(4,8) + '-' + val.slice(8,12);
+      }
+
+      return val;
+    }
+
+    document.getElementById('codeInput').addEventListener('input', (e) => {
+      const formatted = formatCode(e.target.value);
+      e.target.value = formatted;
+    });
 
     async function redeemVouch() {
       const user = localStorage.getItem('user');
@@ -246,6 +269,9 @@
         showMessage('Codice non valido o già usato.');
         return;
       }
+
+      // Imposto Expired: true per il codice vouch riscattato
+      await update(ref(db, `vouch/${vouchOwner}/${code}`), { Expired: true });
 
       // Inizializza redeemed per sicurezza (non obbligatorio ma utile)
       const redeemedSnap = await get(ref(db, `redeemed/${user}`));
