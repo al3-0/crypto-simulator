@@ -2,255 +2,382 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crea Vouch - Crypto Simulator</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vouch Create</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    /* === STILI BASE E NAVBAR === */
     body {
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
-      color: #eee;
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 100px 20px 40px;
-    }
-
-    .navbar {
-      width: 100%;
-      background: #1c1c3aee;
-      padding: 14px 30px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 999;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(12px);
-    }
-
-    .navbar ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 30px;
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar a {
       color: #eee;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
-      border-bottom: 2px solid transparent;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    .navbar a:hover {
-      color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
-    }
-
-    .vouch-container {
+    main {
       background: #2a2a4fdd;
-      border-radius: 16px;
-      max-width: 500px;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
       margin: auto;
-      padding: 40px;
-      box-shadow: 0 0 30px rgba(187, 134, 252, 0.6);
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
-      animation: fadeInUp 1s ease forwards;
+      position: relative;
+      z-index: 2;
+      text-align: center;
     }
 
     h1 {
-      text-align: center;
-      color: #bb86fc;
       font-size: 2.4rem;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
+      color: #bb86fc;
     }
 
-    label {
+    input, select, button {
       display: block;
-      margin: 20px 0 8px;
-      font-weight: bold;
-      color: #ddd;
-    }
-
-    select,
-    input[type="number"] {
       width: 100%;
-      padding: 10px 15px;
+      padding: 12px;
+      margin: 12px 0;
+      font-size: 1rem;
       border-radius: 8px;
       border: none;
-      font-size: 1rem;
-      background-color: #1c1c3a;
-      color: #fff;
       outline: none;
     }
 
+    input, select {
+      background: #44446a;
+      color: #fff;
+    }
+
     button {
-      margin-top: 30px;
-      width: 100%;
-      padding: 12px;
       background: #bb86fc;
-      color: #1c1c3a;
-      border: none;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1.1rem;
+      color: #12122b;
+      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s;
     }
 
     button:hover {
-      background: #d3aaff;
+      background: #9e6cf8;
     }
 
-    #vouchCode {
+    .message {
       margin-top: 20px;
-      text-align: center;
-      color: #bfbfff;
-      font-size: 1.2rem;
-      word-break: break-word;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #8fce8f;
     }
 
-    #vouchList {
-      margin-top: 40px;
-      background-color: #1f1f3d;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+    /* NAVBAR */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+      user-select: none;
     }
 
-    #vouchList h2 {
-      color: #bb86fc;
-      margin-bottom: 15px;
-      font-size: 1.4rem;
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
     }
 
-    ol {
-      padding-left: 20px;
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
     }
 
-    li {
-      margin-bottom: 10px;
-      color: #ccc;
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
-    @keyframes fadeInUp {
-      from {
+    .nav-menu li a, #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover, #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #nav-toggle {
+      display: none;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      position: relative;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        transform: translateY(-150%);
         opacity: 0;
-        transform: translateY(30px);
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
       }
-      to {
-        opacity: 1;
+
+      .nav-menu.open {
         transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
       }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* CANVAS ANIMAZIONE */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
     }
   </style>
-    
-  <script type="module" src="./js/authCheck.js"></script>
-
 </head>
 <body>
-  <header class="navbar">
-    <nav>
-      <ul>
+  <canvas id="bubble-canvas"></canvas>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo"></a>
+      <div id="nav-toggle"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle">🌙</button></li>
       </ul>
-    </nav>
-  </header>
+    </div>
+  </nav>
 
-  <main class="vouch-container">
-    <h1>Crea Vouch</h1>
-
-    <label for="cryptoType">Criptovaluta</label>
-    <select id="cryptoType">
+  <!-- MAIN CONTENT -->
+  <main>
+    <h1>Crea un Vouch</h1>
+    <select id="coin-select">
       <option value="BTC">Bitcoin (BTC)</option>
       <option value="ETH">Ethereum (ETH)</option>
       <option value="LTC">Litecoin (LTC)</option>
     </select>
-
-    <label for="amount">Quantità</label>
-    <input type="number" id="amount" placeholder="Es. 0.1" step="0.001" min="0" />
-
-    <button id="btnCreateVouch">Genera Codice</button>
-
-    <div id="vouchCode"></div>
-
-    <div id="vouchList">
-      <h2>I tuoi codici generati</h2>
-      <ol id="listContainer"></ol>
-    </div>
+    <input type="number" id="amount" placeholder="Quantità" min="0.001" step="0.001" />
+    <button id="create-btn">Genera Codice</button>
+    <div class="message" id="message"></div>
   </main>
 
+  <!-- JS -->
   <script type="module">
-    import { db, ref, get, set, update } from './js/firebase.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    function generateCode() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < 12; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const username = localStorage.getItem("user");
+    if (!username) location.href = "index.html";
+    else if (username !== "Ale") location.href = "dashboard.html";
+
+    const coinSelect = document.getElementById("coin-select");
+    const amountInput = document.getElementById("amount");
+    const createBtn = document.getElementById("create-btn");
+    const msgDiv = document.getElementById("message");
+
+    createBtn.onclick = async () => {
+      const coin = coinSelect.value;
+      const amount = parseFloat(amountInput.value);
+      if (isNaN(amount) || amount <= 0) {
+        msgDiv.textContent = "Inserisci una quantità valida.";
+        return;
       }
-      return code.match(/.{1,4}/g).join('-');
-    }
 
-    async function createVouch() {
-      const user = localStorage.getItem('user');
-      if (!user) return location.href = 'index.html';
+      const walletRef = ref(db, `users/${username}/wallet`);
+      const walletSnap = await get(walletRef);
+      const wallet = walletSnap.val() || {};
 
-      const crypto = document.getElementById('cryptoType').value;
-      const amount = parseFloat(document.getElementById('amount').value);
-      if (!amount || amount <= 0) return alert('Quantità non valida.');
+      if ((wallet[coin] || 0) < amount) {
+        msgDiv.textContent = `Saldo insufficiente in ${coin}`;
+        return;
+      }
 
-      const snap = await get(ref(db, `users/${user}/wallet`));
-      const wallet = snap.exists() ? snap.val() : {};
-
-      if (!wallet[crypto] || wallet[crypto] < amount) return alert('Saldo insufficiente.');
-
-      const code = generateCode();
-      const newAmount = parseFloat((wallet[crypto] - amount).toFixed(6));
-
-      await update(ref(db, `users/${user}/wallet`), { [crypto]: newAmount });
-
-      await set(ref(db, `vouch/${user}/${code}`), {
-        crypto,
-        amount: parseFloat(amount.toFixed(6)),
-        createdAt: Date.now()
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      await set(ref(db, `vouchers/${code}`), {
+        coin,
+        amount,
+        from: username,
+        redeemed: false
       });
 
-      document.getElementById('vouchCode').textContent = `✅ Codice Vouch creato: ${code}`;
+      const updated = { ...wallet, [coin]: (wallet[coin] || 0) - amount };
+      await update(walletRef, updated);
 
-      loadVouches(); // refresh lista
+      msgDiv.textContent = `Voucher generato: ${code}`;
+    };
+
+    // NAV TOGGLE
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('open');
+      navMenu.classList.toggle('open');
+    });
+
+    // THEME TOGGLE
+    const themeBtn = document.getElementById("theme-toggle");
+    const theme = localStorage.getItem("theme");
+    if (theme === "light") {
+      document.body.classList.add("light-theme");
+      themeBtn.textContent = "☀️";
     }
 
-    async function loadVouches() {
-      const user = localStorage.getItem('user');
-      if (!user) return;
+    themeBtn.onclick = () => {
+      document.body.classList.toggle("light-theme");
+      const isLight = document.body.classList.contains("light-theme");
+      themeBtn.textContent = isLight ? "☀️" : "🌙";
+      localStorage.setItem("theme", isLight ? "light" : "dark");
+    };
 
-      const container = document.getElementById('listContainer');
-      container.innerHTML = '';
+    // ANIMAZIONE BOLLE
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, bubbles = [];
 
-      const snap = await get(ref(db, `vouch/${user}`));
-      if (snap.exists()) {
-        const data = snap.val();
-        Object.entries(data).forEach(([code, info]) => {
-          const li = document.createElement('li');
-          li.textContent = `${code} - ${info.amount} ${info.crypto}`;
-          container.appendChild(li);
-        });
+    class Bubble {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 100;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.5 + Math.random() * 1.5;
+        this.alpha = 0.1 + Math.random() * 0.3;
+        this.phase = Math.random() * 2 * Math.PI;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.phase) * 0.3;
+        this.phase += 0.03;
+        if (this.y + this.radius < 0) this.reset();
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        const grad = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        grad.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        grad.addColorStop(1, 'rgba(187,134,252,0)');
+        ctx.fillStyle = grad;
+        ctx.fill();
       }
     }
 
-    window.addEventListener('load', () => {
-      document.getElementById('btnCreateVouch').addEventListener('click', createVouch);
-      loadVouches();
-    });
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const b of bubbles) {
+        b.update();
+        b.draw(ctx);
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function init() {
+      resize();
+      for (let i = 0; i < 50; i++) {
+        bubbles.push(new Bubble());
+      }
+      animate();
+    }
+
+    window.addEventListener("resize", resize);
+    init();
   </script>
 </body>
 </html>
