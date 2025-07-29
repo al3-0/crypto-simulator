@@ -17,39 +17,41 @@ const db = getDatabase(app);
 
 const authorizedUsers = ["Ale"];
 
-window.addEventListener('DOMContentLoaded', async () => {
-  const username = localStorage.getItem('user');
-  const currentPath = window.location.pathname;
+window.addEventListener('DOMContentLoaded', () => {
+  (async () => {
+    const username = localStorage.getItem('user');
+    const currentPath = window.location.pathname.toLowerCase();
 
-  if (!username) {
-    window.location.href = '/crypto-simulator/index.html';
-    return;
-  }
-
-  try {
-    const snapshot = await get(ref(db, `users/${username}`));
-    if (!snapshot.exists()) {
-      localStorage.removeItem('user');
+    if (!username) {
       window.location.href = '/crypto-simulator/index.html';
       return;
     }
 
-    const hasPermission = authorizedUsers.includes(username);
+    try {
+      const snapshot = await get(ref(db, `users/${username}`));
+      if (!snapshot.exists()) {
+        localStorage.removeItem('user');
+        window.location.href = '/crypto-simulator/index.html';
+        return;
+      }
 
-    const voucherSection = document.getElementById('voucher-create-section');
-    if (voucherSection && !hasPermission) {
-      voucherSection.style.display = 'none';
-      console.log("Voucher create section nascosta per utente non autorizzato");
-    }
+      const hasPermission = authorizedUsers.includes(username);
 
-    if (currentPath.endsWith('vouch-create.html') && !hasPermission) {
-      alert("Non sei autorizzato a creare vouchers!");
-      window.location.href = '/crypto-simulator/dashboard.html';
-      return;
+      const voucherSection = document.getElementById('voucher-create-section');
+      if (voucherSection && !hasPermission) {
+        voucherSection.style.display = 'none';
+        console.log("Voucher create section nascosta per utente non autorizzato");
+      }
+
+      if (currentPath.endsWith('vouch-create.html') && !hasPermission) {
+        alert("Non sei autorizzato a creare vouchers!");
+        window.location.href = '/crypto-simulator/dashboard.html';
+        return;
+      }
+    } catch (error) {
+      console.error("Errore durante l'autenticazione:", error);
+      localStorage.removeItem('user');
+      window.location.href = '/crypto-simulator/index.html';
     }
-  } catch (error) {
-    console.error("Errore durante l'autenticazione:", error);
-    localStorage.removeItem('user');
-    window.location.href = '/crypto-simulator/index.html';
-  }
+  })();
 });
