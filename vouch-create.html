@@ -234,7 +234,7 @@
   <nav class="navbar">
     <div class="nav-container">
       <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
-      <div id="nav-toggle"><span></span><span></span><span></span></div>
+      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
@@ -242,7 +242,7 @@
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
-        <li><button id="theme-toggle">🌙</button></li>
+        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
       </ul>
     </div>
   </nav>
@@ -261,297 +261,253 @@
     </form>
   </main>
 
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-    authDomain: "coins-7104d.firebaseapp.com",
-    databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-    projectId: "coins-7104d",
-    storageBucket: "coins-7104d.appspot.com",
-    messagingSenderId: "893938643778",
-    appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-    measurementId: "G-QSY10CVX1F"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  const user = localStorage.getItem("user");
-  if (!user) window.location.href = "index.html";
+    const user = localStorage.getItem("user");
+    if (!user) window.location.href = "index.html";
 
-  const form = document.getElementById("vouch-form");
-  const msg = document.getElementById("message");
+    const form = document.getElementById("vouch-form");
+    const msg = document.getElementById("message");
 
-   const validVouchesContainer = document.createElement("div");
-validVouchesContainer.id = "valid-vouches";
-validVouchesContainer.style.marginTop = "30px";
+    const validVouchesContainer = document.createElement("div");
+    validVouchesContainer.id = "valid-vouches";
+    validVouchesContainer.style.marginTop = "30px";
 
-const expiredVouchesContainer = document.createElement("div");
-expiredVouchesContainer.id = "expired-vouches";
-expiredVouchesContainer.style.marginTop = "20px";
+    const expiredVouchesContainer = document.createElement("div");
+    expiredVouchesContainer.id = "expired-vouches";
+    expiredVouchesContainer.style.marginTop = "20px";
 
-form.parentNode.appendChild(validVouchesContainer);
-form.parentNode.appendChild(expiredVouchesContainer);
+    form.parentNode.appendChild(validVouchesContainer);
+    form.parentNode.appendChild(expiredVouchesContainer);
 
-// Funzione per caricare e mostrare i vouch
-async function loadUserVouches() {
-  try {
-    const vouchesRef = ref(db, 'vouches');
-    const snapshot = await get(vouchesRef);
-    const allVouches = snapshot.val() || {};
+    // Funzione per caricare e mostrare i vouch
+    async function loadUserVouches() {
+      try {
+        const vouchesRef = ref(db, 'vouches');
+        const snapshot = await get(vouchesRef);
+        const allVouches = snapshot.val() || {};
 
-    const now = Date.now();
+        const now = Date.now();
 
-    // Divide i vouch per validi e scaduti
-    const validVouches = [];
-    const expiredVouches = [];
+        // Divide i vouch per validi e scaduti
+        const validVouches = [];
+        const expiredVouches = [];
 
-    Object.entries(allVouches).forEach(([code, vouch]) => {
-      if (vouch.from === user) {
-        // Qui definiamo la scadenza:
-        // Se vouch.expired === true oppure expiryDate < now => scaduto, altrimenti valido
-        // Se non c’è info scadenza, lo consideriamo valido
+        Object.entries(allVouches).forEach(([code, vouch]) => {
+          if (vouch.from === user) {
+            if (vouch.expired === true) {
+              expiredVouches.push({ code, ...vouch });
+            } else if (vouch.expiryDate && vouch.expiryDate < now) {
+              expiredVouches.push({ code, ...vouch });
+            } else {
+              validVouches.push({ code, ...vouch });
+            }
+          }
+        });
 
-        if (vouch.expired === true) {
-          expiredVouches.push({ code, ...vouch });
-        } else if (vouch.expiryDate && vouch.expiryDate < now) {
-          expiredVouches.push({ code, ...vouch });
-        } else {
-          validVouches.push({ code, ...vouch });
-        }
+        validVouchesContainer.innerHTML = `
+          <h3>Vouch Validi</h3>
+          ${validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
+            `<ul>${validVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
+        `;
+
+        expiredVouchesContainer.innerHTML = `
+          <h3>Vouch Scaduti</h3>
+          ${expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
+            `<ul>${expiredVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
+        `;
+      } catch (e) {
+        console.error("Errore caricando i vouch:", e);
       }
-    });
+    }
 
-    // Mostra liste
-    validVouchesContainer.innerHTML = <h3>Vouch Validi</h3> + (validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
-      <ul>${validVouches.map(v => <li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>).join("")}</ul>);
-
-    expiredVouchesContainer.innerHTML = <h3>Vouch Scaduti</h3> + (expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
-      <ul>${expiredVouches.map(v => <li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>).join("")}</ul>);
-
-  } catch (e) {
-    console.error("Errore caricando i vouch:", e);
-  }
-}
-
-// Carica la lista quando si carica la pagina e anche dopo la generazione di un vouch nuovo
-loadUserVouches();
-
-// Modifica la parte di successo nella generazione vouch per ricaricare la lista
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (codeGenerated) return;
-
-  // ... (resto del codice invariato)
-
-  try {
-    // Controlli e aggiornamenti
-
-    await set(ref(db, vouches/${code}), {
-      from: user,
-      coin,
-      amount,
-      // opzionale: expiryDate: Date.now() + 7*24*3600*1000 (esempio 7 giorni)
-    });
-
-    await update(userWalletRef, {
-      [coin]: (wallet[coin] - amount)
-    });
-
-    msg.textContent = Vouch generato: ${code};
-
-    // Bottone copia come prima ...
-
-    // Dopo aver generato e mostrato
     loadUserVouches();
 
-  } catch (error) {
-    msg.textContent = "Errore durante la generazione del vouch.";
-    console.error(error);
-  }
-});
+    let codeGenerated = false; // blocca nuova generazione dopo copia
 
-  let codeGenerated = false; // blocca nuova generazione dopo copia
-
-  function generateCode() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let raw = "";
-    for (let i = 0; i < 12; i++) {
-      raw += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return ${raw.slice(0,4)}-${raw.slice(4,8)}-${raw.slice(8,12)};
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (codeGenerated) return; // blocca se già copiato
-
-    const coin = document.getElementById("coin").value;
-    const amount = parseFloat(document.getElementById("amount").value);
-
-    msg.textContent = "";
-
-    if (isNaN(amount) || amount <= 0) {
-      msg.textContent = "Quantità non valida.";
-      return;
+    function generateCode() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let raw = "";
+      for (let i = 0; i < 12; i++) {
+        raw += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return raw;
     }
 
-    const userWalletRef = ref(db, users/${user}/wallet);
-    try {
-      const snapshot = await get(userWalletRef);
-      const wallet = snapshot.val() || {};
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      if (codeGenerated) {
+        msg.textContent = "Hai già generato un codice. Ricarica la pagina per crearne un altro.";
+        return;
+      }
+      const coin = form.coin.value;
+      const amount = parseFloat(form.amount.value);
 
-      if ((wallet[coin] || 0) < amount) {
-        msg.textContent = "Fondi insufficienti.";
+      if (!coin || isNaN(amount) || amount <= 0) {
+        msg.textContent = "Inserisci dati validi.";
         return;
       }
 
-      const code = generateCode();
+      msg.textContent = "Generazione codice...";
+      const newCode = generateCode();
 
-      // Scrive il vouch nel DB
-      await set(ref(db, vouches/${code}), {
+      // Salvataggio nel DB
+      const vouchData = {
         from: user,
         coin,
-        amount
-      });
-
-      // Aggiorna il wallet dell'utente
-      await update(userWalletRef, {
-        [coin]: (wallet[coin] - amount)
-      });
-
-      // Mostra messaggio con codice e bottone copia
-      msg.textContent = Vouch generato: ${code};
-
-      const copyBtn = document.createElement("button");
-      copyBtn.textContent = "Copia codice";
-      copyBtn.style.marginTop = "10px";
-      copyBtn.style.padding = "8px 14px";
-      copyBtn.style.borderRadius = "6px";
-      copyBtn.style.border = "none";
-      copyBtn.style.cursor = "pointer";
-      copyBtn.style.backgroundColor = "#7b5fff";
-      copyBtn.style.color = "#fff";
-      copyBtn.style.transition = "opacity 0.3s ease";
-
-      copyBtn.onclick = () => {
-        navigator.clipboard.writeText(code).then(() => {
-          copyBtn.textContent = "Copiato!";
-          codeGenerated = true; // blocca nuova generazione
-          form.querySelector("button[type='submit']").disabled = true; // disabilita pulsante genera
-
-          setTimeout(() => {
-            copyBtn.style.opacity = "0";
-            setTimeout(() => copyBtn.remove(), 300); // rimuove il bottone
-          }, 3000);
-        });
+        amount,
+        expired: false,
+        createdAt: Date.now(),
+        expiryDate: Date.now() + 30 * 24 * 3600 * 1000, // scade in 30 giorni
       };
 
-      msg.appendChild(copyBtn);
-    } catch (error) {
-      msg.textContent = "Errore durante la generazione del vouch.";
-      console.error(error);
-    }
-  });
+      try {
+        await set(ref(db, `vouches/${newCode}`), vouchData);
 
-  // Resto del tuo codice per tema, nav e animazione (lascia invariato)...
+        // Mostra codice generato con copia
+        msg.innerHTML = `
+          <p>Vouch creato: <code>${newCode}</code></p>
+          <button id="copy-code">Copia codice</button>
+        `;
+        codeGenerated = true;
 
-  // Tema e hamburger
-  const themeBtn = document.getElementById('theme-toggle');
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-theme');
-    themeBtn.textContent = '☀️';
-  }
-  themeBtn.addEventListener('click', () => {
-    if (document.body.classList.toggle('light-theme')) {
-      localStorage.setItem('theme', 'light');
-      themeBtn.textContent = '☀️';
-    } else {
-      localStorage.setItem('theme', 'dark');
-      themeBtn.textContent = '🌙';
-    }
-  });
+        document.getElementById("copy-code").addEventListener("click", () => {
+          navigator.clipboard.writeText(newCode).then(() => {
+            msg.textContent = "Codice copiato negli appunti!";
+          });
+        });
 
-  const navToggle = document.getElementById('nav-toggle');
-  const navMenu = document.getElementById('nav-menu');
-  function toggleMenu() {
-    navToggle.classList.toggle('open');
-    navMenu.classList.toggle('open');
-    navToggle.setAttribute('aria-expanded', navToggle.classList.contains('open'));
-  }
-  navToggle.addEventListener('click', toggleMenu);
-  navToggle.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleMenu();
-    }
-  });
-  navMenu.querySelectorAll('a, button').forEach(link => {
-    link.addEventListener('click', () => {
-      if (navMenu.classList.contains('open')) toggleMenu();
+        loadUserVouches();
+
+      } catch (err) {
+        console.error(err);
+        msg.textContent = "Errore nella creazione del vouch.";
+      }
     });
-  });
 
-  // Animazione bolle
-  const canvas = document.getElementById('bubble-canvas');
-  const ctx = canvas.getContext('2d');
-  let width, height, bubbles;
+    // NAVBAR TOGGLE
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
 
-  class Bubble {
-    constructor() { this.reset(); }
-    reset() {
-      this.x = Math.random() * width;
-      this.y = height + Math.random() * 100;
-      this.radius = 8 + Math.random() * 12;
-      this.speed = 0.5 + Math.random() * 1.5;
-      this.alpha = 0.1 + Math.random() * 0.3;
-      this.phase = Math.random() * 2 * Math.PI;
+    navToggle.addEventListener("click", () => {
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", !expanded);
+    });
+
+    navToggle.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        navToggle.click();
+      }
+    });
+
+    // THEME TOGGLE
+    const themeToggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        body.classList.add("light-theme");
+        themeToggle.textContent = "🌙";
+      } else {
+        body.classList.remove("light-theme");
+        themeToggle.textContent = "☀️";
+      }
     }
-    update() {
-      this.y -= this.speed;
-      this.x += Math.sin(this.phase) * 0.3;
-      this.phase += 0.03;
-      if (this.y + this.radius < 0) this.reset();
-    }
-    draw(ctx) {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-      const g = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
-      g.addColorStop(0, rgba(187,134,252,${this.alpha}));
-      g.addColorStop(1, 'rgba(187,134,252,0)');
-      ctx.fillStyle = g;
-      ctx.fill();
-    }
-  }
+    loadTheme();
 
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-  }
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("light-theme");
+      if (body.classList.contains("light-theme")) {
+        themeToggle.textContent = "🌙";
+        localStorage.setItem("theme", "light");
+      } else {
+        themeToggle.textContent = "☀️";
+        localStorage.setItem("theme", "dark");
+      }
+    });
 
-  function animate() {
-    ctx.clearRect(0, 0, width, height);
-    for (const b of bubbles) {
-      b.update();
-      b.draw(ctx);
+    // BUBBLE CANVAS
+    const canvas = document.getElementById("bubble-canvas");
+    const ctx = canvas.getContext("2d");
+    let width, height;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     }
-    requestAnimationFrame(animate);
-  }
-
-  function init() {
     resize();
-    bubbles = Array.from({ length: 50 }, () => new Bubble());
-    animate();
-  }
+    window.addEventListener("resize", resize);
 
-  window.addEventListener('resize', resize);
-  init();
-</script>
+    class Bubble {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 200;
+        this.radius = 5 + Math.random() * 15;
+        this.speed = 1 + Math.random() * 2;
+        this.alpha = 0.4 + Math.random() * 0.6;
+        this.angle = Math.random() * 2 * Math.PI;
+        this.angleSpeed = 0.01 + Math.random() * 0.02;
+      }
+      update() {
+        this.y -= this.speed;
+        this.angle += this.angleSpeed;
+        this.x += Math.sin(this.angle) * 0.5;
+        if (this.y + this.radius < 0) {
+          this.x = Math.random() * width;
+          this.y = height + this.radius;
+          this.radius = 5 + Math.random() * 15;
+          this.speed = 1 + Math.random() * 2;
+          this.alpha = 0.4 + Math.random() * 0.6;
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.3, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187, 134, 252, ${this.alpha})`);
+        gradient.addColorStop(1, `rgba(187, 134, 252, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    const bubbles = [];
+    for (let i = 0; i < 60; i++) {
+      bubbles.push(new Bubble());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      bubbles.forEach(b => {
+        b.update();
+        b.draw(ctx);
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+  </script>
 </body>
 </html>
