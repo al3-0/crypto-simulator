@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vouch Create</title>
+  <title>Riscatta Vouch</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
     body {
@@ -40,22 +40,17 @@
       text-align: center;
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    input, button {
       width: 100%;
-    }
-
-    input, select, button {
       padding: 12px 16px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
       outline: none;
+      margin-bottom: 15px;
     }
 
-    input, select {
+    input {
       background: #38386a;
       color: #fff;
     }
@@ -72,11 +67,39 @@
       background: #a48fff;
     }
 
-    .message {
+    #redeemMsg {
       margin-top: 10px;
-      font-size: 1rem;
+      font-size: 1.1rem;
       color: #90ee90;
       text-align: center;
+      min-height: 24px;
+    }
+
+    #redeemedList {
+      margin-top: 30px;
+      background-color: #1f1f3d;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+      width: 100%;
+    }
+
+    #redeemedList h2 {
+      color: #bb86fc;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    #listContainer {
+      list-style: decimal inside;
+      color: #ccc;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #listContainer li {
+      margin-bottom: 10px;
     }
 
     /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
@@ -217,7 +240,7 @@
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
 
-    body.light-theme input, body.light-theme select {
+    body.light-theme input {
       background: #f0f0f0;
       color: #111;
     }
@@ -248,24 +271,22 @@
   </nav>
 
   <main>
-    <h1>Crea un Vouch</h1>
-    <form id="vouch-form">
-      <select id="coin">
-        <option value="BTC">Bitcoin (BTC)</option>
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="LTC">Litecoin (LTC)</option>
-      </select>
-      <input type="number" id="amount" min="0.001" step="0.001" placeholder="Quantità" required />
-      <button type="submit">Genera Vouch</button>
-      <div class="message" id="message"></div>
-    </form>
+    <h1>Riscatta Vouch</h1>
+    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" maxlength="14" />
+    <button id="btnRedeem">Riscatta</button>
+    <div id="redeemMsg"></div>
+
+    <section id="redeemedList">
+      <h2>Codici riscattati</h2>
+      <ol id="listContainer"></ol>
+    </section>
   </main>
 
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-  const firebaseConfig = {
+    const firebaseConfig = {
     apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
     authDomain: "coins-7104d.firebaseapp.com",
     databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
@@ -274,284 +295,178 @@
     messagingSenderId: "893938643778",
     appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
     measurementId: "G-QSY10CVX1F"
-  };
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  const user = localStorage.getItem("user");
-  if (!user) window.location.href = "index.html";
+    const redeemBtn = document.getElementById('btnRedeem');
+    const codeInput = document.getElementById('codeInput');
+    const redeemMsg = document.getElementById('redeemMsg');
+    const redeemedList = document.getElementById('listContainer');
 
-  const form = document.getElementById("vouch-form");
-  const msg = document.getElementById("message");
+    // Carica codici riscattati da localStorage
+    let redeemedCodes = JSON.parse(localStorage.getItem('redeemedCodes')) || [];
+    renderRedeemedList();
 
-   const validVouchesContainer = document.createElement("div");
-validVouchesContainer.id = "valid-vouches";
-validVouchesContainer.style.marginTop = "30px";
+    redeemBtn.addEventListener('click', redeemCode);
 
-const expiredVouchesContainer = document.createElement("div");
-expiredVouchesContainer.id = "expired-vouches";
-expiredVouchesContainer.style.marginTop = "20px";
-
-form.parentNode.appendChild(validVouchesContainer);
-form.parentNode.appendChild(expiredVouchesContainer);
-
-// Funzione per caricare e mostrare i vouch
-async function loadUserVouches() {
-  try {
-    const vouchesRef = ref(db, 'vouches');
-    const snapshot = await get(vouchesRef);
-    const allVouches = snapshot.val() || {};
-
-    const now = Date.now();
-
-    // Divide i vouch per validi e scaduti
-    const validVouches = [];
-    const expiredVouches = [];
-
-    Object.entries(allVouches).forEach(([code, vouch]) => {
-      if (vouch.from === user) {
-        // Qui definiamo la scadenza:
-        // Se vouch.expired === true oppure expiryDate < now => scaduto, altrimenti valido
-        // Se non c’è info scadenza, lo consideriamo valido
-
-        if (vouch.expired === true) {
-          expiredVouches.push({ code, ...vouch });
-        } else if (vouch.expiryDate && vouch.expiryDate < now) {
-          expiredVouches.push({ code, ...vouch });
-        } else {
-          validVouches.push({ code, ...vouch });
-        }
+    function renderRedeemedList() {
+      redeemedList.innerHTML = '';
+      if (redeemedCodes.length === 0) {
+        redeemedList.innerHTML = '<li>Nessun codice riscattato</li>';
+        return;
       }
-    });
-
-    // Mostra liste
-    validVouchesContainer.innerHTML = `<h3>Vouch Validi</h3>` + (validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
-      `<ul>${validVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`);
-
-    expiredVouchesContainer.innerHTML = `<h3>Vouch Scaduti</h3>` + (expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
-      `<ul>${expiredVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`);
-
-  } catch (e) {
-    console.error("Errore caricando i vouch:", e);
-  }
-}
-
-// Carica la lista quando si carica la pagina e anche dopo la generazione di un vouch nuovo
-loadUserVouches();
-
-// Modifica la parte di successo nella generazione vouch per ricaricare la lista
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (codeGenerated) return;
-
-  // ... (resto del codice invariato)
-
-  try {
-    // Controlli e aggiornamenti
-
-    await set(ref(db, `vouches/${code}`), {
-      from: user,
-      coin,
-      amount,
-      // opzionale: expiryDate: Date.now() + 7*24*3600*1000 (esempio 7 giorni)
-    });
-
-    await update(userWalletRef, {
-      [coin]: (wallet[coin] - amount)
-    });
-
-    msg.textContent = `Vouch generato: ${code}`;
-
-    // Bottone copia come prima ...
-
-    // Dopo aver generato e mostrato
-    loadUserVouches();
-
-  } catch (error) {
-    msg.textContent = "Errore durante la generazione del vouch.";
-    console.error(error);
-  }
-});
-
-  let codeGenerated = false; // blocca nuova generazione dopo copia
-
-  function generateCode() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let raw = "";
-    for (let i = 0; i < 12; i++) {
-      raw += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return `${raw.slice(0,4)}-${raw.slice(4,8)}-${raw.slice(8,12)}`;
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (codeGenerated) return; // blocca se già copiato
-
-    const coin = document.getElementById("coin").value;
-    const amount = parseFloat(document.getElementById("amount").value);
-
-    msg.textContent = "";
-
-    if (isNaN(amount) || amount <= 0) {
-      msg.textContent = "Quantità non valida.";
-      return;
+      redeemedCodes.forEach(code => {
+        const li = document.createElement('li');
+        li.textContent = code;
+        redeemedList.appendChild(li);
+      });
     }
 
-    const userWalletRef = ref(db, `users/${user}/wallet`);
-    try {
-      const snapshot = await get(userWalletRef);
-      const wallet = snapshot.val() || {};
+    function sanitizeCode(input) {
+      // Consente solo lettere maiuscole, numeri e trattini
+      return input.toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+    }
 
-      if ((wallet[coin] || 0) < amount) {
-        msg.textContent = "Fondi insufficienti.";
+    codeInput.addEventListener('input', (e) => {
+      e.target.value = sanitizeCode(e.target.value);
+    });
+
+    async function redeemCode() {
+      const code = codeInput.value.trim().toUpperCase();
+      redeemMsg.style.color = '#eee';
+
+      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+        redeemMsg.textContent = "Formato codice non valido (esempio: XXXX-XXXX-XXXX)";
+        redeemMsg.style.color = "#e57373";
         return;
       }
 
-      const code = generateCode();
+      if (redeemedCodes.includes(code)) {
+        redeemMsg.textContent = "Hai già riscattato questo codice.";
+        redeemMsg.style.color = "#ffb74d";
+        return;
+      }
 
-      // Scrive il vouch nel DB
-      await set(ref(db, `vouches/${code}`), {
-        from: user,
-        coin,
-        amount
-      });
+      try {
+        const codeRef = ref(db, `vouch/${code}`);
+        const snapshot = await get(codeRef);
 
-      // Aggiorna il wallet dell'utente
-      await update(userWalletRef, {
-        [coin]: (wallet[coin] - amount)
-      });
+        if (!snapshot.exists()) {
+          redeemMsg.textContent = "Codice non trovato.";
+          redeemMsg.style.color = "#e57373";
+          return;
+        }
 
-      // Mostra messaggio con codice e bottone copia
-      msg.textContent = `Vouch generato: ${code}`;
+        const codeData = snapshot.val();
+        if (codeData.redeemed) {
+          redeemMsg.textContent = "Codice già riscattato.";
+          redeemMsg.style.color = "#e57373";
+          return;
+        }
 
-      const copyBtn = document.createElement("button");
-      copyBtn.textContent = "Copia codice";
-      copyBtn.style.marginTop = "10px";
-      copyBtn.style.padding = "8px 14px";
-      copyBtn.style.borderRadius = "6px";
-      copyBtn.style.border = "none";
-      copyBtn.style.cursor = "pointer";
-      copyBtn.style.backgroundColor = "#7b5fff";
-      copyBtn.style.color = "#fff";
-      copyBtn.style.transition = "opacity 0.3s ease";
+        // Aggiorna il codice come riscattato
+        const updates = {};
+        updates[`vouch/${code}/redeemed`] = true;
+        await update(ref(db), updates);
 
-      copyBtn.onclick = () => {
-        navigator.clipboard.writeText(code).then(() => {
-          copyBtn.textContent = "Copiato!";
-          codeGenerated = true; // blocca nuova generazione
-          form.querySelector("button[type='submit']").disabled = true; // disabilita pulsante genera
+        redeemMsg.textContent = "Codice riscattato con successo!";
+        redeemMsg.style.color = "#90ee90";
 
-          setTimeout(() => {
-            copyBtn.style.opacity = "0";
-            setTimeout(() => copyBtn.remove(), 300); // rimuove il bottone
-          }, 3000);
-        });
-      };
-
-      msg.appendChild(copyBtn);
-    } catch (error) {
-      msg.textContent = "Errore durante la generazione del vouch.";
-      console.error(error);
+        redeemedCodes.push(code);
+        localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
+        renderRedeemedList();
+        codeInput.value = '';
+      } catch (error) {
+        redeemMsg.textContent = "Errore durante il riscatto, riprova.";
+        redeemMsg.style.color = "#e57373";
+        console.error(error);
+      }
     }
-  });
 
-  // Resto del tuo codice per tema, nav e animazione (lascia invariato)...
-
-  // Tema e hamburger
-  const themeBtn = document.getElementById('theme-toggle');
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-theme');
-    themeBtn.textContent = '☀️';
-  }
-  themeBtn.addEventListener('click', () => {
-    if (document.body.classList.toggle('light-theme')) {
-      localStorage.setItem('theme', 'light');
-      themeBtn.textContent = '☀️';
-    } else {
-      localStorage.setItem('theme', 'dark');
-      themeBtn.textContent = '🌙';
-    }
-  });
-
-  const navToggle = document.getElementById('nav-toggle');
-  const navMenu = document.getElementById('nav-menu');
-  function toggleMenu() {
-    navToggle.classList.toggle('open');
-    navMenu.classList.toggle('open');
-    navToggle.setAttribute('aria-expanded', navToggle.classList.contains('open'));
-  }
-  navToggle.addEventListener('click', toggleMenu);
-  navToggle.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleMenu();
-    }
-  });
-  navMenu.querySelectorAll('a, button').forEach(link => {
-    link.addEventListener('click', () => {
-      if (navMenu.classList.contains('open')) toggleMenu();
+    // Navbar toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      navToggle.classList.toggle('open');
     });
-  });
 
-  // Animazione bolle
-  const canvas = document.getElementById('bubble-canvas');
-  const ctx = canvas.getContext('2d');
-  let width, height, bubbles;
-
-  class Bubble {
-    constructor() { this.reset(); }
-    reset() {
-      this.x = Math.random() * width;
-      this.y = height + Math.random() * 100;
-      this.radius = 8 + Math.random() * 12;
-      this.speed = 0.5 + Math.random() * 1.5;
-      this.alpha = 0.1 + Math.random() * 0.3;
-      this.phase = Math.random() * 2 * Math.PI;
+    // Tema chiaro/scuro
+    const themeToggle = document.getElementById('theme-toggle');
+    function setTheme(theme) {
+      if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.remove('light-theme');
+        themeToggle.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+      }
     }
-    update() {
-      this.y -= this.speed;
-      this.x += Math.sin(this.phase) * 0.3;
-      this.phase += 0.03;
-      if (this.y + this.radius < 0) this.reset();
+
+    themeToggle.addEventListener('click', () => {
+      if (document.body.classList.contains('light-theme')) {
+        setTheme('dark');
+      } else {
+        setTheme('light');
+      }
+    });
+
+    // Imposta tema salvato
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+
+    // ==== CANVAS BOLLE ====
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let bubbles = [];
+
+    function initCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      bubbles = [];
+      const bubbleCount = Math.floor(width / 20);
+      for (let i = 0; i < bubbleCount; i++) {
+        bubbles.push(createBubble());
+      }
     }
-    draw(ctx) {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-      const g = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
-      g.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
-      g.addColorStop(1, 'rgba(187,134,252,0)');
-      ctx.fillStyle = g;
-      ctx.fill();
+
+    function createBubble() {
+      return {
+        x: Math.random() * width,
+        y: height + Math.random() * 100,
+        radius: 2 + Math.random() * 4,
+        speed: 0.5 + Math.random() * 1.5,
+        opacity: 0.2 + Math.random() * 0.3
+      };
     }
-  }
 
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-  }
+    function drawBubbles() {
+      ctx.clearRect(0, 0, width, height);
+      bubbles.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(123, 85, 255, ${b.opacity})`;
+        ctx.fill();
 
-  function animate() {
-    ctx.clearRect(0, 0, width, height);
-    for (const b of bubbles) {
-      b.update();
-      b.draw(ctx);
+        b.y -= b.speed;
+        if (b.y + b.radius < 0) {
+          Object.assign(b, createBubble());
+          b.y = height + b.radius;
+        }
+      });
+      requestAnimationFrame(drawBubbles);
     }
-    requestAnimationFrame(animate);
-  }
 
-  function init() {
-    resize();
-    bubbles = Array.from({ length: 50 }, () => new Bubble());
-    animate();
-  }
-
-  window.addEventListener('resize', resize);
-  init();
-</script>
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    drawBubbles();
+  </script>
 </body>
 </html>
