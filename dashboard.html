@@ -4,17 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Dashboard</title>
-  <link rel="icon" href="logo.png" type="image/png">
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    /* ==== BODY & MAIN ==== */
     body {
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
-      color: #eee;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       min-height: 100vh;
       padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
       transition: background 0.3s ease, color 0.3s ease;
     }
+
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
@@ -24,7 +28,9 @@
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
       position: relative;
+      z-index: 2;
     }
+
     h1 {
       font-size: 2.8rem;
       margin-bottom: 8px;
@@ -34,6 +40,7 @@
       animation: fadeInDown 1s ease forwards;
       opacity: 0;
     }
+
     p.welcome {
       font-size: 1.1rem;
       color: #ccc;
@@ -43,6 +50,7 @@
       animation: fadeIn 1.5s ease forwards;
       opacity: 0;
     }
+
     .wallet {
       display: flex;
       flex-direction: column;
@@ -50,6 +58,7 @@
       animation: fadeInUp 1.8s ease forwards;
       opacity: 0;
     }
+
     .coin-card {
       background: linear-gradient(145deg, #3b3b6a, #2a2a4f);
       border-radius: 16px;
@@ -61,7 +70,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
     }
+    .coin-card:hover {
+      transform: scale(1.05);
+      box-shadow: inset 0 0 16px #a48fffcc, 0 10px 30px rgba(123, 85, 255, 0.7);
+    }
+
     .coin-name {
       display: flex;
       align-items: center;
@@ -69,6 +85,7 @@
       font-size: 1.5rem;
       text-shadow: 0 0 6px #bb86fcaa;
     }
+
     .coin-amount {
       font-family: 'Courier New', Courier, monospace;
       letter-spacing: 2px;
@@ -76,11 +93,8 @@
       color: #e0d4ff;
       text-shadow: 0 0 4px #b68fffcc;
     }
-    .coin-card:hover {
-      transform: scale(1.05);
-      box-shadow: inset 0 0 16px #a48fffcc, 0 10px 30px rgba(123, 85, 255, 0.7);
-    }
 
+    /* ==== NAVBAR ==== */
     nav.navbar {
       position: fixed;
       top: 0;
@@ -88,8 +102,10 @@
       width: 100%;
       background: #1c1c3a;
       box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-      z-index: 1000;
+      z-index: 10;
+      user-select: none;
     }
+
     .nav-container {
       max-width: 1200px;
       margin: auto;
@@ -97,17 +113,26 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
     }
+
     .logo-link img {
       height: 36px;
+      cursor: pointer;
     }
+
+    /* Centratura nav-menu: */
     .nav-menu {
       list-style: none;
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
       margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
+
     .nav-menu li a,
     #theme-toggle {
       color: #ddd;
@@ -119,16 +144,94 @@
       padding: 8px 12px;
       border-radius: 6px;
       text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .nav-menu li a:hover,
     #theme-toggle:hover {
       background-color: #4b3ca7;
       color: white;
     }
+
     #theme-toggle {
       margin-left: 6px;
     }
 
+    /* ==== RESPONSIVE ==== */
+    /* Nascondi menu e mostra hamburger su mobile */
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+    #nav-toggle span:nth-child(1) {
+      top: 0;
+    }
+    #nav-toggle span:nth-child(2) {
+      top: 9px;
+    }
+    #nav-toggle span:nth-child(3) {
+      top: 18px;
+    }
+
+    /* Menu nascosto di default */
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #nav-toggle {
+        display: block;
+      }
+      #theme-toggle {
+        margin-left: 0;
+      }
+    }
+
+    /* Hamburger animazione al click */
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* ==== ANIMAZIONI ==== */
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-30px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -142,6 +245,7 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
+    /* ==== TEMA CHIARO ==== */
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -151,15 +255,37 @@
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
+
+    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
+  <!-- CANVAS ANIMAZIONE BOLLE -->
+  <canvas id="bubble-canvas"></canvas>
+
   <!-- NAVBAR -->
   <nav class="navbar">
     <div class="nav-container">
-      <a href="dashboard.html" class="logo-link">
-        <img src="logo.png" alt="CryptoSim Logo">
+      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
+        <img src="logo.png" alt="CryptoSim Logo" />
       </a>
+
+      <!-- HAMBURGER -->
+      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
@@ -167,12 +293,12 @@
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
-        <li><button id="theme-toggle">🌙</button></li>
+        <li><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
       </ul>
     </div>
   </nav>
 
-  <!-- CONTENUTO -->
+  <!-- CONTENUTO PRINCIPALE -->
   <main>
     <h1>Benvenuto, <span id="username">...</span>!</h1>
     <p class="welcome">Questo è il tuo wallet criptovalute simulato.</p>
@@ -192,7 +318,7 @@
     </div>
   </main>
 
-  <!-- JS con aggiornamento LIVE del wallet -->
+  <!-- SCRIPT JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -212,25 +338,27 @@
     const db = getDatabase(app);
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Check user logged in
       const username = localStorage.getItem('user');
       if (!username) {
         window.location.href = "index.html";
         return;
       }
-
       document.getElementById('username').textContent = username;
 
+      // Real-time wallet update
       const walletRef = ref(db, `users/${username}/wallet`);
-      onValue(walletRef, snapshot => {
+      onValue(walletRef, (snapshot) => {
         const wallet = snapshot.val() || {};
         document.getElementById("btc-amount").textContent = (wallet.BTC || 0).toFixed(3);
         document.getElementById("eth-amount").textContent = (wallet.ETH || 0).toFixed(3);
         document.getElementById("ltc-amount").textContent = (wallet.LTC || 0).toFixed(3);
       });
 
+      // Theme toggle
       const themeBtn = document.getElementById('theme-toggle');
-      const saved = localStorage.getItem('theme');
-      if (saved === 'light') {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
         themeBtn.textContent = '☀️';
       }
@@ -244,7 +372,101 @@
           themeBtn.textContent = '🌙';
         }
       });
+
+      // Hamburger menu toggle
+      const navToggle = document.getElementById('nav-toggle');
+      const navMenu = document.getElementById('nav-menu');
+
+      function toggleMenu() {
+        navToggle.classList.toggle('open');
+        navMenu.classList.toggle('open');
+        // ARIA attribute update
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
+      }
+
+      navToggle.addEventListener('click', toggleMenu);
+      navToggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleMenu();
+        }
+      });
+
+      // Close menu on link click (mobile)
+      navMenu.querySelectorAll('a, button').forEach(link => {
+        link.addEventListener('click', () => {
+          if (navMenu.classList.contains('open')) {
+            toggleMenu();
+          }
+        });
+      });
     });
+
+    // ==== CANVAS BUBBLES ANIMATION ====
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, bubbles;
+
+    class Bubble {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 100;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.5 + Math.random() * 1.5;
+        this.alpha = 0.1 + Math.random() * 0.3;
+        this.phase = Math.random() * 2 * Math.PI;
+        this.amplitude = 15 + Math.random() * 15;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.phase) * 0.3;
+        this.phase += 0.03;
+        if (this.y + this.radius < 0) {
+          this.reset();
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        gradient.addColorStop(1, 'rgba(187,134,252,0)');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    }
+
+    function init() {
+      resize();
+      bubbles = [];
+      for (let i = 0; i < 50; i++) {
+        bubbles.push(new Bubble());
+      }
+      animate();
+    }
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const bubble of bubbles) {
+        bubble.update();
+        bubble.draw(ctx);
+      }
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resize);
+    init();
   </script>
 </body>
 </html>
