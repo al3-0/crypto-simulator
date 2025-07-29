@@ -6,27 +6,106 @@
   <title>Crypto Simulator - Exchange</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    :root {
+      --primary: #bb86fc;
+      --bg: #1c1c3a;
+      --bg-light: #2a2a4fdd;
+      --text: #eee;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       margin: 0;
       height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
-      color: #eee;
-      display: flex;
-      flex-direction: column;
+      background: linear-gradient(135deg, var(--bg), #12122b);
+      color: var(--text);
       overflow-x: hidden;
     }
 
+    header.navbar {
+      width: 100%;
+      background: #1c1c3add;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      padding: 16px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+    }
+
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .navbar ul {
+      display: flex;
+      gap: 25px;
+      list-style: none;
+    }
+
+    .navbar a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s, border-bottom 0.3s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .navbar a:hover {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    @media (max-width: 768px) {
+      .navbar ul {
+        display: none;
+        position: absolute;
+        top: 60px;
+        right: 30px;
+        flex-direction: column;
+        background: #1c1c3add;
+        padding: 20px;
+        border-radius: 12px;
+      }
+
+      .navbar ul.show {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
     main {
-      flex: 1;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 100px 20px 20px;
+      padding: 120px 20px 40px;
     }
 
     .exchange-box {
-      background: #2a2a4fdd;
+      background: var(--bg-light);
       padding: 40px;
       border-radius: 20px;
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
@@ -40,7 +119,7 @@
       text-align: center;
       font-size: 2rem;
       margin-bottom: 30px;
-      color: #bb86fc;
+      color: var(--primary);
     }
 
     label {
@@ -65,7 +144,7 @@
       margin-top: 30px;
       padding: 12px;
       border: none;
-      background: #bb86fc;
+      background: var(--primary);
       color: #1c1c3a;
       font-weight: bold;
       font-size: 1.1rem;
@@ -91,38 +170,32 @@
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      z-index: 1;
-    }
-
-    body.light-theme {
-      background: #f4f4f7;
-      color: #222;
-    }
-
-    body.light-theme .exchange-box {
-      background: #ffffffdd;
-      color: #222;
-    }
-
-    body.light-theme select,
-    body.light-theme input {
-      background: #e6e6e6;
-      color: #222;
-    }
-
-    body.light-theme button {
-      background: #7a4ff5;
-      color: white;
-    }
-
-    body.light-theme button:hover {
-      background: #6a3ae6;
+      z-index: 0;
     }
   </style>
 </head>
 <body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">CryptoSim</div>
+    <nav>
+      <div class="menu-toggle" id="menu-toggle">☰</div>
+      <ul id="nav-links">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account Info</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Bubbles Background -->
   <canvas id="bubble-canvas"></canvas>
 
+  <!-- Main Content -->
   <main>
     <div class="exchange-box">
       <h2>Scambia Criptovalute</h2>
@@ -166,30 +239,21 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const user = localStorage.getItem("user");
       if (!user) {
         window.location.href = "index.html";
         return;
       }
 
-      const exchangeBtn = document.getElementById("exchange-btn");
-      const message = document.getElementById("message");
-
-      exchangeBtn.addEventListener("click", async () => {
+      document.getElementById("exchange-btn").addEventListener("click", async () => {
         const from = document.getElementById("from-coin").value;
         const to = document.getElementById("to-coin").value;
         const amount = parseFloat(document.getElementById("amount").value);
+        const message = document.getElementById("message");
 
-        if (from === to) {
-          message.textContent = "Le valute devono essere diverse.";
-          return;
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-          message.textContent = "Inserisci un importo valido.";
-          return;
-        }
+        if (from === to) return message.textContent = "Le valute devono essere diverse.";
+        if (!amount || amount <= 0) return message.textContent = "Inserisci un importo valido.";
 
         try {
           const walletRef = ref(db, `users/${user}/wallet`);
@@ -197,49 +261,50 @@
           const wallet = snapshot.val() || {};
 
           if ((wallet[from] || 0) < amount) {
-            message.textContent = `Fondi ${from} insufficienti.`;
-            return;
+            return message.textContent = `Fondi ${from} insufficienti.`;
           }
 
-          // Esegui lo scambio
-          const rate = 1; // Simulazione tasso 1:1
-          const newFrom = (wallet[from] || 0) - amount;
-          const newTo = (wallet[to] || 0) + amount * rate;
-
-          await set(walletRef, {
+          const rate = 1; // 1:1 per semplicità
+          const updatedWallet = {
             ...wallet,
-            [from]: newFrom,
-            [to]: newTo
-          });
+            [from]: (wallet[from] || 0) - amount,
+            [to]: (wallet[to] || 0) + amount * rate
+          };
 
+          await set(walletRef, updatedWallet);
           message.textContent = "Scambio effettuato con successo!";
         } catch (err) {
           console.error(err);
           message.textContent = "Errore durante lo scambio.";
         }
       });
+
+      // Hamburger menu toggle
+      const toggle = document.getElementById("menu-toggle");
+      const links = document.getElementById("nav-links");
+      toggle.addEventListener("click", () => {
+        links.classList.toggle("show");
+      });
     });
 
-    // ANIMAZIONE BOLLE
+    // Bubbles animation
     const canvas = document.getElementById("bubble-canvas");
     const ctx = canvas.getContext("2d");
     let width, height, bubbles = [];
 
     class Bubble {
-      constructor() {
-        this.reset();
-      }
+      constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * width;
         this.y = height + Math.random() * 100;
-        this.radius = 8 + Math.random() * 12;
-        this.speed = 0.5 + Math.random() * 1.5;
+        this.radius = 6 + Math.random() * 10;
+        this.speed = 0.5 + Math.random() * 1.2;
         this.alpha = 0.1 + Math.random() * 0.3;
         this.phase = Math.random() * Math.PI * 2;
       }
       update() {
         this.y -= this.speed;
-        this.x += Math.sin(this.phase) * 0.3;
+        this.x += Math.sin(this.phase) * 0.5;
         this.phase += 0.03;
         if (this.y + this.radius < 0) this.reset();
       }
@@ -272,8 +337,7 @@
 
     function initCanvas() {
       resizeCanvas();
-      bubbles = [];
-      for (let i = 0; i < 50; i++) bubbles.push(new Bubble());
+      bubbles = Array.from({ length: 40 }, () => new Bubble());
       animate();
     }
 
