@@ -327,90 +327,62 @@
     <div class="particles" aria-hidden="true"></div>
   </main>
 
-  <script type="module">
-    import { loadUserData } from './js/firebase.js';
+<script type="module">
+  import { loadUserData } from './js/firebase.js';
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      // NAVBAR hamburger toggle
-      const navToggle = document.querySelector('.nav-toggle');
-      const navMenu = document.getElementById('nav-menu');
+  document.addEventListener("DOMContentLoaded", async () => {
+    const username = localStorage.getItem("user");
+    if (!username) {
+      window.location.href = "index.html";
+      return;
+    }
 
-      navToggle.addEventListener('click', () => {
-        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', String(!expanded));
-        navMenu.classList.toggle('show');
-      });
-
-      // THEME TOGGLE
-      const themeToggle = document.getElementById('theme-toggle');
-      const currentTheme = localStorage.getItem('theme') || 'dark';
-      document.body.classList.toggle('light-theme', currentTheme === 'light');
-      themeToggle.textContent = currentTheme === 'light' ? '☀️' : '🌙';
-
-      themeToggle.addEventListener('click', () => {
-        const isLight = document.body.classList.toggle('light-theme');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        themeToggle.textContent = isLight ? '☀️' : '🌙';
-      });
-
-      // PARTICLES SIMPLE GENERATOR
-      const particlesContainer = document.querySelector('.particles');
-      for(let i=0; i<30; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.width = `${5 + Math.random() * 10}px`;
-        p.style.height = p.style.width;
-        p.style.left = `${Math.random() * 100}%`;
-        p.style.top = `${Math.random() * 100}%`;
-        p.style.animationDelay = `${Math.random() * 12}s`;
-        particlesContainer.appendChild(p);
+    try {
+      let userData = await loadUserData(username);
+      
+      if (!userData) {
+        // fallback o redirect
+        alert("Dati utente non trovati");
+        window.location.href = "index.html";
+        return;
       }
 
-      // USER DATA LOAD & FALLBACK
+      // aggiorna UI
+      document.getElementById("username").textContent = username;
+      document.getElementById("btc-amount").textContent = Number(userData.btc || 0).toFixed(3);
+      document.getElementById("eth-amount").textContent = Number(userData.eth || 0).toFixed(3);
+      document.getElementById("ltc-amount").textContent = Number(userData.ltc || 0).toFixed(3);
 
-      const usernameEl = document.getElementById("username");
-      const btcEl = document.getElementById("btc-amount");
-      const ethEl = document.getElementById("eth-amount");
-      const ltcEl = document.getElementById("ltc-amount");
+    } catch (err) {
+      console.error(err);
+      window.location.href = "index.html";
+    }
 
-      try {
-        let userData = await loadUserData(); // Funzione da database.js che ritorna dati o null
+    // THEME TOGGLE
+    const themeToggle = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    document.body.classList.toggle('light-theme', currentTheme === 'light');
+    themeToggle.textContent = currentTheme === 'light' ? '☀️' : '🌙';
 
-        if (!userData) {
-          // Se non autenticato, prova fallback IP
-          userData = await fetchUserByIP();
-        }
-
-        if (!userData) {
-          // Se ancora niente, redirect al login
-          window.location.href = 'login.html';
-          return;
-        }
-
-        usernameEl.textContent = userData.name || 'Utente';
-        btcEl.textContent = Number(userData.btc || 0).toFixed(3);
-        ethEl.textContent = Number(userData.eth || 0).toFixed(3);
-        ltcEl.textContent = Number(userData.ltc || 0).toFixed(3);
-
-      } catch (err) {
-        console.error(err);
-        // In caso di errore grave, manda al login
-        window.location.href = 'login.html';
-      }
+    themeToggle.addEventListener('click', () => {
+      const isLight = document.body.classList.toggle('light-theme');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      themeToggle.textContent = isLight ? '☀️' : '🌙';
     });
 
-    // Esempio fallback fetchUserByIP
-    async function fetchUserByIP() {
-      try {
-        // Sostituisci URL con la tua API per risalire utente da IP
-        const response = await fetch('https://api.example.com/userByIP');
-        if (!response.ok) throw new Error('IP fallback failed');
-        const data = await response.json();
-        return data; // { name, btc, eth, ltc }
-      } catch {
-        return null;
-      }
+    // PARTICLES GENERATOR
+    const particlesContainer = document.querySelector('.particles');
+    for(let i=0; i<30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.width = `${5 + Math.random() * 10}px`;
+      p.style.height = p.style.width;
+      p.style.left = `${Math.random() * 100}%`;
+      p.style.top = `${Math.random() * 100}%`;
+      p.style.animationDelay = `${Math.random() * 12}s`;
+      particlesContainer.appendChild(p);
     }
-  </script>
+  });
+</script>
 </body>
 </html>
