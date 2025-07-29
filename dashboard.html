@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Dashboard</title>
   <link rel="icon" href="logo.png" type="image/png">
-  <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* === STILE COMPLETO PER DASHBOARD E NAVBAR === */
     body {
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
@@ -15,7 +13,6 @@
       margin: 0;
       min-height: 100vh;
       padding: 100px 20px 20px;
-      overflow-x: hidden;
       transition: background 0.3s ease, color 0.3s ease;
     }
     main {
@@ -27,7 +24,6 @@
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
       position: relative;
-      overflow: hidden;
     }
     h1 {
       font-size: 2.8rem;
@@ -58,9 +54,7 @@
       background: linear-gradient(145deg, #3b3b6a, #2a2a4f);
       border-radius: 16px;
       padding: 20px 30px;
-      box-shadow:
-        inset 0 0 12px #7e5fff88,
-        0 6px 18px rgba(123, 85, 255, 0.4);
+      box-shadow: inset 0 0 12px #7e5fff88, 0 6px 18px rgba(123, 85, 255, 0.4);
       color: #f0e6ff;
       font-weight: 700;
       font-size: 1.3rem;
@@ -84,73 +78,27 @@
     }
     .coin-card:hover {
       transform: scale(1.05);
-      box-shadow:
-        inset 0 0 16px #a48fffcc,
-        0 10px 30px rgba(123, 85, 255, 0.7);
-    }
-    .coin-name svg {
-      width: 36px;
-      height: 36px;
-      filter: drop-shadow(0 0 2px #a08aff);
+      box-shadow: inset 0 0 16px #a48fffcc, 0 10px 30px rgba(123, 85, 255, 0.7);
     }
 
-    @keyframes fadeInDown {
-      0% { opacity: 0; transform: translateY(-30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    .particles {
-      position: absolute;
+    nav.navbar {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 1000;
     }
-    .particle {
-      position: absolute;
-      background: #bb86fc88;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: drift 12s linear infinite;
-      filter: drop-shadow(0 0 3px #a48aff);
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    @keyframes drift {
-      0% { transform: translateY(0) translateX(0); opacity: 0.6; }
-      50% { opacity: 0.2; }
-      100% { transform: translateY(-150px) translateX(20px); opacity: 0.6; }
-    }
-
-nav.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #1c1c3a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-  z-index: 1000;
-}
-.nav-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-
-    .logo-link img.logo-img {
+    .logo-link img {
       height: 36px;
     }
     .nav-menu {
@@ -170,6 +118,7 @@ nav.navbar {
       cursor: pointer;
       padding: 8px 12px;
       border-radius: 6px;
+      text-decoration: none;
     }
     .nav-menu li a:hover,
     #theme-toggle:hover {
@@ -179,49 +128,18 @@ nav.navbar {
     #theme-toggle {
       margin-left: 6px;
     }
-    @media (max-width: 768px) {
-      .nav-menu {
-        flex-direction: column;
-        position: fixed;
-        top: 56px;
-        right: 0;
-        background: #1c1c3a;
-        padding: 20px;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        width: 220px;
-        height: calc(100vh - 56px);
-        box-shadow: -4px 0 12px rgba(0,0,0,0.6);
-      }
-      .nav-menu.show {
-        transform: translateX(0);
-      }
-      .nav-toggle {
-        display: block;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 6px;
-      }
-      .nav-toggle .hamburger,
-      .nav-toggle .hamburger::before,
-      .nav-toggle .hamburger::after {
-        display: block;
-        background-color: #ddd;
-        height: 2px;
-        width: 24px;
-        border-radius: 2px;
-        position: relative;
-      }
-      .nav-toggle .hamburger::before,
-      .nav-toggle .hamburger::after {
-        content: "";
-        position: absolute;
-        left: 0;
-      }
-      .nav-toggle .hamburger::before { top: -7px; }
-      .nav-toggle .hamburger::after { top: 7px; }
+
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     body.light-theme {
@@ -233,75 +151,51 @@ nav.navbar {
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
-}
   </style>
 </head>
 <body>
   <!-- NAVBAR -->
   <nav class="navbar">
-<a href="dashboard.html" class="logo-link">
-      <img src="logo.png" alt="CryptoSim Logo" class="logo-img" />
-    </a>
-<nav class="navbar">
-  <div class="nav-container">
-    <a href="dashboard.html" class="logo-link">
-      <img src="logo.png" alt="CryptoSim Logo" class="logo-img" />
-    </a>
-    <button class="nav-toggle" aria-label="Apri menu" aria-expanded="false">
-      <span class="hamburger"></span>
-    </button>
-    <ul class="nav-menu" id="nav-menu">
-      <li><a href="dashboard.html">Home</a></li>
-      <li><a href="exchange.html">Exchange</a></li>
-      <li><a href="vouch-create.html">Vouch Create</a></li>
-      <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
-      <li><a href="afk.html">AFK Zone</a></li>
-      <li><a href="account.html">Account</a></li>
-      <li><button id="theme-toggle">🌙</button></li>
-    </ul>
-  </div>
-</nav>
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link">
+        <img src="logo.png" alt="CryptoSim Logo">
+      </a>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle">🌙</button></li>
+      </ul>
+    </div>
+  </nav>
 
   <!-- CONTENUTO -->
   <main>
     <h1>Benvenuto, <span id="username">...</span>!</h1>
     <p class="welcome">Questo è il tuo wallet criptovalute simulato.</p>
     <div class="wallet">
-      <div class="coin-card" title="Bitcoin">
-        <div class="coin-name">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="#f2a900" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1010 10A10.0114 10.0114 0 0012 2zm1.9167 14.5h-1.9167v1.25h-2.0833v-1.25H8.75v-2.5h1.1667v-3.75H8.75v-2.5h1.1667v-1.25h2.0833v1.25H13.9167v2.5h-1.25v3.75h1.25zm.6666-5.4167h1.5v1.25h-1.5zm0 3.75h1.5v1.25h-1.5z"/></svg>
-          Bitcoin (BTC)
-        </div>
+      <div class="coin-card">
+        <div class="coin-name">💰 Bitcoin (BTC)</div>
         <div class="coin-amount" id="btc-amount">0.000</div>
       </div>
-      <div class="coin-card" title="Ethereum">
-        <div class="coin-name">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="#3c3cbd" viewBox="0 0 24 24"><path d="M12 2L6 12l6 10 6-10z"/></svg>
-          Ethereum (ETH)
-        </div>
+      <div class="coin-card">
+        <div class="coin-name">💸 Ethereum (ETH)</div>
         <div class="coin-amount" id="eth-amount">0.000</div>
       </div>
-      <div class="coin-card" title="Litecoin">
-        <div class="coin-name">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="#b8b8b8" viewBox="0 0 24 24"><path d="M14.07 10.41L11 10l1-3-2.5 0 0 2.9-2.66-0.4L7.94 14l2.14 0.33-1.11 3L14.07 10.41z"/></svg>
-          Litecoin (LTC)
-        </div>
+      <div class="coin-card">
+        <div class="coin-name">💵 Litecoin (LTC)</div>
         <div class="coin-amount" id="ltc-amount">0.000</div>
       </div>
     </div>
-    <div class="particles">
-      <div class="particle" style="width: 8px; height: 8px; top: 10%; left: 15%; animation-delay: 0s;"></div>
-      <div class="particle" style="width: 10px; height: 10px; top: 30%; left: 50%; animation-delay: 4s;"></div>
-      <div class="particle" style="width: 6px; height: 6px; top: 60%; left: 80%; animation-delay: 2s;"></div>
-      <div class="particle" style="width: 9px; height: 9px; top: 80%; left: 35%; animation-delay: 6s;"></div>
-      <div class="particle" style="width: 7px; height: 7px; top: 45%; left: 20%; animation-delay: 1s;"></div>
-    </div>
   </main>
 
-  <!-- JS FIREBASE -->
+  <!-- JS con aggiornamento LIVE del wallet -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -317,24 +211,22 @@ nav.navbar {
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const username = localStorage.getItem('user');
-      if (!username) return window.location.href = 'index.html';
+      if (!username) {
+        window.location.href = "index.html";
+        return;
+      }
 
       document.getElementById('username').textContent = username;
 
-      try {
-        const snapshot = await get(ref(db, `users/${username}/wallet`));
-        if (!snapshot.exists()) throw new Error('Wallet non trovato');
-
-        const wallet = snapshot.val();
+      const walletRef = ref(db, `users/${username}/wallet`);
+      onValue(walletRef, snapshot => {
+        const wallet = snapshot.val() || {};
         document.getElementById("btc-amount").textContent = (wallet.BTC || 0).toFixed(3);
         document.getElementById("eth-amount").textContent = (wallet.ETH || 0).toFixed(3);
         document.getElementById("ltc-amount").textContent = (wallet.LTC || 0).toFixed(3);
-      } catch (err) {
-        console.error("Errore nel caricamento:", err);
-        window.location.href = 'index.html';
-      }
+      });
 
       const themeBtn = document.getElementById('theme-toggle');
       const saved = localStorage.getItem('theme');
@@ -351,10 +243,6 @@ nav.navbar {
           localStorage.setItem('theme', 'dark');
           themeBtn.textContent = '🌙';
         }
-      });
-
-      document.querySelector('.nav-toggle')?.addEventListener('click', () => {
-        document.getElementById('nav-menu').classList.toggle('show');
       });
     });
   </script>
