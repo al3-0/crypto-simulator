@@ -14,12 +14,11 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       min-height: 100vh;
-      padding: 100px 20px 20px; /* lascia spazio per navbar fissa */
+      padding: 100px 20px 20px; /* spazio per navbar fissa */
       overflow-x: hidden;
       transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* Stili main */
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
@@ -54,7 +53,6 @@
       opacity: 0;
     }
 
-    /* Wallet e coin-card */
     .wallet {
       display: flex;
       flex-direction: column;
@@ -114,7 +112,6 @@
       text-shadow: 0 0 4px #b68fffcc;
     }
 
-    /* Animazioni */
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-30px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -130,7 +127,6 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* Particelle decorative */
     .particles {
       position: absolute;
       top: 0;
@@ -172,7 +168,6 @@
       }
     }
 
-    /* Tema chiaro */
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -183,7 +178,6 @@
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
 
-    /* Navbar nuova */
     nav.navbar {
       position: fixed;
       top: 0;
@@ -276,7 +270,6 @@
       top: 7px;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .nav-menu {
         position: fixed;
@@ -308,7 +301,6 @@
 
 <body>
 
-  <!-- NAVBAR inserita direttamente -->
   <nav class="navbar" role="navigation" aria-label="Menu principale">
     <div class="nav-container">
       <a href="dashboard.html" class="logo-link" aria-label="Crypto Simulator Home">
@@ -327,15 +319,12 @@
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
         <li>
-          <button id="theme-toggle" aria-label="Cambia tema" title="Cambia tema">
-            🌙
-          </button>
+          <button id="theme-toggle" aria-label="Cambia tema" title="Cambia tema">🌙</button>
         </li>
       </ul>
     </div>
   </nav>
 
-  <!-- CONTENUTO PRINCIPALE -->
   <main role="main" aria-label="Dashboard Crypto Simulator">
     <h1 id="welcome-title">Benvenuto, <span id="username">...</span>!</h1>
     <p class="welcome">Ecco il riepilogo del tuo portafoglio criptovalute</p>
@@ -379,17 +368,17 @@
     import { db, ref, get } from './js/firebase.js';
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // Navbar toggle menu
+      // Navbar toggle
       const navToggle = document.querySelector('.nav-toggle');
       const navMenu = document.querySelector('.nav-menu');
 
       navToggle.addEventListener('click', () => {
         const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', !expanded);
+        navToggle.setAttribute('aria-expanded', String(!expanded));
         navMenu.classList.toggle('show');
       });
 
-      // Theme toggle button
+      // Theme toggle
       const themeToggleBtn = document.getElementById('theme-toggle');
       const body = document.body;
 
@@ -403,7 +392,7 @@
         updateThemeIcon();
       });
 
-      // Set theme on load from localStorage
+      // Set initial theme from localStorage
       if (localStorage.getItem('theme') === 'light') {
         body.classList.add('light-theme');
       } else {
@@ -411,35 +400,37 @@
       }
       updateThemeIcon();
 
-      // --- Caricamento dati utente da db ---
+      // Load user data
       const usernameEl = document.getElementById("username");
       const btcEl = document.getElementById("btc-amount");
       const ethEl = document.getElementById("eth-amount");
       const ltcEl = document.getElementById("ltc-amount");
 
-      const storedUser = localStorage.getItem("user");
-
-      if (!storedUser) {
-        window.location.href = "index.html"; // rimanda a login o home se non loggato
-        return;
-      }
-
-      usernameEl.textContent = storedUser;
-
       try {
-        const snapshot = await get(ref(db, `users/${storedUser}/wallet`));
-        if (snapshot.exists()) {
-          const wallet = snapshot.val();
-          btcEl.textContent = parseFloat(wallet.btc).toFixed(3);
-          ethEl.textContent = parseFloat(wallet.eth).toFixed(3);
-          ltcEl.textContent = parseFloat(wallet.ltc).toFixed(3);
-        } else {
-          btcEl.textContent = '0.000';
-          ethEl.textContent = '0.000';
-          ltcEl.textContent = '0.000';
+        // Supponiamo che l'uid sia salvato in localStorage per demo
+        const uid = localStorage.getItem('uid');
+        if (!uid) throw new Error('Utente non autenticato');
+
+        // Recupera dati utente da Firebase
+        const userSnapshot = await get(ref(db, `users/${uid}`));
+        if (!userSnapshot.exists()) {
+          throw new Error('Utente non trovato nel database');
         }
+
+        const userData = userSnapshot.val();
+        usernameEl.textContent = userData.name || 'Utente';
+
+        // Carica portafoglio criptovalute, valori arrotondati a 3 decimali
+        btcEl.textContent = Number(userData.btc || 0).toFixed(3);
+        ethEl.textContent = Number(userData.eth || 0).toFixed(3);
+        ltcEl.textContent = Number(userData.ltc || 0).toFixed(3);
+
       } catch (error) {
-        console.error("Errore nel recupero wallet:", error);
+        usernameEl.textContent = "ospite";
+        btcEl.textContent = "0.000";
+        ethEl.textContent = "0.000";
+        ltcEl.textContent = "0.000";
+        console.error(error);
       }
     });
   </script>
