@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -15,4 +15,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-export { db, ref, set, get, child, update };
+/**
+ * Recupera dati utente dal Realtime Database Firebase.
+ * @param {string} username
+ * @returns {Promise<Object|null>} dati utente o null se non esiste
+ */
+async function loadUserData(username) {
+  if (!username) return null;
+  try {
+    const snapshot = await get(ref(db, `users/${username}/wallet`));
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Errore caricamento dati utente:", error);
+    return null;
+  }
+}
+
+export { db, ref, get, loadUserData };
