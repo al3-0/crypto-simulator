@@ -2,197 +2,263 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Riscatta Vouch</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script type="module" src="./js/authCheck.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vouch Redeem</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
     body {
       margin: 0;
-      padding: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #1c1c3a, #12122b);
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
       overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    .background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: rgba(187, 134, 252, 0.3);
-      border-radius: 50%;
-      animation: rise 20s infinite ease-in;
-    }
-
-    @keyframes rise {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.3;
-      }
-      50% {
-        opacity: 0.6;
-      }
-      100% {
-        transform: translateY(-120vh) scale(1.5);
-        opacity: 0;
-      }
-    }
-
-    .navbar {
-      width: 100%;
-      background: #1c1c3add;
-      padding: 14px 30px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(10px);
-    }
-
-    .navbar ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar a {
-      color: #eee;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      border-bottom: 2px solid transparent;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
-    }
-
-    .navbar a:hover {
-      color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
-    }
-
-    .redeem-container {
-      background: #2a2a4fcc;
-      border-radius: 16px;
-      max-width: 500px;
-      margin: 140px auto 40px;
-      padding: 40px;
-      color: #eee;
-      box-shadow: 0 0 30px rgba(187, 134, 252, 0.4);
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     h1 {
-      text-align: center;
-      color: #bb86fc;
       font-size: 2.2rem;
       margin-bottom: 30px;
+      color: #bb86fc;
+      text-align: center;
     }
 
-    input,
-    button {
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+    }
+
+    input, select, button {
+      padding: 12px 16px;
+      border: none;
       border-radius: 8px;
       font-size: 1rem;
-      border: none;
+      outline: none;
     }
 
-    input {
-      background-color: #1c1c3a;
+    input, select {
+      background: #38386a;
       color: #fff;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 600;
     }
 
     button {
-      background: #bb86fc;
-      color: #1c1c3a;
+      background: #7b5fff;
+      color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.3s;
     }
 
     button:hover {
-      background: #d3aaff;
+      background: #a48fff;
     }
 
-    #redeemMsg {
-      margin-top: 20px;
+    .message {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #90ee90;
       text-align: center;
-      color: #bfbfff;
-      font-size: 1.1rem;
     }
 
-    #redeemedList {
-      margin-top: 40px;
-      background-color: #1f1f3d;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+    /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
     }
 
-    #redeemedList h2 {
-      color: #bb86fc;
-      margin-bottom: 15px;
-      font-size: 1.3rem;
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
     }
 
-    li {
-      margin-bottom: 10px;
-      color: #ccc;
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a, #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover, #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
+    #nav-toggle.open span:nth-child(2) { opacity: 0; }
+    #nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
+
+    /* CANVAS BOLLE */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+
+    body.light-theme input, body.light-theme select {
+      background: #f0f0f0;
+      color: #111;
+    }
+
+    body.light-theme button {
+      background: #7b5fff;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <!-- Bolle animate -->
-  <div class="background" id="bubbles"></div>
+  <canvas id="bubble-canvas"></canvas>
 
-  <!-- Navbar identica alla dashboard -->
-  <header class="navbar">
-    <nav>
-      <ul>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
       </ul>
-    </nav>
-  </header>
-
-  <!-- Contenuto principale -->
-  <main class="redeem-container">
-    <h1>Riscatta Vouch</h1>
-
-    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" maxlength="14" />
-    <button id="btnRedeem">Riscatta</button>
-
-    <div id="redeemMsg"></div>
-
-    <div id="redeemedList">
-      <h2>Codici riscattati</h2>
-      <ol id="listContainer"></ol>
     </div>
+  </nav>
+
+  <main>
+    <h1>Riscatta un Vouch</h1>
+    <form id="redeem-form">
+      <input type="text" id="vouch-code" placeholder="Inserisci codice vouch" required maxlength="12" minlength="12" />
+      <button type="submit">Riscatta</button>
+      <div class="message" id="message"></div>
+    </form>
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-    import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -202,151 +268,181 @@
       storageBucket: "coins-7104d.appspot.com",
       messagingSenderId: "893938643778",
       appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    function showMessage(msg) {
-      document.getElementById('redeemMsg').textContent = msg;
-    }
+    const user = localStorage.getItem("user");
+    if (!user) window.location.href = "index.html";
 
-    // Funzione per formattare automaticamente il codice in XXXX-XXXX-XXXX maiuscolo
-    function formatCode(input) {
-      // Rimuove tutto tranne lettere e numeri
-      let val = input.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const form = document.getElementById("redeem-form");
+    const msg = document.getElementById("message");
 
-      // Inserisce trattini dopo ogni 4 caratteri, massimo 12 caratteri
-      if (val.length > 4 && val.length <= 8) {
-        val = val.slice(0,4) + '-' + val.slice(4);
-      } else if (val.length > 8) {
-        val = val.slice(0,4) + '-' + val.slice(4,8) + '-' + val.slice(8,12);
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const code = form['vouch-code'].value.trim().toUpperCase();
+
+      if (code.length !== 12) {
+        msg.textContent = "Il codice deve essere lungo 12 caratteri.";
+        msg.style.color = "#f44336"; // rosso
+        return;
       }
 
-      return val;
-    }
+      msg.textContent = "Verifica in corso...";
+      msg.style.color = "#90ee90";
 
-    document.getElementById('codeInput').addEventListener('input', (e) => {
-      const formatted = formatCode(e.target.value);
-      e.target.value = formatted;
+      try {
+        const vouchRef = ref(db, `vouches/${code}`);
+        const snapshot = await get(vouchRef);
+        const vouch = snapshot.val();
+
+        if (!vouch) {
+          msg.textContent = "Codice vouch non valido.";
+          msg.style.color = "#f44336";
+          return;
+        }
+
+        if (vouch.expired) {
+          msg.textContent = "Questo vouch è già stato riscattato o scaduto.";
+          msg.style.color = "#f44336";
+          return;
+        }
+
+        const now = Date.now();
+        if (vouch.expiryDate && vouch.expiryDate < now) {
+          msg.textContent = "Questo vouch è scaduto.";
+          msg.style.color = "#f44336";
+          return;
+        }
+
+        if (vouch.to && vouch.to !== user) {
+          msg.textContent = "Questo vouch non è valido per il tuo account.";
+          msg.style.color = "#f44336";
+          return;
+        }
+
+        // Segna il vouch come riscattato
+        await update(vouchRef, {
+          expired: true,
+          redeemedAt: now,
+          redeemedBy: user
+        });
+
+        msg.textContent = `Vouch riscattato con successo: ${vouch.amount} ${vouch.coin}`;
+        msg.style.color = "#90ee90";
+
+      } catch (error) {
+        console.error(error);
+        msg.textContent = "Errore durante il riscatto del vouch.";
+        msg.style.color = "#f44336";
+      }
     });
 
-    async function redeemVouch() {
-      const user = localStorage.getItem('user');
-      if (!user) {
-        location.href = 'index.html';
-        return;
+    // NAVBAR TOGGLE
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    navToggle.addEventListener("click", () => {
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", !expanded);
+    });
+
+    navToggle.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        navToggle.click();
       }
+    });
 
-      const codeInput = document.getElementById('codeInput');
-      const code = codeInput.value.trim().toUpperCase();
-      const match = code.match(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
-      if (!match) {
-        alert('Formato codice non valido.');
-        return;
+    // THEME TOGGLE
+    const themeToggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        body.classList.add("light-theme");
+        themeToggle.textContent = "🌙";
+      } else {
+        body.classList.remove("light-theme");
+        themeToggle.textContent = "☀️";
       }
+    }
+    loadTheme();
 
-      const vouchSnap = await get(ref(db, 'vouch'));
-      if (!vouchSnap.exists()) {
-        showMessage('Nessun codice valido.');
-        return;
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("light-theme");
+      if (body.classList.contains("light-theme")) {
+        themeToggle.textContent = "🌙";
+        localStorage.setItem("theme", "light");
+      } else {
+        themeToggle.textContent = "☀️";
+        localStorage.setItem("theme", "dark");
       }
+    });
 
-      let found = false;
-      let vouchOwner = null;
-      let vouchData = null;
+    // BUBBLE CANVAS
+    const canvas = document.getElementById("bubble-canvas");
+    const ctx = canvas.getContext("2d");
+    let width, height;
 
-      for (const [owner, codes] of Object.entries(vouchSnap.val())) {
-        if (codes[code]) {
-          vouchOwner = owner;
-          vouchData = codes[code];
-          found = true;
-          break;
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    class Bubble {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 200;
+        this.radius = 5 + Math.random() * 15;
+        this.speed = 1 + Math.random() * 2;
+        this.alpha = 0.4 + Math.random() * 0.6;
+        this.angle = Math.random() * 2 * Math.PI;
+        this.angleSpeed = 0.01 + Math.random() * 0.02;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.angle) * 0.5;
+        this.angle += this.angleSpeed;
+        if (this.y + this.radius < 0) {
+          this.x = Math.random() * width;
+          this.y = height + this.radius;
+          this.radius = 5 + Math.random() * 15;
+          this.speed = 1 + Math.random() * 2;
+          this.alpha = 0.4 + Math.random() * 0.6;
         }
       }
-
-      if (!found) {
-        showMessage('Codice non valido o già usato.');
-        return;
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(123, 85, 255, ${this.alpha})`;
+        ctx.shadowColor = "rgba(123, 85, 255, 0.8)";
+        ctx.shadowBlur = 10;
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
       }
-
-      // Imposto Expired: true per il codice vouch riscattato
-      await update(ref(db, `vouch/${vouchOwner}/${code}`), { Expired: true });
-
-      // Inizializza redeemed per sicurezza (non obbligatorio ma utile)
-      const redeemedSnap = await get(ref(db, `redeemed/${user}`));
-      let redeemed = redeemedSnap.exists() ? redeemedSnap.val() : {};
-
-      const walletSnap = await get(ref(db, `users/${user}/wallet`));
-      const wallet = walletSnap.exists() ? walletSnap.val() : {};
-      const { crypto, amount } = vouchData;
-
-      wallet[crypto] = (wallet[crypto] || 0) + parseFloat(amount);
-      await update(ref(db, `users/${user}/wallet`), wallet);
-
-      // Aggiungo il codice riscattato con timestamp
-      const newKey = Date.now().toString();
-      redeemed[newKey] = {
-        code,
-        crypto,
-        amount,
-        owner: vouchOwner,
-        redeemedAt: new Date().toISOString()
-      };
-
-      // Aggiorno il database con il codice riscattato
-      await set(ref(db, `redeemed/${user}`), redeemed);
-
-      // Rimuovo il codice dal nodo vouch
-      await remove(ref(db, `vouch/${vouchOwner}/${code}`));
-
-      showMessage(`Hai riscattato ${amount} ${crypto}!`);
-      codeInput.value = '';
-      loadRedeemedList();
     }
 
-    async function loadRedeemedList() {
-      const user = localStorage.getItem('user');
-      if (!user) return;
+    const bubbles = [];
+    for(let i=0; i<30; i++) bubbles.push(new Bubble());
 
-      const redeemedSnap = await get(ref(db, `redeemed/${user}`));
-      const listContainer = document.getElementById('listContainer');
-      listContainer.innerHTML = '';
-
-      if (!redeemedSnap.exists()) {
-        listContainer.innerHTML = '<li>Nessun codice riscattato.</li>';
-        return;
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const bubble of bubbles) {
+        bubble.update();
+        bubble.draw();
       }
-
-      const redeemed = redeemedSnap.val();
-
-      Object.entries(redeemed).forEach(([key, data]) => {
-        const li = document.createElement('li');
-        li.textContent = `${data.code} - ${data.amount} ${data.crypto} (da ${data.owner})`;
-        listContainer.appendChild(li);
-      });
+      requestAnimationFrame(animate);
     }
-
-    // Gestione click bottone
-    document.getElementById('btnRedeem').addEventListener('click', redeemVouch);
-
-    // Carico lista riscatti all'avvio
-    window.addEventListener('load', () => {
-      // Genera bolle animate random per sfondo
-      const bubblesContainer = document.getElementById('bubbles');
-      for (let i = 0; i < 30; i++) {
-        const bubble = document.createElement('div');
-        bubble.classList.add('bubble');
-        const size = Math.random() * 60 + 20;
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        bubble.style.left = `${Math.random() * 100}%`;
-        bubble.style.animationDuration = `${10 + Math.random() * 10}s`;
-        bubblesContainer.appendChild(bubble);
-      }
-
-      loadRedeemedList();
-    });
+    animate();
   </script>
 </body>
 </html>
