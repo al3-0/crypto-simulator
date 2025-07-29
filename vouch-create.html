@@ -322,7 +322,7 @@
   });
 
       msg.textContent = `Vouch generato: ${code}`;
-     const copyBtn = document.createElement("button");
+const copyBtn = document.createElement("button");
 copyBtn.textContent = "Copia codice";
 copyBtn.style.marginTop = "10px";
 copyBtn.style.padding = "8px 14px";
@@ -331,10 +331,15 @@ copyBtn.style.border = "none";
 copyBtn.style.cursor = "pointer";
 copyBtn.style.backgroundColor = "#7b5fff";
 copyBtn.style.color = "#fff";
+copyBtn.style.transition = "opacity 0.3s ease";
 
 copyBtn.onclick = () => {
   navigator.clipboard.writeText(code);
   copyBtn.textContent = "Copiato!";
+  setTimeout(() => {
+    copyBtn.style.opacity = "0";
+    setTimeout(() => copyBtn.remove(), 300); // rimozione definitiva
+  }, 3000);
 };
 
 msg.appendChild(copyBtn);
