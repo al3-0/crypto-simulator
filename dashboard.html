@@ -231,6 +231,15 @@ nav.navbar {
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
+  
+    html, body {
+  overflow-y: auto;
+}
+@media (min-height: 900px) {
+  body {
+    overflow-y: hidden;
+  }
+}
   </style>
 </head>
 <body>
@@ -350,9 +359,6 @@ nav.navbar {
         document.getElementById('nav-menu').classList.toggle('show');
       });
     });
-    if (document.body.scrollHeight <= window.innerHeight) {
-  document.body.style.overflowY = 'hidden';
-}
   </script>
 </body>
 </html>
