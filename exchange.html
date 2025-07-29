@@ -6,302 +6,152 @@
   <title>Crypto Simulator - Exchange</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    /* ==== BODY & MAIN ==== */
     body {
       margin: 0;
-      min-height: 100vh;
-      padding: 100px 20px 20px;
+      height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #eee;
       background: linear-gradient(135deg, #1c1c3a, #12122b);
+      color: #eee;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
-      position: relative;
-      transition: background 0.3s ease, color 0.3s ease;
     }
 
     main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 20px 20px;
+    }
+
+    .exchange-box {
       background: #2a2a4fdd;
+      padding: 40px;
       border-radius: 20px;
-      padding: 40px 60px;
-      max-width: 600px;
-      margin: auto;
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
-      position: relative;
+      width: 100%;
+      max-width: 500px;
       z-index: 2;
-      color: #eee;
     }
 
-    h1 {
-      font-size: 2.8rem;
-      margin-bottom: 8px;
-      font-weight: 800;
-      color: #bb86fc;
+    h2 {
       text-align: center;
-      animation: fadeInDown 1s ease forwards;
-      opacity: 0;
-    }
-
-    .exchange-form {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      animation: fadeInUp 1.8s ease forwards;
-      opacity: 0;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #bb86fc;
     }
 
     label {
-      font-weight: 600;
-      font-size: 1.1rem;
-      margin-bottom: 8px;
+      display: block;
+      margin-top: 16px;
+      font-weight: bold;
     }
 
-    select, input[type="number"] {
-      padding: 12px;
-      border-radius: 8px;
+    select, input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
       border: none;
+      margin-top: 8px;
       font-size: 1rem;
-      background: #3b3b6a;
-      color: #eee;
-      box-shadow: inset 0 0 8px #7e5fff88;
-      transition: background-color 0.3s ease;
-    }
-    select:hover, input[type="number"]:hover {
-      background: #4b4b7a;
+      background: #1c1c3a;
+      color: #fff;
     }
 
-    button.exchange-btn {
-      background: #bb86fc;
-      color: #222;
-      font-weight: 700;
-      padding: 14px;
-      border-radius: 12px;
+    button {
+      width: 100%;
+      margin-top: 30px;
+      padding: 12px;
       border: none;
-      font-size: 1.2rem;
+      background: #bb86fc;
+      color: #1c1c3a;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-radius: 12px;
       cursor: pointer;
-      box-shadow: 0 0 12px #bb86fccc;
-      transition: background-color 0.3s ease;
-    }
-    button.exchange-btn:hover {
-      background: #9a68e3;
+      transition: background 0.3s ease;
     }
 
-    .result {
-      margin-top: 20px;
-      font-size: 1.2rem;
-      font-weight: 700;
+    button:hover {
+      background: #9d6bff;
+    }
+
+    #message {
       text-align: center;
-      color: #ccc;
-      min-height: 2rem;
+      margin-top: 20px;
+      font-weight: 500;
     }
 
-    /* ==== NAVBAR ==== */
-    nav.navbar {
+    canvas {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      background: #1c1c3a;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-      z-index: 10;
-      user-select: none;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    .nav-container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
     }
 
-    .logo-link img {
-      height: 36px;
-      cursor: pointer;
+    body.light-theme .exchange-box {
+      background: #ffffffdd;
+      color: #222;
     }
 
-    .nav-menu {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      margin: 0;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+    body.light-theme select,
+    body.light-theme input {
+      background: #e6e6e6;
+      color: #222;
     }
 
-    .nav-menu li a,
-    #theme-toggle {
-      color: #ddd;
-      background: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    .nav-menu li a:hover,
-    #theme-toggle:hover {
-      background-color: #4b3ca7;
+    body.light-theme button {
+      background: #7a4ff5;
       color: white;
     }
 
-    #theme-toggle {
-      margin-left: 6px;
-    }
-
-    /* ==== RESPONSIVE ==== */
-    #nav-toggle {
-      display: none;
-      position: relative;
-      width: 30px;
-      height: 22px;
-      cursor: pointer;
-      z-index: 15;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #nav-toggle span {
-      position: absolute;
-      height: 4px;
-      width: 100%;
-      background: #ddd;
-      border-radius: 2px;
-      transition: 0.3s ease;
-      left: 0;
-    }
-    #nav-toggle span:nth-child(1) {
-      top: 0;
-    }
-    #nav-toggle span:nth-child(2) {
-      top: 9px;
-    }
-    #nav-toggle span:nth-child(3) {
-      top: 18px;
-    }
-
-    @media (max-width: 768px) {
-      .nav-menu {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        background: #1c1c3a;
-        flex-direction: column;
-        gap: 16px;
-        padding: 20px 0;
-        margin: 0;
-        transform: translateY(-150%);
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        text-align: center;
-        font-size: 1.2rem;
-      }
-      .nav-menu.open {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-      }
-      #nav-toggle {
-        display: block;
-      }
-      #theme-toggle {
-        margin-left: 0;
-      }
-    }
-
-    #nav-toggle.open span:nth-child(1) {
-      transform: rotate(45deg);
-      top: 9px;
-    }
-    #nav-toggle.open span:nth-child(2) {
-      opacity: 0;
-    }
-    #nav-toggle.open span:nth-child(3) {
-      transform: rotate(-45deg);
-      top: 9px;
-    }
-
-    /* ==== ANIMAZIONI ==== */
-    @keyframes fadeInDown {
-      0% { opacity: 0; transform: translateY(-30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
+    body.light-theme button:hover {
+      background: #6a3ae6;
     }
   </style>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
-        <img src="logo.png" alt="CryptoSim Logo" />
-      </a>
+  <canvas id="bubble-canvas"></canvas>
 
-      <!-- HAMBURGER -->
-      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-
-      <ul class="nav-menu" id="nav-menu">
-        <li><a href="dashboard.html">Home</a></li>
-        <li><a href="exchange.html">Exchange</a></li>
-        <li><a href="vouch-create.html">Vouch Create</a></li>
-        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
-        <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account</a></li>
-        <li><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
-      </ul>
-    </div>
-  </nav>
-
-  <!-- CONTENUTO PRINCIPALE -->
   <main>
-    <h1>Exchange Criptovalute</h1>
-    <form class="exchange-form" id="exchange-form">
-      <div>
-        <label for="from-coin">Da:</label>
-        <select id="from-coin" required>
-          <option value="" disabled selected>Seleziona criptovaluta</option>
-          <option value="BTC">Bitcoin (BTC)</option>
-          <option value="ETH">Ethereum (ETH)</option>
-          <option value="LTC">Litecoin (LTC)</option>
-        </select>
-      </div>
-      <div>
-        <label for="to-coin">A:</label>
-        <select id="to-coin" required>
-          <option value="" disabled selected>Seleziona criptovaluta</option>
-          <option value="BTC">Bitcoin (BTC)</option>
-          <option value="ETH">Ethereum (ETH)</option>
-          <option value="LTC">Litecoin (LTC)</option>
-        </select>
-      </div>
-      <div>
-        <label for="amount">Importo:</label>
-        <input type="number" id="amount" min="0.001" step="0.001" placeholder="0.000" required />
-      </div>
-      <button type="submit" class="exchange-btn">Scambia</button>
-    </form>
+    <div class="exchange-box">
+      <h2>Scambia Criptovalute</h2>
+      <label for="from-coin">Da:</label>
+      <select id="from-coin">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="LTC">Litecoin (LTC)</option>
+      </select>
 
-    <div class="result" id="exchange-result"></div>
+      <label for="to-coin">A:</label>
+      <select id="to-coin">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="LTC">Litecoin (LTC)</option>
+      </select>
+
+      <label for="amount">Importo:</label>
+      <input type="number" id="amount" min="0" step="0.001" />
+
+      <button id="exchange-btn">Scambia</button>
+
+      <div id="message"></div>
+    </div>
   </main>
 
-  <!-- SCRIPT JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -310,124 +160,125 @@
       projectId: "coins-7104d",
       storageBucket: "coins-7104d.appspot.com",
       messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F"
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Controllo utente loggato
-      const username = localStorage.getItem('user');
-      if (!username) {
+    document.addEventListener("DOMContentLoaded", async () => {
+      const user = localStorage.getItem("user");
+      if (!user) {
         window.location.href = "index.html";
         return;
       }
 
-      // Theme toggle
-      const themeBtn = document.getElementById('theme-toggle');
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light-theme');
-        themeBtn.textContent = '☀️';
-      }
+      const exchangeBtn = document.getElementById("exchange-btn");
+      const message = document.getElementById("message");
 
-      themeBtn.addEventListener('click', () => {
-        if (document.body.classList.toggle('light-theme')) {
-          localStorage.setItem('theme', 'light');
-          themeBtn.textContent = '☀️';
-        } else {
-          localStorage.setItem('theme', 'dark');
-          themeBtn.textContent = '🌙';
-        }
-      });
+      exchangeBtn.addEventListener("click", async () => {
+        const from = document.getElementById("from-coin").value;
+        const to = document.getElementById("to-coin").value;
+        const amount = parseFloat(document.getElementById("amount").value);
 
-      // Hamburger menu toggle
-      const navToggle = document.getElementById('nav-toggle');
-      const navMenu = document.getElementById('nav-menu');
-
-      function toggleMenu() {
-        navToggle.classList.toggle('open');
-        navMenu.classList.toggle('open');
-        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', String(!expanded));
-      }
-
-      navToggle.addEventListener('click', toggleMenu);
-      navToggle.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggleMenu();
-        }
-      });
-
-      navMenu.querySelectorAll('a, button').forEach(link => {
-        link.addEventListener('click', () => {
-          if (navMenu.classList.contains('open')) {
-            toggleMenu();
-          }
-        });
-      });
-
-      // Exchange form logic
-      const form = document.getElementById('exchange-form');
-      const resultDiv = document.getElementById('exchange-result');
-
-      // Semplice tasso di cambio fittizio (per esempio)
-      const rates = {
-        BTC: { BTC: 1, ETH: 15, LTC: 250 },
-        ETH: { BTC: 1/15, ETH: 1, LTC: 16.6 },
-        LTC: { BTC: 1/250, ETH: 1/16.6, LTC: 1 },
-      };
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const fromCoin = form['from-coin'].value;
-        const toCoin = form['to-coin'].value;
-        const amount = parseFloat(form['amount'].value);
-
-        if (fromCoin === toCoin) {
-          resultDiv.textContent = "Seleziona due criptovalute differenti.";
+        if (from === to) {
+          message.textContent = "Le valute devono essere diverse.";
           return;
         }
 
-        if (amount <= 0 || isNaN(amount)) {
-          resultDiv.textContent = "Inserisci un importo valido.";
+        if (isNaN(amount) || amount <= 0) {
+          message.textContent = "Inserisci un importo valido.";
           return;
         }
-
-        resultDiv.textContent = "Elaborazione...";
 
         try {
-          // Prendo wallet attuale
-          const walletRef = ref(db, `users/${username}/wallet`);
-          const walletSnap = await get(walletRef);
-          const wallet = walletSnap.val() || {};
+          const walletRef = ref(db, `users/${user}/wallet`);
+          const snapshot = await get(walletRef);
+          const wallet = snapshot.val() || {};
 
-          if ((wallet[fromCoin] || 0) < amount) {
-            resultDiv.textContent = `Saldo insufficiente in ${fromCoin}.`;
+          if ((wallet[from] || 0) < amount) {
+            message.textContent = `Fondi ${from} insufficienti.`;
             return;
           }
 
-          // Calcolo importo convertito
-          const convertedAmount = amount * rates[fromCoin][toCoin];
+          // Esegui lo scambio
+          const rate = 1; // Simulazione tasso 1:1
+          const newFrom = (wallet[from] || 0) - amount;
+          const newTo = (wallet[to] || 0) + amount * rate;
 
-          // Aggiorno il database
-          const updates = {};
-          updates[`users/${username}/wallet/${fromCoin}`] = (wallet[fromCoin] || 0) - amount;
-          updates[`users/${username}/wallet/${toCoin}`] = (wallet[toCoin] || 0) + convertedAmount;
+          await set(walletRef, {
+            ...wallet,
+            [from]: newFrom,
+            [to]: newTo
+          });
 
-          await update(ref(db), updates);
+          message.textContent = "Scambio effettuato con successo!";
+        } catch (err) {
+          console.error(err);
+          message.textContent = "Errore durante lo scambio.";
+        }
+      });
+    });
 
-          resultDiv.textContent = Scambiati ${amount.toFixed(3)} ${fromCoin} per ${convertedAmount.toFixed(3)} ${toCoin}.;
-              } catch (err) {
-      console.error(err);
-      resultDiv.textContent = "Errore durante lo scambio.";
+    // ANIMAZIONE BOLLE
+    const canvas = document.getElementById("bubble-canvas");
+    const ctx = canvas.getContext("2d");
+    let width, height, bubbles = [];
+
+    class Bubble {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 100;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.5 + Math.random() * 1.5;
+        this.alpha = 0.1 + Math.random() * 0.3;
+        this.phase = Math.random() * Math.PI * 2;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.phase) * 0.3;
+        this.phase += 0.03;
+        if (this.y + this.radius < 0) this.reset();
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        gradient.addColorStop(1, "rgba(187,134,252,0)");
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
     }
-  });
-});
-</script>
+
+    function resizeCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const bubble of bubbles) {
+        bubble.update();
+        bubble.draw(ctx);
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function initCanvas() {
+      resizeCanvas();
+      bubbles = [];
+      for (let i = 0; i < 50; i++) bubbles.push(new Bubble());
+      animate();
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    initCanvas();
+  </script>
 </body>
 </html>
