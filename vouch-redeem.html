@@ -2,471 +2,325 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Riscatta Vouch</title>
-  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="module" src="./js/authCheck.js"></script>
   <style>
     body {
       margin: 0;
-      min-height: 100vh;
-      padding: 100px 20px 20px;
+      padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #eee;
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      background: linear-gradient(to right, #1c1c3a, #12122b);
       overflow-x: hidden;
-      position: relative;
-      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    main {
-      background: #2a2a4fdd;
-      border-radius: 20px;
-      padding: 40px 60px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
-      backdrop-filter: blur(12px);
-      position: relative;
-      z-index: 2;
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      background: rgba(187, 134, 252, 0.3);
+      border-radius: 50%;
+      animation: rise 20s infinite ease-in;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-120vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .navbar {
+      width: 100%;
+      background: #1c1c3add;
+      padding: 14px 30px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .navbar ul {
+      list-style: none;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar a {
+      color: #eee;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1rem;
+      border-bottom: 2px solid transparent;
+      transition: color 0.3s ease, border-bottom 0.3s ease;
+    }
+
+    .navbar a:hover {
+      color: #bb86fc;
+      border-bottom: 2px solid #bb86fc;
+    }
+
+    .redeem-container {
+      background: #2a2a4fcc;
+      border-radius: 16px;
+      max-width: 500px;
+      margin: 140px auto 40px;
+      padding: 40px;
+      color: #eee;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.4);
+      backdrop-filter: blur(12px);
     }
 
     h1 {
+      text-align: center;
+      color: #bb86fc;
       font-size: 2.2rem;
       margin-bottom: 30px;
-      color: #bb86fc;
-      text-align: center;
     }
 
-    input, button {
+    input,
+    button {
       width: 100%;
-      padding: 12px 16px;
-      border: none;
+      padding: 12px;
+      margin: 10px 0;
       border-radius: 8px;
       font-size: 1rem;
-      outline: none;
-      margin-bottom: 15px;
+      border: none;
     }
 
     input {
-      background: #38386a;
+      background-color: #1c1c3a;
       color: #fff;
     }
 
     button {
-      background: #7b5fff;
-      color: white;
+      background: #bb86fc;
+      color: #1c1c3a;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s ease;
     }
 
     button:hover {
-      background: #a48fff;
+      background: #d3aaff;
     }
 
     #redeemMsg {
-      margin-top: 10px;
-      font-size: 1.1rem;
-      color: #90ee90;
+      margin-top: 20px;
       text-align: center;
-      min-height: 24px;
+      color: #bfbfff;
+      font-size: 1.1rem;
     }
 
     #redeemedList {
-      margin-top: 30px;
+      margin-top: 40px;
       background-color: #1f1f3d;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
-      width: 100%;
     }
 
     #redeemedList h2 {
       color: #bb86fc;
       margin-bottom: 15px;
       font-size: 1.3rem;
-      text-align: center;
     }
 
-    #listContainer {
-      list-style: decimal inside;
-      color: #ccc;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    #listContainer li {
+    li {
       margin-bottom: 10px;
-    }
-
-    /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
-    nav.navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #1c1c3a;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-      z-index: 10;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-    }
-
-    .logo-link img {
-      height: 36px;
-      cursor: pointer;
-    }
-
-    .nav-menu {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      margin: 0;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .nav-menu li a, #theme-toggle {
-      color: #ddd;
-      background: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    .nav-menu li a:hover, #theme-toggle:hover {
-      background-color: #4b3ca7;
-      color: white;
-    }
-
-    #theme-toggle {
-      margin-left: 6px;
-    }
-
-    #nav-toggle {
-      display: none;
-      position: relative;
-      width: 30px;
-      height: 22px;
-      cursor: pointer;
-      z-index: 15;
-    }
-
-    #nav-toggle span {
-      position: absolute;
-      height: 4px;
-      width: 100%;
-      background: #ddd;
-      border-radius: 2px;
-      transition: 0.3s ease;
-      left: 0;
-    }
-
-    #nav-toggle span:nth-child(1) { top: 0; }
-    #nav-toggle span:nth-child(2) { top: 9px; }
-    #nav-toggle span:nth-child(3) { top: 18px; }
-
-    @media (max-width: 768px) {
-      .nav-menu {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        background: #1c1c3a;
-        flex-direction: column;
-        gap: 16px;
-        padding: 20px 0;
-        margin: 0;
-        transform: translateY(-150%);
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        text-align: center;
-        font-size: 1.2rem;
-      }
-
-      .nav-menu.open {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      #nav-toggle {
-        display: block;
-      }
-    }
-
-    #nav-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
-    #nav-toggle.open span:nth-child(2) { opacity: 0; }
-    #nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
-
-    /* CANVAS BOLLE */
-    #bubble-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    body.light-theme {
-      background: #f4f4f7;
-      color: #222;
-    }
-
-    body.light-theme main {
-      background: #fff;
-      color: #222;
-      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
-    }
-
-    body.light-theme input {
-      background: #f0f0f0;
-      color: #111;
-    }
-
-    body.light-theme button {
-      background: #7b5fff;
-      color: white;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <canvas id="bubble-canvas"></canvas>
+  <!-- Bolle animate -->
+  <div class="background" id="bubbles"></div>
 
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
-      <div id="nav-toggle"><span></span><span></span><span></span></div>
-      <ul class="nav-menu" id="nav-menu">
+  <!-- Navbar identica alla dashboard -->
+  <header class="navbar">
+    <nav>
+      <ul>
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
-        <li><button id="theme-toggle">🌙</button></li>
       </ul>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
-  <main>
+  <!-- Contenuto principale -->
+  <main class="redeem-container">
     <h1>Riscatta Vouch</h1>
-    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" maxlength="14" />
+
+    <input type="text" id="codeInput" placeholder="XXXX-XXXX-XXXX" />
     <button id="btnRedeem">Riscatta</button>
+
     <div id="redeemMsg"></div>
 
-    <section id="redeemedList">
+    <div id="redeemedList">
       <h2>Codici riscattati</h2>
       <ol id="listContainer"></ol>
-    </section>
+    </div>
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getDatabase, ref, set, get, update, remove } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-    authDomain: "coins-7104d.firebaseapp.com",
-    databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-    projectId: "coins-7104d",
-    storageBucket: "coins-7104d.appspot.com",
-    messagingSenderId: "893938643778",
-    appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-    measurementId: "G-QSY10CVX1F"
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const redeemBtn = document.getElementById('btnRedeem');
-    const codeInput = document.getElementById('codeInput');
-    const redeemMsg = document.getElementById('redeemMsg');
-    const redeemedList = document.getElementById('listContainer');
+    function showMessage(msg) {
+      document.getElementById('redeemMsg').textContent = msg;
+    }
 
-    // Carica codici riscattati da localStorage
-    let redeemedCodes = JSON.parse(localStorage.getItem('redeemedCodes')) || [];
-    renderRedeemedList();
-
-    redeemBtn.addEventListener('click', redeemCode);
-
-    function renderRedeemedList() {
-      redeemedList.innerHTML = '';
-      if (redeemedCodes.length === 0) {
-        redeemedList.innerHTML = '<li>Nessun codice riscattato</li>';
+    async function redeemVouch() {
+      const user = localStorage.getItem('user');
+      if (!user) {
+        location.href = 'index.html';
         return;
       }
-      redeemedCodes.forEach(code => {
-        const li = document.createElement('li');
-        li.textContent = code;
-        redeemedList.appendChild(li);
-      });
-    }
 
-    function sanitizeCode(input) {
-      // Consente solo lettere maiuscole, numeri e trattini
-      return input.toUpperCase().replace(/[^A-Z0-9\-]/g, '');
-    }
-
-    codeInput.addEventListener('input', (e) => {
-      e.target.value = sanitizeCode(e.target.value);
-    });
-
-    async function redeemCode() {
+      const codeInput = document.getElementById('codeInput');
       const code = codeInput.value.trim().toUpperCase();
-      redeemMsg.style.color = '#eee';
-
-      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
-        redeemMsg.textContent = "Formato codice non valido (esempio: XXXX-XXXX-XXXX)";
-        redeemMsg.style.color = "#e57373";
+      const match = code.match(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
+      if (!match) {
+        alert('Formato codice non valido.');
         return;
       }
 
-      if (redeemedCodes.includes(code)) {
-        redeemMsg.textContent = "Hai già riscattato questo codice.";
-        redeemMsg.style.color = "#ffb74d";
+      const vouchSnap = await get(ref(db, 'vouch'));
+      if (!vouchSnap.exists()) {
+        showMessage('Nessun codice valido.');
         return;
       }
 
-      try {
-        const codeRef = ref(db, `vouch/${code}`);
-        const snapshot = await get(codeRef);
+      let found = false;
+      let vouchOwner = null;
+      let vouchData = null;
 
-        if (!snapshot.exists()) {
-          redeemMsg.textContent = "Codice non trovato.";
-          redeemMsg.style.color = "#e57373";
-          return;
+      for (const [owner, codes] of Object.entries(vouchSnap.val())) {
+        if (codes[code]) {
+          vouchOwner = owner;
+          vouchData = codes[code];
+          found = true;
+          break;
         }
-
-        const codeData = snapshot.val();
-        if (codeData.redeemed) {
-          redeemMsg.textContent = "Codice già riscattato.";
-          redeemMsg.style.color = "#e57373";
-          return;
-        }
-
-        // Aggiorna il codice come riscattato
-        const updates = {};
-        updates[`vouch/${code}/redeemed`] = true;
-        await update(ref(db), updates);
-
-        redeemMsg.textContent = "Codice riscattato con successo!";
-        redeemMsg.style.color = "#90ee90";
-
-        redeemedCodes.push(code);
-        localStorage.setItem('redeemedCodes', JSON.stringify(redeemedCodes));
-        renderRedeemedList();
-        codeInput.value = '';
-      } catch (error) {
-        redeemMsg.textContent = "Errore durante il riscatto, riprova.";
-        redeemMsg.style.color = "#e57373";
-        console.error(error);
       }
-    }
 
-    // Navbar toggle
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-    navToggle.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      navToggle.classList.toggle('open');
-    });
-
-    // Tema chiaro/scuro
-    const themeToggle = document.getElementById('theme-toggle');
-    function setTheme(theme) {
-      if (theme === 'light') {
-        document.body.classList.add('light-theme');
-        themeToggle.textContent = '🌙';
-        localStorage.setItem('theme', 'light');
-      } else {
-        document.body.classList.remove('light-theme');
-        themeToggle.textContent = '☀️';
-        localStorage.setItem('theme', 'dark');
+      if (!found) {
+        showMessage('Codice non valido o già usato.');
+        return;
       }
-    }
 
-    themeToggle.addEventListener('click', () => {
-      if (document.body.classList.contains('light-theme')) {
-        setTheme('dark');
-      } else {
-        setTheme('light');
-      }
-    });
+      // Inizializza redeemed per sicurezza (non obbligatorio ma utile)
+      const redeemedSnap = await get(ref(db, `redeemed/${user}`));
+      let redeemed = redeemedSnap.exists() ? redeemedSnap.val() : {};
 
-    // Imposta tema salvato
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
+      const walletSnap = await get(ref(db, `users/${user}/wallet`));
+      const wallet = walletSnap.exists() ? walletSnap.val() : {};
+      const { crypto, amount } = vouchData;
 
-    // ==== CANVAS BOLLE ====
-    const canvas = document.getElementById('bubble-canvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let bubbles = [];
+      wallet[crypto] = (wallet[crypto] || 0) + parseFloat(amount);
+      await update(ref(db, `users/${user}/wallet`), wallet);
 
-    function initCanvas() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-      bubbles = [];
-      const bubbleCount = Math.floor(width / 20);
-      for (let i = 0; i < bubbleCount; i++) {
-        bubbles.push(createBubble());
-      }
-    }
-
-    function createBubble() {
-      return {
-        x: Math.random() * width,
-        y: height + Math.random() * 100,
-        radius: 2 + Math.random() * 4,
-        speed: 0.5 + Math.random() * 1.5,
-        opacity: 0.2 + Math.random() * 0.3
+      // Aggiungo il codice riscattato con timestamp
+      const newKey = Date.now().toString();
+      redeemed[newKey] = {
+        code,
+        crypto,
+        amount,
+        owner: vouchOwner,
+        redeemedAt: new Date().toISOString()
       };
+
+      // Aggiorno il database con il codice riscattato
+      await set(ref(db, `redeemed/${user}`), redeemed);
+
+      // Rimuovo il codice dal nodo vouch
+      await remove(ref(db, `vouch/${vouchOwner}/${code}`));
+
+      showMessage(`Hai riscattato ${amount} ${crypto}!`);
+      codeInput.value = '';
+      loadRedeemedList();
     }
 
-    function drawBubbles() {
-      ctx.clearRect(0, 0, width, height);
-      bubbles.forEach(b => {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(123, 85, 255, ${b.opacity})`;
-        ctx.fill();
+    async function loadRedeemedList() {
+      const user = localStorage.getItem('user');
+      if (!user) return;
 
-        b.y -= b.speed;
-        if (b.y + b.radius < 0) {
-          Object.assign(b, createBubble());
-          b.y = height + b.radius;
-        }
+      const redeemedSnap = await get(ref(db, `redeemed/${user}`));
+      const listContainer = document.getElementById('listContainer');
+      listContainer.innerHTML = '';
+
+      if (!redeemedSnap.exists()) {
+        listContainer.innerHTML = '<li>Nessun codice riscattato.</li>';
+        return;
+      }
+
+      const redeemed = redeemedSnap.val();
+
+      Object.entries(redeemed).forEach(([key, data]) => {
+        const li = document.createElement('li');
+        li.textContent = `${data.code} - ${data.amount} ${data.crypto} (da ${data.owner})`;
+        listContainer.appendChild(li);
       });
-      requestAnimationFrame(drawBubbles);
     }
 
-    window.addEventListener('resize', initCanvas);
-    initCanvas();
-    drawBubbles();
+    // Gestione click bottone
+    document.getElementById('btnRedeem').addEventListener('click', redeemVouch);
+
+    // Carico lista riscatti all'avvio
+    window.addEventListener('load', () => {
+      // Genera bolle animate random per sfondo
+      const bubblesContainer = document.getElementById('bubbles');
+      for (let i = 0; i < 30; i++) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        const size = Math.random() * 60 + 20;
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}%`;
+        bubble.style.animationDuration = `${10 + Math.random() * 10}s`;
+        bubblesContainer.appendChild(bubble);
+      }
+
+      loadRedeemedList();
+    });
   </script>
 </body>
 </html>
