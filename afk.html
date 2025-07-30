@@ -277,92 +277,96 @@
       applyTheme(savedTheme);
     });
 
-    // TIMER
-    let totalSeconds = 180;
-    let btcEarned = 0;         // BTC totale guadagnato da timer + click
-    let timerAccumulatedBTC = 0; // BTC accumulato dal timer (da aggiungere solo a scadenza)
+    // TIMER & BTC LOGIC
+    let totalSeconds = 180;                 // 3 minuti timer countdown
+    let btcEarned = 0;                     // BTC totale mostrato (somma tutto)
+    let timerAccumulatedBTC = 0;           // BTC accumulato dal timer in corso
+
     const timerElem = document.getElementById('timer');
     const btcStatsElem = document.getElementById('btc-stats');
 
+    // Formatta il timer mm:ss
     function formatTime(sec) {
       const m = Math.floor(sec / 60).toString().padStart(2, '0');
       const s = (sec % 60).toString().padStart(2, '0');
       return `${m}:${s}`;
     }
 
+    // Aggiorna display timer
     function updateTimerDisplay() {
       timerElem.textContent = formatTime(totalSeconds);
     }
 
-    async function updateBTCBackend(newBTC) {
-      try {
-        await fetch('/update-btc', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ btc: newBTC }),
-        });
-      } catch (error) {
-        console.error('Errore aggiornando BTC sul server:', error);
-      }
+    // Aggiorna BTC a schermo (totale)
+    function updateBTCDisplay() {
+      btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
     }
 
-    function showBtcGainText(x, y, amount) {
-      const elem = document.createElement('div');
-      elem.className = 'btc-gained';
-      elem.style.left = x + 'px';
-      elem.style.top = y + 'px';
-      elem.textContent = `+${amount.toFixed(4)} BTC`;
-      document.body.appendChild(elem);
-      setTimeout(() => elem.remove(), 1200);
+    // Simulazione aggiornamento backend, sostituisci con fetch/ajax reale
+    function updateBTCBackend(additionalBTC) {
+      // Manda solo l'incremento BTC al backend, non il totale (come richiesto)
+      // Usa POST/fetch reale qui. Esempio:
+      /*
+      fetch('/api/updateBTC', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({btcIncrement: additionalBTC})
+      })
+      .then(res => res.json())
+      .then(data => console.log('Backend updated:', data))
+      .catch(e => console.error('Backend error:', e));
+      */
+      console.log(`Aggiornamento backend +${additionalBTC.toFixed(4)} BTC`);
     }
 
-    function resetTimer() {
-      totalSeconds = 180;
-      timerAccumulatedBTC = 0;
-      updateTimerDisplay();
+    // Aggiunge BTC, aggiorna display e backend
+    function addBTC(amount) {
+      btcEarned += amount;
+      updateBTCDisplay();
+      updateBTCBackend(amount);
     }
 
-    updateTimerDisplay();
-
-    // TIMER LOGICA: decrementa ogni secondo, accumula BTC in timerAccumulatedBTC (es: 0.0005/s)
-    // Quando scade (totalSeconds = 0), somma timerAccumulatedBTC a btcEarned, aggiorna DB, resetta timerAccumulatedBTC e totalSeconds
+    // TIMER COUNTDOWN & accumulo BTC
     setInterval(() => {
       if (totalSeconds > 0) {
         totalSeconds--;
+        // accumulo BTC timer (per secondo)
         timerAccumulatedBTC += 0.0005;
         updateTimerDisplay();
+      } else {
+        // Timer scaduto: aggiungi BTC accumulati + 0.05 al DB e resetta timer e accumulo
+        const timerAdd = timerAccumulatedBTC + 0.05;
+        addBTC(timerAdd);
 
-        if (totalSeconds === 0) {
-          btcEarned += timerAccumulatedBTC;
-          btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
-          updateBTCBackend(btcEarned);
-          timerAccumulatedBTC = 0;
-          totalSeconds = 180; // reset timer automaticamente
-          updateTimerDisplay();
-        }
+        // reset timer e accumulo
+        totalSeconds = 180;
+        timerAccumulatedBTC = 0;
+        updateTimerDisplay();
       }
     }, 1000);
 
-    // RAIN DROPS (max 10 al minuto = 1 ogni 6 secondi)
+    // Reset timer accumulo (non timer countdown)
+    function resetTimerAccumulo() {
+      timerAccumulatedBTC = 0;
+    }
+
+    // RAIN DROPS (max 10 al minuto, 1 ogni 6 secondi)
     const raindropContainer = document.getElementById('raindrop-container');
 
     function createRaindrop() {
       const drop = document.createElement('div');
       drop.className = 'raindrop';
       drop.style.left = `${Math.random() * window.innerWidth}px`;
-      const duration = 6000 + Math.random() * 4000; // 6-10s caduta
+      const duration = 6000 + Math.random() * 4000; // caduta 6-10s
       drop.style.animationDuration = `${duration}ms`;
-
       drop.style.pointerEvents = 'auto';
 
       drop.addEventListener('click', e => {
         e.stopPropagation();
         const gain = 0.001;
-        btcEarned += gain;
-        btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
+        addBTC(gain);
         showBtcGainText(e.clientX, e.clientY, gain);
-        updateBTCBackend(btcEarned);
-        resetTimer();
+        resetTimerAccumulo();
         drop.remove();
       });
 
@@ -439,11 +443,9 @@
       for (let i = 0; i < bubbles.length; i++) {
         if (bubbles[i].isPointInside(x, y)) {
           const gain = 0.001;
-          btcEarned += gain;
-          btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
+          addBTC(gain);
           showBtcGainText(e.clientX, e.clientY, gain);
-          updateBTCBackend(btcEarned);
-          resetTimer();
+          resetTimerAccumulo();
           break;
         }
       }
@@ -451,6 +453,31 @@
 
     initBubbles();
     animate();
+
+    // Mostra +BTC che fluttuano quando clicchi
+    function showBtcGainText(x, y, amount) {
+      const txt = document.createElement('div');
+      txt.className = 'btc-gained';
+      txt.textContent = `+${amount.toFixed(4)} BTC`;
+      txt.style.left = `${x}px`;
+      txt.style.top = `${y}px`;
+      document.body.appendChild(txt);
+      setTimeout(() => txt.remove(), 1200);
+    }
+
+    // Gestione evento cambio scheda o chiusura
+    window.addEventListener('beforeunload', () => {
+      if (timerAccumulatedBTC > 0) {
+        // Invia al backend gli ultimi BTC accumulati dal timer non ancora aggiunti
+        updateBTCBackend(timerAccumulatedBTC);
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && timerAccumulatedBTC > 0) {
+        updateBTCBackend(timerAccumulatedBTC);
+      }
+    });
   </script>
 </body>
 </html>
