@@ -3,411 +3,543 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AFK Zone - Crypto Simulator</title>
+  <title>Crypto Simulator - AFK Zone</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ==== BODY & MAIN ==== */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #1a1a2e;
-      color: #eee;
-      overflow-x: hidden;
+      margin: 0;
       min-height: 100vh;
-      position: relative;
-    }
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-    #drop-canvas {
-      pointer-events: auto;
-      z-index: 3;
-    }
-    nav.navbar {
-      background: rgba(30, 30, 60, 0.85);
-      backdrop-filter: blur(10px);
-      padding: 10px 30px;
-      position: fixed;
-      width: 100%;
-      top: 0;
-      left: 0;
-      z-index: 10;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .nav-container {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      max-width: 1100px;
-      margin: auto;
-      justify-content: space-between;
-    }
-    .logo-link img {
-      height: 40px;
-    }
-    #nav-toggle {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-      width: 30px;
-      height: 25px;
-      justify-content: space-between;
-    }
-    #nav-toggle span {
-      display: block;
-      height: 4px;
-      background: #bbb;
-      border-radius: 2px;
-    }
-    ul.nav-menu {
-      list-style: none;
-      display: flex;
-      gap: 25px;
-      align-items: center;
-      font-weight: 600;
-    }
-    ul.nav-menu li a,
-    ul.nav-menu li button {
+      padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #eee;
-      text-decoration: none;
-      font-size: 1rem;
-      background: none;
-      border: none;
-      cursor: pointer;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
     }
-    ul.nav-menu li button:hover,
-    ul.nav-menu li a:hover {
-      color: #bb86fc;
-    }
+
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
       padding: 40px 60px;
       max-width: 600px;
-      margin: 140px auto 60px auto;
+      margin: auto;
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
       position: relative;
-      z-index: 5;
+      z-index: 2;
       text-align: center;
-      color: #eee;
     }
-    p.timer {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      font-weight: 700;
-      text-shadow: 0 0 8px #bb86fcaa;
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      font-weight: 800;
+      color: #bb86fc;
+      animation: fadeInDown 1s ease forwards;
+      opacity: 0;
     }
-    p.btc-earned {
-      font-size: 1.5rem;
-      margin-top: -20px;
+
+    p.welcome {
+      font-size: 1.1rem;
+      color: #ccc;
+      font-weight: 500;
       margin-bottom: 40px;
-      color: #b5f4a5;
-      text-shadow: 0 0 8px #a5f47faa;
+      animation: fadeIn 1.5s ease forwards;
+      opacity: 0;
+    }
+
+    #timer {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #bb86fc;
+      margin-bottom: 20px;
+      font-family: 'Courier New', Courier, monospace;
+      animation: fadeInUp 1.8s ease forwards;
+      opacity: 0;
+    }
+
+    #btc-stats {
+      font-size: 1.3rem;
       font-weight: 700;
+      color: #d6bfff;
+      margin-top: 10px;
+      min-height: 24px;
+      font-family: 'Courier New', Courier, monospace;
     }
 
-    /* Responsive menu toggle */
-    @media (max-width: 768px) {
-      #nav-toggle {
-        display: flex;
-      }
-      ul.nav-menu {
-        position: fixed;
-        top: 60px;
-        right: -100%;
-        background: #1a1a2e;
-        height: calc(100vh - 60px);
-        width: 220px;
-        flex-direction: column;
-        padding: 20px;
-        gap: 15px;
-        transition: right 0.3s ease;
-        box-shadow: -3px 0 15px rgba(0,0,0,0.7);
-      }
-      ul.nav-menu.active {
-        right: 0;
-      }
+    /* ==== NAVBAR ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+      user-select: none;
     }
 
-    /* Theme toggle button */
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a,
     #theme-toggle {
-      font-size: 1.2rem;
+      color: #ddd;
       background: none;
+      font-weight: 600;
+      font-size: 1rem;
       border: none;
       cursor: pointer;
-      color: #eee;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    /* ==== RESPONSIVE ==== */
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #nav-toggle {
+        display: block;
+      }
+      #theme-toggle {
+        margin-left: 0;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* ==== ANIMAZIONI ==== */
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==== TEMA CHIARO ==== */
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+    body.light-theme nav.navbar {
+      background: #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    body.light-theme .nav-menu li a,
+    body.light-theme #theme-toggle {
+      color: #444;
+    }
+    body.light-theme .nav-menu li a:hover,
+    body.light-theme #theme-toggle:hover {
+      background-color: #8861ff;
+      color: white;
+    }
+    body.light-theme #nav-toggle span {
+      background: #444;
+    }
+
+    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==== GOCCE (DAVANTI A TUTTO) ==== */
+    #raindrop-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999; /* Davanti a tutto */
+    }
+
+    .raindrop {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: radial-gradient(circle at center, #a3c9ff 40%, #3a6eff 90%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      box-shadow: 0 0 8px #4d79ffcc;
+      cursor: pointer;
+      pointer-events: auto;
       user-select: none;
+      filter: drop-shadow(0 0 5px #5b7affcc);
+      animation-fill-mode: forwards;
+      animation-name: fall;
+      animation-timing-function: linear;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh); }
+    }
+
+    /* +BTC testo animato */
+    .btc-gained {
+      position: fixed;
+      font-weight: 900;
+      color: #bb86fc;
+      text-shadow: 0 0 8px #bb86fccc;
+      font-family: 'Courier New', Courier, monospace;
+      user-select: none;
+      pointer-events: none;
+      animation: floatUp 1.2s ease forwards;
+      z-index: 10000;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-60px); }
     }
   </style>
 </head>
 <body>
-  <canvas id="bubble-canvas"></canvas>
-  <canvas id="drop-canvas"></canvas>
-
-  <nav class="navbar" role="navigation" aria-label="Main Navigation">
+  <nav class="navbar" aria-label="Main Navigation">
     <div class="nav-container">
-      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
-        <img src="logo.png" alt="CryptoSim Logo" />
+      <a href="index.html" class="logo-link" aria-label="Homepage">
+        <img src="logo.png" alt="Crypto Simulator Logo" />
       </a>
-      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false" aria-controls="nav-menu">
+      <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
         <span></span><span></span><span></span>
-      </div>
+      </button>
       <ul class="nav-menu" id="nav-menu" role="menu">
-        <li role="none"><a role="menuitem" href="dashboard.html">Home</a></li>
-        <li role="none"><a role="menuitem" href="exchange.html">Exchange</a></li>
-        <li role="none"><a role="menuitem" href="vouch-create.html">Vouch Create</a></li>
-        <li role="none"><a role="menuitem" href="vouch-redeem.html">Vouch Redeem</a></li>
-        <li role="none"><a role="menuitem" href="afk.html">AFK Zone</a></li>
-        <li role="none"><a role="menuitem" href="account.html">Account</a></li>
-        <li role="none"><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
+        <li role="none"><a href="index.html" role="menuitem" tabindex="0">Home</a></li>
+        <li role="none"><a href="affiliates.html" role="menuitem" tabindex="0">Affiliates</a></li>
+        <li role="none"><a href="afkzone.html" role="menuitem" tabindex="0" aria-current="page">AFK Zone</a></li>
+        <li role="none"><a href="dashboard.html" role="menuitem" tabindex="0">Dashboard</a></li>
       </ul>
+      <button id="theme-toggle" aria-label="Toggle light/dark theme">Toggle Theme</button>
     </div>
   </nav>
 
   <main>
     <h1>AFK Zone</h1>
-    <p class="timer" id="countdown">Tempo rimasto: 02:00</p>
-    <p class="btc-earned" id="btc-earned">BTC Guadagnati: 0.000</p>
-    <p>Clicca sulle gocce che cadono per togliere 5 secondi dal timer e guadagnare BTC!</p>
+    <p class="welcome">Stai accumulando BTC automaticamente! Il timer scorre... ma puoi ridurlo cliccando sulle gocce.</p>
+    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Tempo rimanente">03:00</div>
+    <div id="btc-stats" aria-live="polite" aria-atomic="true">BTC Guadagnati: 0.0000</div>
   </main>
 
-  <script type="module">
-    // NAVBAR menu toggle
+  <div id="raindrop-container" aria-hidden="true"></div>
+  <canvas id="bubble-canvas" aria-hidden="true"></canvas>
+
+  <script>
+    // NAV TOGGLE
     const navToggle = document.getElementById('nav-toggle');
     const navMenu = document.getElementById('nav-menu');
-
     navToggle.addEventListener('click', () => {
-      const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-      navToggle.setAttribute('aria-expanded', String(!expanded));
-      navMenu.classList.toggle('active');
+      const isOpen = navMenu.classList.toggle('open');
+      navToggle.classList.toggle('open', isOpen);
+      navToggle.setAttribute('aria-expanded', isOpen);
     });
 
-    navToggle.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        navToggle.click();
-      }
-    });
+    // THEME TOGGLE + memorizza in localStorage
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
+    const currentTheme = localStorage.getItem('theme') || 'dark';
 
-    // Theme toggle (light/dark)
-    const themeToggle = document.getElementById('theme-toggle');
-    const darkThemeClass = 'dark-theme';
-
-    function applyTheme(isDark) {
-      if(isDark) {
-        document.body.style.background = '#121212';
-        document.body.style.color = '#ddd';
-        themeToggle.textContent = '☀️';
-      } else {
-        document.body.style.background = '#1a1a2e';
-        document.body.style.color = '#eee';
-        themeToggle.textContent = '🌙';
-      }
+    function applyTheme(theme) {
+      if (theme === 'light') body.classList.add('light-theme');
+      else body.classList.remove('light-theme');
+      localStorage.setItem('theme', theme);
     }
 
-    // inizialmente tema scuro
-    let darkMode = true;
-    applyTheme(darkMode);
+    applyTheme(currentTheme);
 
-    themeToggle.addEventListener('click', () => {
-      darkMode = !darkMode;
-      applyTheme(darkMode);
+    themeToggleBtn.addEventListener('click', () => {
+      const newTheme = body.classList.contains('light-theme') ? 'dark' : 'light';
+      applyTheme(newTheme);
     });
 
-    // Canvas setup
-    const bubbleCanvas = document.getElementById('bubble-canvas');
-    const bubbleCtx = bubbleCanvas.getContext('2d');
-    const dropCanvas = document.getElementById('drop-canvas');
-    const dropCtx = dropCanvas.getContext('2d');
+    // TIMER E BTC
+    let timer = 180; // 3 minuti in secondi
+    let btc = 0;
+    let timerInterval;
+    const timerElement = document.getElementById('timer');
+    const btcStats = document.getElementById('btc-stats');
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timer / 60);
+      const seconds = timer % 60;
+      timerElement.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+    updateTimerDisplay();
+    btcStats.textContent = `BTC Guadagnati: ${btc.toFixed(4)}`;
+
+    // Gestione visibilità pagina (pausa timer se non visibile)
+    let isPageVisible = true;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        isPageVisible = true;
+        startTimer();
+      } else {
+        isPageVisible = false;
+        stopTimer();
+      }
+    });
+
+    function startTimer() {
+      if (timerInterval || timer <= 0) return;
+      timerInterval = setInterval(() => {
+        if (!isPageVisible) return;
+        if (timer <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          return;
+        }
+        timer--;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+    startTimer();
+
+    // BOLLE CANVAS (animazioni 1,3,8) - semplificato per performance
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
+    let bubbles = [];
     let width, height;
 
-    function resize() {
+    function resizeCanvas() {
       width = window.innerWidth;
       height = window.innerHeight;
-      bubbleCanvas.width = width;
-      bubbleCanvas.height = height;
-      dropCanvas.width = width;
-      dropCanvas.height = height;
+      canvas.width = width;
+      canvas.height = height;
     }
-    window.addEventListener('resize', resize);
-    resize();
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-    // BUBBLES
     class Bubble {
       constructor() {
-        this.reset();
-      }
-      reset() {
         this.x = Math.random() * width;
-        this.y = height + Math.random() * 100;
-        this.radius = 8 + Math.random() * 12;
-        this.speed = 0.5 + Math.random() * 1.5;
-        this.alpha = 0.1 + Math.random() * 0.3;
-        this.phase = Math.random() * 2 * Math.PI;
+        this.y = height + 50 + Math.random() * 100;
+        this.radius = 8 + Math.random() * 15;
+        this.speed = 0.6 + Math.random() * 1.2;
+        this.alpha = 0.1 + Math.random() * 0.15;
+        this.animationType = [1,3,8][Math.floor(Math.random() * 3)];
+        this.time = 0;
+        this.maxTime = 300 + Math.random() * 200;
       }
       update() {
         this.y -= this.speed;
-        this.x += Math.sin(this.phase) * 0.3;
-        this.phase += 0.03;
-        if (this.y + this.radius < 0) this.reset();
-      }
-      draw(ctx) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
-        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
-        gradient.addColorStop(1, 'rgba(187,134,252,0)');
-        ctx.fillStyle = gradient;
-        ctx.fill();
-      }
-    }
-    let bubbles = [];
-    function initBubbles() {
-      bubbles = [];
-      for (let i = 0; i < 50; i++) bubbles.push(new Bubble());
-    }
-    initBubbles();
-
-    // DROPS
-    class Drop {
-      constructor() {
-        this.reset();
-        this.clicked = false;
+        this.time++;
+        if (this.y + this.radius < -10 || this.time > this.maxTime) {
+          this.reset();
+        }
+        // Animazioni
+        if(this.animationType === 1){
+          // oscillazione laterale lenta
+          this.x += Math.sin(this.time / 30) * 0.3;
+        } else if(this.animationType === 3){
+          // leggera variazione di dimensione
+          this.radius += Math.sin(this.time / 15) * 0.05;
+          if (this.radius < 7) this.radius = 7;
+          if (this.radius > 23) this.radius = 23;
+        } else if(this.animationType === 8){
+          // oscillazione più ampia
+          this.x += Math.sin(this.time / 10) * 0.6;
+        }
       }
       reset() {
         this.x = Math.random() * width;
-        this.y = -10 - Math.random() * 100;
-        this.radius = 15 + Math.random() * 10;
-        this.speed = 1.5 + Math.random() * 2;
-        this.clicked = false;
+        this.y = height + 50 + Math.random() * 100;
+        this.radius = 8 + Math.random() * 15;
+        this.speed = 0.6 + Math.random() * 1.2;
+        this.alpha = 0.1 + Math.random() * 0.15;
+        this.time = 0;
+        this.maxTime = 300 + Math.random() * 200;
+        this.animationType = [1,3,8][Math.floor(Math.random() * 3)];
       }
-      update() {
-        this.y += this.speed;
-      }
-      draw(ctx) {
+      draw() {
         ctx.beginPath();
-        ctx.fillStyle = 'rgba(187,134,252,0.8)';
-        ctx.shadowColor = '#bb86fc';
-        ctx.shadowBlur = 8;
-        ctx.moveTo(this.x, this.y - this.radius);
-        ctx.bezierCurveTo(
-          this.x + this.radius, this.y - this.radius / 2,
-          this.x + this.radius / 2, this.y + this.radius,
-          this.x, this.y + this.radius
-        );
-        ctx.bezierCurveTo(
-          this.x - this.radius / 2, this.y + this.radius,
-          this.x - this.radius, this.y - this.radius / 2,
-          this.x, this.y - this.radius
-        );
+        ctx.fillStyle = `rgba(187, 134, 252, ${this.alpha})`;
+        ctx.shadowColor = `rgba(187, 134, 252, 0.6)`;
+        ctx.shadowBlur = 12;
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
       }
-      isClicked(mx, my) {
-        const dx = mx - this.x;
-        const dy = my - this.y;
-        return dx*dx + dy*dy <= this.radius*this.radius;
-      }
     }
 
-    let drops = [];
-
-    // Spawn drops max 10 al minuto (una ogni 6 sec)
-    let lastDropSpawnTime = 0;
-    const dropInterval = 6000; // ms
-
-    function spawnDrop(time) {
-      // Rimuove gocce fuori schermo
-      drops = drops.filter(d => d.y - d.radius <= height);
-
-      if (drops.length < 10) {
-        drops.push(new Drop());
-      }
-      lastDropSpawnTime = time;
+    for(let i=0; i<30; i++) {
+      bubbles.push(new Bubble());
     }
 
-    // TIMER
-    let timerSeconds = 120; // 2 minuti
-    let timerRunning = true;
-    const countdownEl = document.getElementById('countdown');
-    const btcEarnedEl = document.getElementById('btc-earned');
-    let btcEarned = 0;
-
-    function updateTimerText() {
-      const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
-      const s = Math.floor(timerSeconds % 60).toString().padStart(2, '0');
-      countdownEl.textContent = `Tempo rimasto: ${m}:${s}`;
-    }
-
-    function updateBtcText() {
-      btcEarnedEl.textContent = `BTC Guadagnati: ${btcEarned.toFixed(3)}`;
-    }
-
-    // Blocca timer se scheda non attiva
-    document.addEventListener('visibilitychange', () => {
-      timerRunning = !document.hidden;
-    });
-
-    // Gestione click sulle gocce
-    dropCanvas.addEventListener('click', (e) => {
-      const rect = dropCanvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      for (const drop of drops) {
-        if (!drop.clicked && drop.isClicked(mx, my)) {
-          drop.clicked = true;
-          timerSeconds = Math.max(0, timerSeconds - 5);
-          btcEarned += 0.001;
-          updateTimerText();
-          updateBtcText();
-          drops = drops.filter(d => d !== drop);
-          break;
-        }
-      }
-    });
-
-    function animate(time = 0) {
-      bubbleCtx.clearRect(0, 0, width, height);
-      dropCtx.clearRect(0, 0, width, height);
-
-      for (const b of bubbles) {
+    function animateBubbles() {
+      ctx.clearRect(0, 0, width, height);
+      bubbles.forEach(b => {
         b.update();
-        b.draw(bubbleCtx);
-      }
+        b.draw();
+      });
+      requestAnimationFrame(animateBubbles);
+    }
+    animateBubbles();
 
-      for (const d of drops) {
-        d.update();
-        d.draw(dropCtx);
-      }
+    // GOCCE CADENTI
+    const raindropContainer = document.getElementById('raindrop-container');
 
-      if (!lastDropSpawnTime || time - lastDropSpawnTime > dropInterval) {
-        spawnDrop(time);
-      }
+    let raindropCount = 0;
+    const maxRaindropsPerMinute = 10;
+    const raindropIntervalMs = 60000 / maxRaindropsPerMinute;
+    let lastRaindropTime = 0;
 
-      if (timerRunning) {
-        timerSeconds -= 1/60;
-        if (timerSeconds <= 0) {
-          timerSeconds = 120; // reset timer
-        }
-        updateTimerText();
-      }
+    function createRaindrop() {
+      const now = Date.now();
+      if (now - lastRaindropTime < raindropIntervalMs) return;
+      lastRaindropTime = now;
 
-      requestAnimationFrame(animate);
+      const drop = document.createElement('div');
+      drop.classList.add('raindrop');
+      drop.style.left = Math.random() * (window.innerWidth - 32) + 'px';
+      drop.style.top = '-40px';
+      drop.style.pointerEvents = 'auto';
+
+      // Durata caduta variabile 5-8 secondi (velocità diversa)
+      const duration = 5000 + Math.random() * 3000;
+      drop.style.animation = `fall ${duration}ms linear forwards`;
+
+      raindropContainer.appendChild(drop);
+
+      // Click goccia: toglie 5 secondi dal timer, animazioni scoppio e +BTC
+      drop.addEventListener('click', () => {
+        if (drop.classList.contains('pop')) return; // Previeni multi click
+        drop.classList.add('pop');
+
+        const btcEarned = 0.001;
+        btc += btcEarned;
+        btcStats.textContent = `BTC Guadagnati: ${btc.toFixed(4)}`;
+
+        timer = Math.max(0, timer - 5);
+        updateTimerDisplay();
+
+        const btcText = document.createElement('div');
+        btcText.className = 'btc-gained';
+        btcText.textContent = `+${btcEarned.toFixed(3)} BTC`;
+        btcText.style.left = drop.offsetLeft + 'px';
+        btcText.style.top = drop.offsetTop + 'px';
+        document.body.appendChild(btcText);
+        setTimeout(() => btcText.remove(), 1200);
+
+        setTimeout(() => drop.remove(), 400);
+      });
+
+      // Rimuovi goccia dopo la caduta
+      setTimeout(() => {
+        if (drop.parentNode) drop.remove();
+      }, duration);
     }
 
-    updateTimerText();
-    updateBtcText();
-    animate();
+    // Loop gocce, crea massimo 10 al minuto (1 ogni 6 secondi circa)
+    setInterval(createRaindrop, 1000);
+
   </script>
 </body>
 </html>
