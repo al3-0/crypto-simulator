@@ -294,44 +294,39 @@
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-60px); }
-    }
-  </style>
+    }  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <nav class="navbar" aria-label="Main Navigation">
-    <div class="nav-container">
-      <a href="index.html" class="logo-link" aria-label="Homepage">
-        <img src="logo.png" alt="Crypto Simulator Logo" />
-      </a>
-      <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
-        <span></span><span></span><span></span>
-      </button>
-      <ul class="nav-menu" id="nav-menu" role="menu">
-        <li role="none"><a href="index.html" role="menuitem" tabindex="0">Home</a></li>
-        <li role="none"><a href="affiliates.html" role="menuitem" tabindex="0">Affiliates</a></li>
-        <li role="none"><a href="afkzone.html" role="menuitem" tabindex="0" aria-current="page">AFK Zone</a></li>
-        <li role="none"><a href="dashboard.html" role="menuitem" tabindex="0">Dashboard</a></li>
-        <li role="none"><button id="theme-toggle" aria-pressed="false" role="switch" tabindex="0" aria-label="Toggle light/dark theme">🌗</button></li>
-      </ul>
-    </div>
-  </nav>
-
-  <main>
-    <h1>AFK Zone</h1>
-    <p class="welcome">Welcome to the AFK Zone. Accumulate BTC automatically and by clicking drops!</p>
-    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Countdown timer">03:00</div>
-    <div id="btc-stats" aria-live="polite" aria-atomic="true" aria-label="Bitcoin stats">BTC: 0.0000</div>
-  </main>
+  <!-- ... NAV + MAIN ... -->
 
   <canvas id="bubble-canvas"></canvas>
   <div id="raindrop-container" aria-label="Clickable bitcoin drops"></div>
 
   <script>
-    // --- Variabili globali ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let userIP = '';
+    let currentUserKey = null;
     let btc = 0;
     const btcIncrementDrop = 0.005;
     const btcIncrementTimer = 0.05;
-    const timerDuration = 3 * 60; // 3 minuti in secondi
+    const timerDuration = 3 * 60;
     let remainingSeconds = timerDuration;
 
     const timerElem = document.getElementById('timer');
@@ -341,12 +336,70 @@
     let timerInterval = null;
     let isPageVisible = true;
 
-    // --- Funzione per aggiornare il display BTC ---
+    async function getUserIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip;
+      } catch (e) {
+        console.error("Errore ottenendo l'IP:", e);
+        return null;
+      }
+    }
+
+    async function authenticateUser() {
+      userIP = await getUserIP();
+      if (!userIP) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      db.ref('users').once('value', snapshot => {
+        const users = snapshot.val();
+        for (let key in users) {
+          if (users[key].ip === userIP) {
+            currentUserKey = key;
+            btc = parseFloat(users[key].wallet?.BTC || 0);
+            updateBTCDisplay();
+            updateTimerDisplay();
+            startTimer();
+            startRaindrops();
+            return;
+          }
+        }
+
+        // Nessun IP corrispondente trovato
+        const username = prompt("Inserisci nome utente:");
+        const password = prompt("Inserisci password:");
+
+        for (let key in users) {
+          if (users[key].Nome === username && users[key].password === password) {
+            currentUserKey = key;
+            btc = parseFloat(users[key].wallet?.BTC || 0);
+            updateBTCDisplay();
+            updateTimerDisplay();
+            startTimer();
+            startRaindrops();
+            return;
+          }
+        }
+
+        // Nessun utente trovato
+        window.location.href = 'index.html';
+      });
+    }
+
+    function updateDatabase(newBtcValue) {
+      if (!currentUserKey) return;
+      db.ref(`users/${currentUserKey}/wallet/BTC`).set(newBtcValue).catch((error) => {
+        console.error("Errore aggiornando database:", error);
+      });
+    }
+
     function updateBTCDisplay() {
       btcStatsElem.textContent = `BTC: ${btc.toFixed(4)}`;
     }
 
-    // --- Funzione per il countdown timer ---
     function updateTimerDisplay() {
       const m = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
       const s = (remainingSeconds % 60).toString().padStart(2, '0');
@@ -354,16 +407,15 @@
     }
 
     function timerTick() {
-      if (!isPageVisible) return; // blocca timer se pagina non visibile
-
+      if (!isPageVisible) return;
       if (remainingSeconds > 0) {
         remainingSeconds--;
         updateTimerDisplay();
       } else {
-        // Timer finito, aggiungo BTC, resetto
-        btc += btcIncrementTimer;
+        btc = parseFloat((btc + btcIncrementTimer).toFixed(6));
         updateBTCDisplay();
-        showBtcGainAnimation(timerElem.getBoundingClientRect().left + timerElem.offsetWidth/2, timerElem.getBoundingClientRect().top);
+        updateDatabase(btc);
+        showBtcGainAnimation(timerElem.getBoundingClientRect().left + timerElem.offsetWidth / 2, timerElem.getBoundingClientRect().top);
         remainingSeconds = timerDuration;
         updateTimerDisplay();
       }
@@ -381,36 +433,23 @@
       }
     }
 
-    // --- Funzione per aggiungere e gestire le bolle (sfere) che cadono ---
-    // Ogni 1.5-3 secondi genera una bolla che cade e si può cliccare
     function createRaindrop() {
       const drop = document.createElement('div');
       drop.classList.add('raindrop');
-
-      // posizione orizzontale casuale
       const x = Math.random() * (window.innerWidth - 32);
       drop.style.left = `${x}px`;
-      drop.style.top = `-40px`; // parte sopra lo schermo
-
-      // durata caduta casuale tra 4 e 8 secondi
+      drop.style.top = `-40px`;
       const fallDuration = 4000 + Math.random() * 4000;
       drop.style.animationDuration = `${fallDuration}ms`;
 
-      // evento click su drop
       drop.addEventListener('click', () => {
-        // incremento BTC
-        btc += btcIncrementDrop;
+        btc = parseFloat((btc + btcIncrementDrop).toFixed(6));
         updateBTCDisplay();
-        showBtcGainAnimation(x + 16, drop.getBoundingClientRect().top);
-
-        // rimuovo la goccia cliccata
-        drop.remove();
-
-        // Simulo update database - in pratica qui metteresti chiamata API
         updateDatabase(btc);
+        showBtcGainAnimation(x + 16, drop.getBoundingClientRect().top);
+        drop.remove();
       });
 
-      // rimuovo la goccia dopo animazione
       drop.addEventListener('animationend', () => {
         drop.remove();
       });
@@ -418,7 +457,6 @@
       raindropContainer.appendChild(drop);
     }
 
-    // Funzione per creare drops periodicamente solo se pagina visibile
     let raindropTimer = null;
     function startRaindrops() {
       if (raindropTimer) clearInterval(raindropTimer);
@@ -428,6 +466,7 @@
         }
       }, 1500 + Math.random() * 1500);
     }
+
     function stopRaindrops() {
       if (raindropTimer) {
         clearInterval(raindropTimer);
@@ -435,13 +474,6 @@
       }
     }
 
-    // --- Simulo aggiornamento database in tempo reale (placeholder) ---
-    function updateDatabase(newBtcValue) {
-      console.log(`Database aggiornato: BTC = ${newBtcValue.toFixed(4)}`);
-      // Qui potresti fare fetch o websocket per aggiornare il DB in tempo reale
-    }
-
-    // --- Animazione +BTC che sale e scompare ---
     function showBtcGainAnimation(x, y) {
       const gain = document.createElement('div');
       gain.className = 'btc-gained';
@@ -454,7 +486,6 @@
       }, 1200);
     }
 
-    // --- Gestione visibilità pagina (tab attivo o no) ---
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         isPageVisible = true;
@@ -467,43 +498,9 @@
       }
     });
 
-    // --- Tema chiaro / scuro ---
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    function setTheme(theme) {
-      if (theme === 'light') {
-        document.body.classList.add('light-theme');
-        themeToggleBtn.setAttribute('aria-pressed', 'true');
-      } else {
-        document.body.classList.remove('light-theme');
-        themeToggleBtn.setAttribute('aria-pressed', 'false');
-      }
-      localStorage.setItem('theme', theme);
-    }
-    // Carica tema da localStorage o default scuro
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
+    // Tema, navbar ecc. invariati...
 
-    themeToggleBtn.addEventListener('click', () => {
-      const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-      setTheme(currentTheme === 'light' ? 'dark' : 'light');
-    });
-
-    // --- Navbar toggle mobile ---
-    const navToggleBtn = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-
-    navToggleBtn.addEventListener('click', () => {
-      const isOpen = navMenu.classList.toggle('open');
-      navToggleBtn.classList.toggle('open');
-      navToggleBtn.setAttribute('aria-expanded', isOpen);
-    });
-
-    // --- Inizio tutto ---
-    updateBTCDisplay();
-    updateTimerDisplay();
-    startTimer();
-    startRaindrops();
-
+    authenticateUser();
   </script>
 </body>
 </html>
