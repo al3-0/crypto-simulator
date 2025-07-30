@@ -6,6 +6,7 @@
   <title>Crypto Simulator - AFK Zone</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    /* ==== BODY & MAIN ==== */
     body {
       margin: 0;
       min-height: 100vh;
@@ -17,6 +18,7 @@
       position: relative;
       transition: background 0.3s ease, color 0.3s ease;
     }
+
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
@@ -29,6 +31,7 @@
       z-index: 2;
       text-align: center;
     }
+
     h1 {
       font-size: 2.8rem;
       margin-bottom: 8px;
@@ -37,6 +40,7 @@
       animation: fadeInDown 1s ease forwards;
       opacity: 0;
     }
+
     p.welcome {
       font-size: 1.1rem;
       color: #ccc;
@@ -45,6 +49,7 @@
       animation: fadeIn 1.5s ease forwards;
       opacity: 0;
     }
+
     #timer {
       font-size: 3rem;
       font-weight: 900;
@@ -54,6 +59,7 @@
       animation: fadeInUp 1.8s ease forwards;
       opacity: 0;
     }
+
     #btc-stats {
       font-size: 1.3rem;
       font-weight: 700;
@@ -63,89 +69,134 @@
       font-family: 'Courier New', Courier, monospace;
     }
 
+    /* ==== NAVBAR ==== */
     nav.navbar {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      background-color: #222;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.9);
-      z-index: 9999;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
       user-select: none;
-      padding: 0 20px;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
-      height: 56px;
+      justify-content: space-between;
+      position: relative;
     }
-    nav.navbar .logo {
-      color: #bb86fc;
-      font-weight: 900;
-      font-size: 1.5rem;
-      text-decoration: none;
-      user-select: none;
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
     }
-    nav.navbar ul.menu {
+
+    .nav-menu {
       list-style: none;
-      margin: 0;
-      padding: 0;
       display: flex;
-      gap: 24px;
-      margin-left: auto;
       align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
-    nav.navbar ul.menu li a {
+
+    .nav-menu li a,
+    #theme-toggle {
       color: #ddd;
-      text-decoration: none;
+      background: none;
       font-weight: 600;
       font-size: 1rem;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    nav.navbar ul.menu li a:hover,
-    nav.navbar ul.menu li a.active {
-      background-color: #4b3ca7;
-      color: white;
-    }
-    #theme-toggle {
-      margin-left: 20px;
-      background: none;
       border: none;
       cursor: pointer;
-      color: #ddd;
-      font-weight: 600;
-      font-size: 1rem;
-      padding: 6px 12px;
+      padding: 8px 12px;
       border-radius: 6px;
+      text-decoration: none;
       transition: background-color 0.3s ease, color 0.3s ease;
-      user-select: none;
     }
+    .nav-menu li a:hover,
     #theme-toggle:hover {
       background-color: #4b3ca7;
       color: white;
     }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    /* ==== RESPONSIVE ==== */
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
     @media (max-width: 768px) {
-      nav.navbar {
-        flex-wrap: wrap;
-        height: auto;
-        padding: 10px 20px;
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
       }
-      nav.navbar ul.menu {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 8px;
-        margin-left: 0;
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #nav-toggle {
+        display: block;
       }
       #theme-toggle {
         margin-left: 0;
-        width: 100%;
-        margin-top: 8px;
       }
     }
 
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* ==== ANIMAZIONI ==== */
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-30px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -159,6 +210,7 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
+    /* ==== TEMA CHIARO ==== */
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -172,16 +224,20 @@
       background: #ddd;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    body.light-theme nav.navbar ul.menu li a,
+    body.light-theme .nav-menu li a,
     body.light-theme #theme-toggle {
       color: #444;
     }
-    body.light-theme nav.navbar ul.menu li a:hover,
+    body.light-theme .nav-menu li a:hover,
     body.light-theme #theme-toggle:hover {
       background-color: #8861ff;
       color: white;
     }
+    body.light-theme #nav-toggle span {
+      background: #444;
+    }
 
+    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
     #bubble-canvas {
       position: fixed;
       top: 0;
@@ -192,6 +248,7 @@
       z-index: 1;
     }
 
+    /* ==== GOCCE (DAVANTI A TUTTO) ==== */
     #raindrop-container {
       position: fixed;
       top: 0;
@@ -199,8 +256,9 @@
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      z-index: 9999;
+      z-index: 9999; /* Davanti a tutto */
     }
+
     .raindrop {
       position: absolute;
       width: 32px;
@@ -216,10 +274,12 @@
       animation-name: fall;
       animation-timing-function: linear;
     }
+
     @keyframes fall {
       to { transform: translateY(110vh); }
     }
 
+    /* +BTC testo animato */
     .btc-gained {
       position: fixed;
       font-weight: 900;
@@ -238,246 +298,268 @@
   </style>
 </head>
 <body>
-  <nav class="navbar" role="navigation" aria-label="Main Navigation">
-    <a href="index.html" class="logo" aria-label="Homepage">Crypto Simulator</a>
-    <ul class="menu" role="menubar">
-      <li role="none"><a href="index.html" role="menuitem" tabindex="0">Home</a></li>
-      <li role="none"><a href="affiliates.html" role="menuitem" tabindex="0">Affiliates</a></li>
-      <li role="none"><a href="afkzone.html" role="menuitem" tabindex="0" aria-current="page" class="active">AFK Zone</a></li>
-      <li role="none"><a href="dashboard.html" role="menuitem" tabindex="0">Dashboard</a></li>
-    </ul>
-    <button id="theme-toggle" aria-label="Toggle light/dark theme">Toggle Theme</button>
+  <nav class="navbar" aria-label="Main Navigation">
+    <div class="nav-container">
+      <a href="index.html" class="logo-link" aria-label="Homepage">
+        <img src="logo.png" alt="Crypto Simulator Logo" />
+      </a>
+      <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="nav-menu" role="menu">
+        <li role="none"><a href="index.html" role="menuitem" tabindex="0">Home</a></li>
+        <li role="none"><a href="affiliates.html" role="menuitem" tabindex="0">Affiliates</a></li>
+        <li role="none"><a href="afkzone.html" role="menuitem" tabindex="0" aria-current="page">AFK Zone</a></li>
+        <li role="none"><a href="dashboard.html" role="menuitem" tabindex="0">Dashboard</a></li>
+        <li role="none"><button id="theme-toggle" aria-pressed="false">Toggle Theme</button></li>
+      </ul>
+    </div>
   </nav>
 
-  <main>
-    <h1>AFK Zone</h1>
-    <p class="welcome">Stai accumulando BTC automaticamente! Il timer scorre... ma puoi ridurlo cliccando sulle gocce o sulle sfere.</p>
-    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Tempo rimanente">03:00</div>
-    <div id="btc-stats" aria-live="polite" aria-atomic="true">BTC Guadagnati: 0.0000</div>
+  <main role="main" aria-label="Crypto Simulator AFK Zone">
+    <h1>Crypto Simulator</h1>
+    <p class="welcome">Benvenuto nella zona AFK. Premi le bolle cadenti per guadagnare BTC!</p>
+    <div id="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
+    <div id="btc-stats" aria-live="polite" aria-atomic="true" aria-label="Bitcoin totali guadagnati">BTC: 0.0000</div>
   </main>
 
   <div id="raindrop-container" aria-hidden="true"></div>
+
   <canvas id="bubble-canvas" aria-hidden="true"></canvas>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
   <script>
-    // THEME TOGGLE
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    function applyTheme(theme) {
-      if (theme === 'light') {
-        document.body.classList.add('light-theme');
-      } else {
-        document.body.classList.remove('light-theme');
-      }
-    }
-    let savedTheme = localStorage.getItem('theme') || 'dark';
-    applyTheme(savedTheme);
-    themeToggleBtn.addEventListener('click', () => {
-      savedTheme = savedTheme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', savedTheme);
-      applyTheme(savedTheme);
+    // ==== NAV TOGGLE ====
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+
+    navToggle.addEventListener('click', () => {
+      const expanded = navToggle.getAttribute('aria-expanded') === 'true' || false;
+      navToggle.setAttribute('aria-expanded', !expanded);
+      navToggle.classList.toggle('open');
+      navMenu.classList.toggle('open');
     });
 
-    // TIMER & BTC LOGIC
-    let totalSeconds = 180;                 // 3 minuti timer countdown
-    let btcEarned = 0;                     // BTC totale mostrato (somma tutto)
-    let timerAccumulatedBTC = 0;           // BTC accumulato dal timer in corso
+    // ==== THEME TOGGLE ====
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
 
-    const timerElem = document.getElementById('timer');
-    const btcStatsElem = document.getElementById('btc-stats');
-
-    // Formatta il timer mm:ss
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60).toString().padStart(2, '0');
-      const s = (sec % 60).toString().padStart(2, '0');
-      return `${m}:${s}`;
-    }
-
-    // Aggiorna display timer
-    function updateTimerDisplay() {
-      timerElem.textContent = formatTime(totalSeconds);
-    }
-
-    // Aggiorna BTC a schermo (totale)
-    function updateBTCDisplay() {
-      btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
-    }
-
-    // Simulazione aggiornamento backend, sostituisci con fetch/ajax reale
-    function updateBTCBackend(additionalBTC) {
-      // Manda solo l'incremento BTC al backend, non il totale (come richiesto)
-      // Usa POST/fetch reale qui. Esempio:
-      /*
-      fetch('/api/updateBTC', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({btcIncrement: additionalBTC})
-      })
-      .then(res => res.json())
-      .then(data => console.log('Backend updated:', data))
-      .catch(e => console.error('Backend error:', e));
-      */
-      console.log(`Aggiornamento backend +${additionalBTC.toFixed(4)} BTC`);
-    }
-
-    // Aggiunge BTC, aggiorna display e backend
-    function addBTC(amount) {
-      btcEarned += amount;
-      updateBTCDisplay();
-      updateBTCBackend(amount);
-    }
-
-    // TIMER COUNTDOWN & accumulo BTC
-    setInterval(() => {
-      if (totalSeconds > 0) {
-        totalSeconds--;
-        // accumulo BTC timer (per secondo)
-        timerAccumulatedBTC += 0.0005;
-        updateTimerDisplay();
+    function setTheme(theme) {
+      if (theme === 'light') {
+        body.classList.add('light-theme');
+        themeToggleBtn.setAttribute('aria-pressed', 'true');
       } else {
-        // Timer scaduto: aggiungi BTC accumulati + 0.05 al DB e resetta timer e accumulo
-        const timerAdd = timerAccumulatedBTC + 0.05;
-        addBTC(timerAdd);
-
-        // reset timer e accumulo
-        totalSeconds = 180;
-        timerAccumulatedBTC = 0;
-        updateTimerDisplay();
+        body.classList.remove('light-theme');
+        themeToggleBtn.setAttribute('aria-pressed', 'false');
       }
-    }, 1000);
-
-    // Reset timer accumulo (non timer countdown)
-    function resetTimerAccumulo() {
-      timerAccumulatedBTC = 0;
+      localStorage.setItem('theme', theme);
     }
 
-    // RAIN DROPS (max 10 al minuto, 1 ogni 6 secondi)
-    const raindropContainer = document.getElementById('raindrop-container');
+    themeToggleBtn.addEventListener('click', () => {
+      if (body.classList.contains('light-theme')) {
+        setTheme('dark');
+      } else {
+        setTheme('light');
+      }
+    });
 
-    function createRaindrop() {
-      const drop = document.createElement('div');
-      drop.className = 'raindrop';
-      drop.style.left = `${Math.random() * window.innerWidth}px`;
-      const duration = 6000 + Math.random() * 4000; // caduta 6-10s
-      drop.style.animationDuration = `${duration}ms`;
-      drop.style.pointerEvents = 'auto';
+    // Caricamento tema da storage
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
 
-      drop.addEventListener('click', e => {
-        e.stopPropagation();
-        const gain = 0.001;
-        addBTC(gain);
-        showBtcGainText(e.clientX, e.clientY, gain);
-        resetTimerAccumulo();
-        drop.remove();
-      });
+    // ==== TIMER ====
+    const timerElem = document.getElementById('timer');
 
-      drop.addEventListener('animationend', () => drop.remove());
-
-      raindropContainer.appendChild(drop);
+    function updateTimer() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      timerElem.textContent = `${h}:${m}:${s}`;
     }
-    setInterval(createRaindrop, 6000);
+    updateTimer();
+    setInterval(updateTimer, 1000);
 
-    // BUBBLES CANVAS
+    // ==== FIREBASE SETUP ====
+
+    const firebaseConfig = {
+      apiKey: "API_KEY_HERE",
+      authDomain: "AUTH_DOMAIN_HERE",
+      databaseURL: "DATABASE_URL_HERE",
+      projectId: "PROJECT_ID_HERE",
+      storageBucket: "STORAGE_BUCKET_HERE",
+      messagingSenderId: "SENDER_ID_HERE",
+      appId: "APP_ID_HERE"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Percorso BTC nel database
+    const btcPath = 'userData/btc';
+
+    // Stato BTC attuale
+    let btcTotal = 0;
+
+    // Legge BTC da DB
+    function loadBtcFromDB() {
+      database.ref(btcPath).once('value')
+        .then(snapshot => {
+          const val = snapshot.val();
+          if (typeof val === 'number') {
+            btcTotal = val;
+          } else {
+            btcTotal = 0;
+          }
+          updateBtcDisplay();
+        })
+        .catch(() => {
+          btcTotal = 0;
+          updateBtcDisplay();
+        });
+    }
+
+    // Salva BTC nel DB
+    function saveBtcToDB() {
+      database.ref(btcPath).set(btcTotal);
+    }
+
+    // Aggiorna il display BTC
+    const btcStatsElem = document.getElementById('btc-stats');
+    function updateBtcDisplay() {
+      btcStatsElem.textContent = `BTC: ${btcTotal.toFixed(4)}`;
+    }
+
+    // ==== BOLLE IN MOVIMENTO SULLO SFONDO ====
+
     const canvas = document.getElementById('bubble-canvas');
     const ctx = canvas.getContext('2d');
-    let width, height;
     let bubbles = [];
 
     function resizeCanvas() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     class Bubble {
-      constructor() { this.reset(); }
-      reset() {
-        this.x = Math.random() * width;
-        this.y = height + Math.random() * 100;
-        this.radius = 10 + Math.random() * 20;
-        this.speed = 0.5 + Math.random();
-        this.opacity = 0.1 + Math.random() * 0.3;
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20 + Math.random() * 200;
+        this.radius = 8 + Math.random() * 15;
+        this.speed = 0.6 + Math.random() * 1.2;
+        this.opacity = 0.05 + Math.random() * 0.12;
       }
       update() {
         this.y -= this.speed;
-        if (this.y < -this.radius) this.reset();
+        this.opacity -= 0.001;
+        if (this.opacity <= 0 || this.y + this.radius < 0) {
+          this.x = Math.random() * canvas.width;
+          this.y = canvas.height + 20 + Math.random() * 200;
+          this.radius = 8 + Math.random() * 15;
+          this.speed = 0.6 + Math.random() * 1.2;
+          this.opacity = 0.05 + Math.random() * 0.12;
+        }
       }
       draw() {
-        const grad = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
-        grad.addColorStop(0, `rgba(187,134,252,${this.opacity})`);
-        grad.addColorStop(1, 'rgba(187,134,252,0)');
-        ctx.fillStyle = grad;
         ctx.beginPath();
+        let gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.1, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187, 134, 252, ${this.opacity * 0.6})`);
+        gradient.addColorStop(1, `rgba(187, 134, 252, 0)`);
+        ctx.fillStyle = gradient;
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
       }
-      isPointInside(px, py) {
-        const dx = px - this.x;
-        const dy = py - this.y;
-        return dx * dx + dy * dy <= this.radius * this.radius;
-      }
     }
 
-    function initBubbles(count = 30) {
-      bubbles = [];
-      for (let i = 0; i < count; i++) bubbles.push(new Bubble());
+    for (let i = 0; i < 35; i++) {
+      bubbles.push(new Bubble());
     }
 
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      bubbles.forEach(bubble => {
-        bubble.update();
-        bubble.draw();
+    function animateBubbles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      bubbles.forEach(b => {
+        b.update();
+        b.draw();
       });
-      requestAnimationFrame(animate);
+      requestAnimationFrame(animateBubbles);
+    }
+    animateBubbles();
+
+    // ==== GOCCE CHE CADONO (INTERAZIONE) ====
+
+    const raindropContainer = document.getElementById('raindrop-container');
+    const BTC_PER_DROP = 0.0005;
+    const MAX_DROPS_PER_MIN = 10;
+    let dropsThisMinute = 0;
+
+    // Reset contatore ogni minuto
+    setInterval(() => {
+      dropsThisMinute = 0;
+    }, 60000);
+
+    // Funzione per creare una goccia
+    function createRaindrop() {
+      if (dropsThisMinute >= MAX_DROPS_PER_MIN) return;
+
+      dropsThisMinute++;
+
+      const drop = document.createElement('div');
+      drop.classList.add('raindrop');
+
+      // Posizione orizzontale casuale
+      drop.style.left = Math.random() * (window.innerWidth - 32) + 'px';
+
+      // Durata caduta casuale 5-7 secondi
+      const duration = 5000 + Math.random() * 2000;
+      drop.style.animationDuration = duration + 'ms';
+
+      raindropContainer.appendChild(drop);
+
+      // Click sulla goccia
+      drop.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Aggiungi BTC
+        btcTotal += BTC_PER_DROP;
+        saveBtcToDB();
+        updateBtcDisplay();
+
+        // Mostra +BTC
+        showBtcGained(e.clientX, e.clientY);
+
+        // Rimuovi goccia
+        drop.remove();
+      });
+
+      // Rimuovi goccia al termine animazione (caduta)
+      drop.addEventListener('animationend', () => {
+        drop.remove();
+      });
     }
 
-    canvas.style.pointerEvents = 'auto';
-
-    canvas.addEventListener('click', e => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      for (let i = 0; i < bubbles.length; i++) {
-        if (bubbles[i].isPointInside(x, y)) {
-          const gain = 0.001;
-          addBTC(gain);
-          showBtcGainText(e.clientX, e.clientY, gain);
-          resetTimerAccumulo();
-          break;
-        }
-      }
-    });
-
-    initBubbles();
-    animate();
-
-    // Mostra +BTC che fluttuano quando clicchi
-    function showBtcGainText(x, y, amount) {
-      const txt = document.createElement('div');
-      txt.className = 'btc-gained';
-      txt.textContent = `+${amount.toFixed(4)} BTC`;
-      txt.style.left = `${x}px`;
-      txt.style.top = `${y}px`;
-      document.body.appendChild(txt);
-      setTimeout(() => txt.remove(), 1200);
+    // Funzione +BTC animato
+    function showBtcGained(x, y) {
+      const text = document.createElement('div');
+      text.classList.add('btc-gained');
+      text.textContent = `+${BTC_PER_DROP.toFixed(4)} BTC`;
+      text.style.left = (x - 30) + 'px';
+      text.style.top = (y - 20) + 'px';
+      document.body.appendChild(text);
+      setTimeout(() => {
+        text.remove();
+      }, 1200);
     }
 
-    // Gestione evento cambio scheda o chiusura
-    window.addEventListener('beforeunload', () => {
-      if (timerAccumulatedBTC > 0) {
-        // Invia al backend gli ultimi BTC accumulati dal timer non ancora aggiunti
-        updateBTCBackend(timerAccumulatedBTC);
-      }
-    });
+    // Generazione gocce ogni 6 secondi max 10/min
+    setInterval(createRaindrop, 6000);
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && timerAccumulatedBTC > 0) {
-        updateBTCBackend(timerAccumulatedBTC);
-      }
-    });
+    // ==== CARICAMENTO INIZIALE BTC DA DB ====
+    loadBtcFromDB();
   </script>
 </body>
 </html>
