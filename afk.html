@@ -311,256 +311,199 @@
         <li role="none"><a href="affiliates.html" role="menuitem" tabindex="0">Affiliates</a></li>
         <li role="none"><a href="afkzone.html" role="menuitem" tabindex="0" aria-current="page">AFK Zone</a></li>
         <li role="none"><a href="dashboard.html" role="menuitem" tabindex="0">Dashboard</a></li>
-        <li role="none"><button id="theme-toggle" aria-pressed="false">Toggle Theme</button></li>
+        <li role="none"><button id="theme-toggle" aria-pressed="false" role="switch" tabindex="0" aria-label="Toggle light/dark theme">🌗</button></li>
       </ul>
     </div>
   </nav>
 
-  <main role="main" aria-label="Crypto Simulator AFK Zone">
-    <h1>Crypto Simulator</h1>
-    <p class="welcome">Benvenuto nella zona AFK. Premi le bolle cadenti per guadagnare BTC!</p>
-    <div id="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
-    <div id="btc-stats" aria-live="polite" aria-atomic="true" aria-label="Bitcoin totali guadagnati">BTC: 0.0000</div>
+  <main>
+    <h1>AFK Zone</h1>
+    <p class="welcome">Welcome to the AFK Zone. Accumulate BTC automatically and by clicking drops!</p>
+    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Countdown timer">03:00</div>
+    <div id="btc-stats" aria-live="polite" aria-atomic="true" aria-label="Bitcoin stats">BTC: 0.0000</div>
   </main>
 
-  <div id="raindrop-container" aria-hidden="true"></div>
-
-  <canvas id="bubble-canvas" aria-hidden="true"></canvas>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <canvas id="bubble-canvas"></canvas>
+  <div id="raindrop-container" aria-label="Clickable bitcoin drops"></div>
 
   <script>
-    // ==== NAV TOGGLE ====
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
+    // --- Variabili globali ---
+    let btc = 0;
+    const btcIncrementDrop = 0.005;
+    const btcIncrementTimer = 0.05;
+    const timerDuration = 3 * 60; // 3 minuti in secondi
+    let remainingSeconds = timerDuration;
 
-    navToggle.addEventListener('click', () => {
-      const expanded = navToggle.getAttribute('aria-expanded') === 'true' || false;
-      navToggle.setAttribute('aria-expanded', !expanded);
-      navToggle.classList.toggle('open');
-      navMenu.classList.toggle('open');
+    const timerElem = document.getElementById('timer');
+    const btcStatsElem = document.getElementById('btc-stats');
+    const raindropContainer = document.getElementById('raindrop-container');
+
+    let timerInterval = null;
+    let isPageVisible = true;
+
+    // --- Funzione per aggiornare il display BTC ---
+    function updateBTCDisplay() {
+      btcStatsElem.textContent = `BTC: ${btc.toFixed(4)}`;
+    }
+
+    // --- Funzione per il countdown timer ---
+    function updateTimerDisplay() {
+      const m = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+      const s = (remainingSeconds % 60).toString().padStart(2, '0');
+      timerElem.textContent = `${m}:${s}`;
+    }
+
+    function timerTick() {
+      if (!isPageVisible) return; // blocca timer se pagina non visibile
+
+      if (remainingSeconds > 0) {
+        remainingSeconds--;
+        updateTimerDisplay();
+      } else {
+        // Timer finito, aggiungo BTC, resetto
+        btc += btcIncrementTimer;
+        updateBTCDisplay();
+        showBtcGainAnimation(timerElem.getBoundingClientRect().left + timerElem.offsetWidth/2, timerElem.getBoundingClientRect().top);
+        remainingSeconds = timerDuration;
+        updateTimerDisplay();
+      }
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(timerTick, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // --- Funzione per aggiungere e gestire le bolle (sfere) che cadono ---
+    // Ogni 1.5-3 secondi genera una bolla che cade e si può cliccare
+    function createRaindrop() {
+      const drop = document.createElement('div');
+      drop.classList.add('raindrop');
+
+      // posizione orizzontale casuale
+      const x = Math.random() * (window.innerWidth - 32);
+      drop.style.left = `${x}px`;
+      drop.style.top = `-40px`; // parte sopra lo schermo
+
+      // durata caduta casuale tra 4 e 8 secondi
+      const fallDuration = 4000 + Math.random() * 4000;
+      drop.style.animationDuration = `${fallDuration}ms`;
+
+      // evento click su drop
+      drop.addEventListener('click', () => {
+        // incremento BTC
+        btc += btcIncrementDrop;
+        updateBTCDisplay();
+        showBtcGainAnimation(x + 16, drop.getBoundingClientRect().top);
+
+        // rimuovo la goccia cliccata
+        drop.remove();
+
+        // Simulo update database - in pratica qui metteresti chiamata API
+        updateDatabase(btc);
+      });
+
+      // rimuovo la goccia dopo animazione
+      drop.addEventListener('animationend', () => {
+        drop.remove();
+      });
+
+      raindropContainer.appendChild(drop);
+    }
+
+    // Funzione per creare drops periodicamente solo se pagina visibile
+    let raindropTimer = null;
+    function startRaindrops() {
+      if (raindropTimer) clearInterval(raindropTimer);
+      raindropTimer = setInterval(() => {
+        if (isPageVisible) {
+          createRaindrop();
+        }
+      }, 1500 + Math.random() * 1500);
+    }
+    function stopRaindrops() {
+      if (raindropTimer) {
+        clearInterval(raindropTimer);
+        raindropTimer = null;
+      }
+    }
+
+    // --- Simulo aggiornamento database in tempo reale (placeholder) ---
+    function updateDatabase(newBtcValue) {
+      console.log(`Database aggiornato: BTC = ${newBtcValue.toFixed(4)}`);
+      // Qui potresti fare fetch o websocket per aggiornare il DB in tempo reale
+    }
+
+    // --- Animazione +BTC che sale e scompare ---
+    function showBtcGainAnimation(x, y) {
+      const gain = document.createElement('div');
+      gain.className = 'btc-gained';
+      gain.textContent = '+BTC';
+      gain.style.left = `${x}px`;
+      gain.style.top = `${y}px`;
+      document.body.appendChild(gain);
+      setTimeout(() => {
+        gain.remove();
+      }, 1200);
+    }
+
+    // --- Gestione visibilità pagina (tab attivo o no) ---
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        isPageVisible = true;
+        startTimer();
+        startRaindrops();
+      } else {
+        isPageVisible = false;
+        stopTimer();
+        stopRaindrops();
+      }
     });
 
-    // ==== THEME TOGGLE ====
+    // --- Tema chiaro / scuro ---
     const themeToggleBtn = document.getElementById('theme-toggle');
-    const body = document.body;
-
     function setTheme(theme) {
       if (theme === 'light') {
-        body.classList.add('light-theme');
+        document.body.classList.add('light-theme');
         themeToggleBtn.setAttribute('aria-pressed', 'true');
       } else {
-        body.classList.remove('light-theme');
+        document.body.classList.remove('light-theme');
         themeToggleBtn.setAttribute('aria-pressed', 'false');
       }
       localStorage.setItem('theme', theme);
     }
-
-    themeToggleBtn.addEventListener('click', () => {
-      if (body.classList.contains('light-theme')) {
-        setTheme('dark');
-      } else {
-        setTheme('light');
-      }
-    });
-
-    // Caricamento tema da storage
+    // Carica tema da localStorage o default scuro
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
 
-    // ==== TIMER ====
-    const timerElem = document.getElementById('timer');
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+      setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
 
-    function updateTimer() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      timerElem.textContent = `${h}:${m}:${s}`;
-    }
-    updateTimer();
-    setInterval(updateTimer, 1000);
+    // --- Navbar toggle mobile ---
+    const navToggleBtn = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
 
-    // ==== FIREBASE SETUP ====
+    navToggleBtn.addEventListener('click', () => {
+      const isOpen = navMenu.classList.toggle('open');
+      navToggleBtn.classList.toggle('open');
+      navToggleBtn.setAttribute('aria-expanded', isOpen);
+    });
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-      authDomain: "coins-7104d.firebaseapp.com",
-      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-      projectId: "coins-7104d",
-      storageBucket: "coins-7104d.appspot.com",
-      messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F"
-    };
+    // --- Inizio tutto ---
+    updateBTCDisplay();
+    updateTimerDisplay();
+    startTimer();
+    startRaindrops();
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    // Percorso BTC nel database
-    const btcPath = 'userData/btc';
-
-    // Stato BTC attuale
-    let btcTotal = 0;
-
-    // Legge BTC da DB
-    function loadBtcFromDB() {
-      database.ref(btcPath).once('value')
-        .then(snapshot => {
-          const val = snapshot.val();
-          if (typeof val === 'number') {
-            btcTotal = val;
-          } else {
-            btcTotal = 0;
-          }
-          updateBtcDisplay();
-        })
-        .catch(() => {
-          btcTotal = 0;
-          updateBtcDisplay();
-        });
-    }
-
-    // Salva BTC nel DB
-    function saveBtcToDB() {
-      database.ref(btcPath).set(btcTotal);
-    }
-
-    // Aggiorna il display BTC
-    const btcStatsElem = document.getElementById('btc-stats');
-    function updateBtcDisplay() {
-      btcStatsElem.textContent = `BTC: ${btcTotal.toFixed(4)}`;
-    }
-
-    // ==== BOLLE IN MOVIMENTO SULLO SFONDO ====
-
-    const canvas = document.getElementById('bubble-canvas');
-    const ctx = canvas.getContext('2d');
-    let bubbles = [];
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    class Bubble {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + 20 + Math.random() * 200;
-        this.radius = 8 + Math.random() * 15;
-        this.speed = 0.6 + Math.random() * 1.2;
-        this.opacity = 0.05 + Math.random() * 0.12;
-      }
-      update() {
-        this.y -= this.speed;
-        this.opacity -= 0.001;
-        if (this.opacity <= 0 || this.y + this.radius < 0) {
-          this.x = Math.random() * canvas.width;
-          this.y = canvas.height + 20 + Math.random() * 200;
-          this.radius = 8 + Math.random() * 15;
-          this.speed = 0.6 + Math.random() * 1.2;
-          this.opacity = 0.05 + Math.random() * 0.12;
-        }
-      }
-      draw() {
-        ctx.beginPath();
-        let gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.1, this.x, this.y, this.radius);
-        gradient.addColorStop(0, `rgba(187, 134, 252, ${this.opacity * 0.6})`);
-        gradient.addColorStop(1, `rgba(187, 134, 252, 0)`);
-        ctx.fillStyle = gradient;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    for (let i = 0; i < 35; i++) {
-      bubbles.push(new Bubble());
-    }
-
-    function animateBubbles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      bubbles.forEach(b => {
-        b.update();
-        b.draw();
-      });
-      requestAnimationFrame(animateBubbles);
-    }
-    animateBubbles();
-
-    // ==== GOCCE CHE CADONO (INTERAZIONE) ====
-
-    const raindropContainer = document.getElementById('raindrop-container');
-    const BTC_PER_DROP = 0.0005;
-    const MAX_DROPS_PER_MIN = 10;
-    let dropsThisMinute = 0;
-
-    // Reset contatore ogni minuto
-    setInterval(() => {
-      dropsThisMinute = 0;
-    }, 60000);
-
-    // Funzione per creare una goccia
-    function createRaindrop() {
-      if (dropsThisMinute >= MAX_DROPS_PER_MIN) return;
-
-      dropsThisMinute++;
-
-      const drop = document.createElement('div');
-      drop.classList.add('raindrop');
-
-      // Posizione orizzontale casuale
-      drop.style.left = Math.random() * (window.innerWidth - 32) + 'px';
-
-      // Durata caduta casuale 5-7 secondi
-      const duration = 5000 + Math.random() * 2000;
-      drop.style.animationDuration = duration + 'ms';
-
-      raindropContainer.appendChild(drop);
-
-      // Click sulla goccia
-      drop.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Aggiungi BTC
-        btcTotal += BTC_PER_DROP;
-        saveBtcToDB();
-        updateBtcDisplay();
-
-        // Mostra +BTC
-        showBtcGained(e.clientX, e.clientY);
-
-        // Rimuovi goccia
-        drop.remove();
-      });
-
-      // Rimuovi goccia al termine animazione (caduta)
-      drop.addEventListener('animationend', () => {
-        drop.remove();
-      });
-    }
-
-    // Funzione +BTC animato
-    function showBtcGained(x, y) {
-      const text = document.createElement('div');
-      text.classList.add('btc-gained');
-      text.textContent = `+${BTC_PER_DROP.toFixed(4)} BTC`;
-      text.style.left = (x - 30) + 'px';
-      text.style.top = (y - 20) + 'px';
-      document.body.appendChild(text);
-      setTimeout(() => {
-        text.remove();
-      }, 1200);
-    }
-
-    // Generazione gocce ogni 6 secondi max 10/min
-    setInterval(createRaindrop, 6000);
-
-    // ==== CARICAMENTO INIZIALE BTC DA DB ====
-    loadBtcFromDB();
   </script>
 </body>
 </html>
