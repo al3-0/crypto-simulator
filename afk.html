@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crypto Simulator - AFK Zone</title>
-  <link rel="icon" href="logo.png" type="image/png" />
+  <meta charset="UTF-8">
+  <title>AFK Zone BTC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* === TUTTO IL TUO CSS QUI SOTTO INCOLLATO INTEGRAMENTE === */
     /* ==== BODY & MAIN ==== */
     body {
       margin: 0;
@@ -196,7 +196,6 @@
       top: 9px;
     }
 
-    /* ==== ANIMAZIONI ==== */
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-30px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -210,7 +209,6 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* ==== TEMA CHIARO ==== */
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -237,7 +235,6 @@
       background: #444;
     }
 
-    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
     #bubble-canvas {
       position: fixed;
       top: 0;
@@ -248,7 +245,6 @@
       z-index: 1;
     }
 
-    /* ==== GOCCE (DAVANTI A TUTTO) ==== */
     #raindrop-container {
       position: fixed;
       top: 0;
@@ -256,7 +252,7 @@
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      z-index: 9999; /* Davanti a tutto */
+      z-index: 9999;
     }
 
     .raindrop {
@@ -279,7 +275,6 @@
       to { transform: translateY(110vh); }
     }
 
-    /* +BTC testo animato */
     .btc-gained {
       position: fixed;
       font-weight: 900;
@@ -294,17 +289,31 @@
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-60px); }
-    }  </style>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
 <body>
-  <!-- ... NAV + MAIN ... -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo-link"><img src="logo.png" alt="Logo"></div>
+      <ul class="nav-menu">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Profilo</a></li>
+        <li><button id="theme-toggle">🌓</button></li>
+      </ul>
+    </div>
+  </nav>
 
-  <canvas id="bubble-canvas"></canvas>
-  <div id="raindrop-container" aria-label="Clickable bitcoin drops"></div>
+  <main>
+    <h1>Benvenuto in AFK Zone</h1>
+    <p class="welcome">Ottieni BTC restando attivo o cliccando le gocce!</p>
+    <div id="timer">03:00</div>
+    <div id="btc-stats">BTC: 0.0000</div>
+  </main>
+
+  <div id="raindrop-container"></div>
 
   <script>
     const firebaseConfig = {
@@ -321,184 +330,94 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let userIP = '';
-    let currentUserKey = null;
-    let btc = 0;
-    const btcIncrementDrop = 0.005;
-    const btcIncrementTimer = 0.05;
-    const timerDuration = 3 * 60;
-    let remainingSeconds = timerDuration;
+    let currentUser = null;
+    let countdown = 180;
+    let timerInterval;
 
-    const timerElem = document.getElementById('timer');
-    const btcStatsElem = document.getElementById('btc-stats');
-    const raindropContainer = document.getElementById('raindrop-container');
-
-    let timerInterval = null;
-    let isPageVisible = true;
-
-    async function getUserIP() {
+    async function getPublicIP() {
       try {
         const res = await fetch("https://api.ipify.org?format=json");
         const data = await res.json();
         return data.ip;
-      } catch (e) {
-        console.error("Errore ottenendo l'IP:", e);
+      } catch {
         return null;
       }
     }
 
     async function authenticateUser() {
-      userIP = await getUserIP();
-      if (!userIP) {
-        window.location.href = 'index.html';
-        return;
-      }
+      const ip = await getPublicIP();
+      if (!ip) return redirectToLogin();
 
-      db.ref('users').once('value', snapshot => {
+      db.ref("users").once("value", snapshot => {
         const users = snapshot.val();
-        for (let key in users) {
-          if (users[key].ip === userIP) {
-            currentUserKey = key;
-            btc = parseFloat(users[key].wallet?.BTC || 0);
-            updateBTCDisplay();
-            updateTimerDisplay();
-            startTimer();
-            startRaindrops();
-            return;
+        for (let username in users) {
+          if (users[username].ip === ip) {
+            currentUser = username;
+            return initGame(users[username]);
           }
         }
+        redirectToLogin();
+      });
+    }
 
-        // Nessun IP corrispondente trovato
-        const username = prompt("Inserisci nome utente:");
-        const password = prompt("Inserisci password:");
+    function redirectToLogin() {
+      const username = prompt("Nome utente:");
+      const password = prompt("Password:");
+      if (!username || !password) return window.location.href = "login.html";
 
-        for (let key in users) {
-          if (users[key].Nome === username && users[key].password === password) {
-            currentUserKey = key;
-            btc = parseFloat(users[key].wallet?.BTC || 0);
-            updateBTCDisplay();
-            updateTimerDisplay();
-            startTimer();
-            startRaindrops();
-            return;
-          }
+      db.ref("users/" + username).once("value", snapshot => {
+        const user = snapshot.val();
+        if (user && user.password === password) {
+          currentUser = username;
+          initGame(user);
+        } else {
+          alert("Login fallito.");
+          window.location.href = "login.html";
         }
-
-        // Nessun utente trovato
-        window.location.href = 'index.html';
       });
     }
 
-    function updateDatabase(newBtcValue) {
-      if (!currentUserKey) return;
-      db.ref(`users/${currentUserKey}/wallet/BTC`).set(newBtcValue).catch((error) => {
-        console.error("Errore aggiornando database:", error);
-      });
+    function initGame(userData) {
+      let btc = userData.wallet?.BTC ?? 0;
+      updateBtc(btc);
+      startCountdown(btc);
     }
 
-    function updateBTCDisplay() {
-      btcStatsElem.textContent = `BTC: ${btc.toFixed(4)}`;
+    function updateBtc(amount) {
+      document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(4)}`;
     }
 
-    function updateTimerDisplay() {
-      const m = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
-      const s = (remainingSeconds % 60).toString().padStart(2, '0');
-      timerElem.textContent = `${m}:${s}`;
-    }
+    function startCountdown(btc) {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        countdown--;
+        const min = String(Math.floor(countdown / 60)).padStart(2, '0');
+        const sec = String(countdown % 60).padStart(2, '0');
+        document.getElementById("timer").textContent = `${min}:${sec}`;
 
-    function timerTick() {
-      if (!isPageVisible) return;
-      if (remainingSeconds > 0) {
-        remainingSeconds--;
-        updateTimerDisplay();
-      } else {
-        btc = parseFloat((btc + btcIncrementTimer).toFixed(6));
-        updateBTCDisplay();
-        updateDatabase(btc);
-        showBtcGainAnimation(timerElem.getBoundingClientRect().left + timerElem.offsetWidth / 2, timerElem.getBoundingClientRect().top);
-        remainingSeconds = timerDuration;
-        updateTimerDisplay();
-      }
-    }
-
-    function startTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(timerTick, 1000);
-    }
-
-    function stopTimer() {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      }
-    }
-
-    function createRaindrop() {
-      const drop = document.createElement('div');
-      drop.classList.add('raindrop');
-      const x = Math.random() * (window.innerWidth - 32);
-      drop.style.left = `${x}px`;
-      drop.style.top = `-40px`;
-      const fallDuration = 4000 + Math.random() * 4000;
-      drop.style.animationDuration = `${fallDuration}ms`;
-
-      drop.addEventListener('click', () => {
-        btc = parseFloat((btc + btcIncrementDrop).toFixed(6));
-        updateBTCDisplay();
-        updateDatabase(btc);
-        showBtcGainAnimation(x + 16, drop.getBoundingClientRect().top);
-        drop.remove();
-      });
-
-      drop.addEventListener('animationend', () => {
-        drop.remove();
-      });
-
-      raindropContainer.appendChild(drop);
-    }
-
-    let raindropTimer = null;
-    function startRaindrops() {
-      if (raindropTimer) clearInterval(raindropTimer);
-      raindropTimer = setInterval(() => {
-        if (isPageVisible) {
-          createRaindrop();
+        if (countdown <= 0) {
+          countdown = 180;
+          btc += 0.05;
+          updateBtc(btc);
+          db.ref("users/" + currentUser + "/wallet").update({ BTC: btc });
+          spawnDrop("+0.05 BTC");
         }
-      }, 1500 + Math.random() * 1500);
+      }, 1000);
     }
 
-    function stopRaindrops() {
-      if (raindropTimer) {
-        clearInterval(raindropTimer);
-        raindropTimer = null;
-      }
+    function spawnDrop(text) {
+      const drop = document.createElement("div");
+      drop.className = "btc-gained";
+      drop.style.left = Math.random() * 80 + 10 + "vw";
+      drop.style.top = Math.random() * 60 + 10 + "vh";
+      drop.textContent = text;
+      document.body.appendChild(drop);
+      setTimeout(() => drop.remove(), 1200);
     }
 
-    function showBtcGainAnimation(x, y) {
-      const gain = document.createElement('div');
-      gain.className = 'btc-gained';
-      gain.textContent = '+BTC';
-      gain.style.left = `${x}px`;
-      gain.style.top = `${y}px`;
-      document.body.appendChild(gain);
-      setTimeout(() => {
-        gain.remove();
-      }, 1200);
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        isPageVisible = true;
-        startTimer();
-        startRaindrops();
-      } else {
-        isPageVisible = false;
-        stopTimer();
-        stopRaindrops();
-      }
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      document.body.classList.toggle("light-theme");
     });
-
-    // Tema, navbar ecc. invariati...
 
     authenticateUser();
   </script>
