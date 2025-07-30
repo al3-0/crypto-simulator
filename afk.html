@@ -279,7 +279,8 @@
 
     // TIMER
     let totalSeconds = 180;
-    let btcEarned = 0;
+    let btcEarned = 0;         // BTC totale guadagnato da timer + click
+    let timerAccumulatedBTC = 0; // BTC accumulato dal timer (da aggiungere solo a scadenza)
     const timerElem = document.getElementById('timer');
     const btcStatsElem = document.getElementById('btc-stats');
 
@@ -317,65 +318,61 @@
 
     function resetTimer() {
       totalSeconds = 180;
+      timerAccumulatedBTC = 0;
       updateTimerDisplay();
     }
 
     updateTimerDisplay();
 
-    // Timer decrementa ogni secondo e accumula BTC (0.0005 al secondo)
+    // TIMER LOGICA: decrementa ogni secondo, accumula BTC in timerAccumulatedBTC (es: 0.0005/s)
+    // Quando scade (totalSeconds = 0), somma timerAccumulatedBTC a btcEarned, aggiorna DB, resetta timerAccumulatedBTC e totalSeconds
     setInterval(() => {
       if (totalSeconds > 0) {
         totalSeconds--;
+        timerAccumulatedBTC += 0.0005;
         updateTimerDisplay();
 
-        const btcIncrement = 0.0005;
-        btcEarned += btcIncrement;
-        btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
-        updateBTCBackend(btcEarned);
+        if (totalSeconds === 0) {
+          btcEarned += timerAccumulatedBTC;
+          btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
+          updateBTCBackend(btcEarned);
+          timerAccumulatedBTC = 0;
+          totalSeconds = 180; // reset timer automaticamente
+          updateTimerDisplay();
+        }
       }
     }, 1000);
 
-    // RAINDROPS
-
+    // RAIN DROPS (max 10 al minuto = 1 ogni 6 secondi)
     const raindropContainer = document.getElementById('raindrop-container');
 
     function createRaindrop() {
       const drop = document.createElement('div');
-      drop.classList.add('raindrop');
-      drop.style.left = Math.random() * (window.innerWidth - 32) + 'px';
-      drop.style.top = '-40px';
-      const duration = 3 + Math.random() * 2; // 3-5 sec
-      drop.style.animationDuration = duration + 's';
+      drop.className = 'raindrop';
+      drop.style.left = `${Math.random() * window.innerWidth}px`;
+      const duration = 6000 + Math.random() * 4000; // 6-10s caduta
+      drop.style.animationDuration = `${duration}ms`;
 
-      // Abilita pointer events per click
       drop.style.pointerEvents = 'auto';
 
       drop.addEventListener('click', e => {
         e.stopPropagation();
-        // Guadagno BTC +0.001
         const gain = 0.001;
         btcEarned += gain;
         btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
         showBtcGainText(e.clientX, e.clientY, gain);
         updateBTCBackend(btcEarned);
-
         resetTimer();
-
         drop.remove();
       });
 
-      drop.addEventListener('animationend', () => {
-        drop.remove();
-      });
+      drop.addEventListener('animationend', () => drop.remove());
 
       raindropContainer.appendChild(drop);
     }
-
-    // Massimo 10 gocce al minuto => 1 ogni 6 secondi
     setInterval(createRaindrop, 6000);
 
     // BUBBLES CANVAS
-
     const canvas = document.getElementById('bubble-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -391,21 +388,17 @@
     resizeCanvas();
 
     class Bubble {
-      constructor() {
-        this.reset();
-      }
+      constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * width;
         this.y = height + Math.random() * 100;
         this.radius = 10 + Math.random() * 20;
-        this.speed = 0.5 + Math.random() * 1;
+        this.speed = 0.5 + Math.random();
         this.opacity = 0.1 + Math.random() * 0.3;
       }
       update() {
         this.y -= this.speed;
-        if (this.y < -this.radius) {
-          this.reset();
-        }
+        if (this.y < -this.radius) this.reset();
       }
       draw() {
         const grad = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
@@ -425,9 +418,7 @@
 
     function initBubbles(count = 30) {
       bubbles = [];
-      for (let i = 0; i < count; i++) {
-        bubbles.push(new Bubble());
-      }
+      for (let i = 0; i < count; i++) bubbles.push(new Bubble());
     }
 
     function animate() {
@@ -439,13 +430,12 @@
       requestAnimationFrame(animate);
     }
 
-    canvas.style.pointerEvents = 'auto'; // abilita click
+    canvas.style.pointerEvents = 'auto';
 
     canvas.addEventListener('click', e => {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-
       for (let i = 0; i < bubbles.length; i++) {
         if (bubbles[i].isPointInside(x, y)) {
           const gain = 0.001;
