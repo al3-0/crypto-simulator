@@ -6,7 +6,6 @@
   <title>Crypto Simulator - AFK Zone</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    /* ==== BODY & MAIN ==== */
     body {
       margin: 0;
       min-height: 100vh;
@@ -18,7 +17,6 @@
       position: relative;
       transition: background 0.3s ease, color 0.3s ease;
     }
-
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
@@ -31,7 +29,6 @@
       z-index: 2;
       text-align: center;
     }
-
     h1 {
       font-size: 2.8rem;
       margin-bottom: 8px;
@@ -40,7 +37,6 @@
       animation: fadeInDown 1s ease forwards;
       opacity: 0;
     }
-
     p.welcome {
       font-size: 1.1rem;
       color: #ccc;
@@ -49,7 +45,6 @@
       animation: fadeIn 1.5s ease forwards;
       opacity: 0;
     }
-
     #timer {
       font-size: 3rem;
       font-weight: 900;
@@ -59,7 +54,6 @@
       animation: fadeInUp 1.8s ease forwards;
       opacity: 0;
     }
-
     #btc-stats {
       font-size: 1.3rem;
       font-weight: 700;
@@ -69,7 +63,6 @@
       font-family: 'Courier New', Courier, monospace;
     }
 
-    /* ==== NAVBAR ==== */
     nav.navbar {
       position: fixed;
       top: 0;
@@ -85,7 +78,6 @@
       align-items: center;
       height: 56px;
     }
-
     nav.navbar .logo {
       color: #bb86fc;
       font-weight: 900;
@@ -93,7 +85,6 @@
       text-decoration: none;
       user-select: none;
     }
-
     nav.navbar ul.menu {
       list-style: none;
       margin: 0;
@@ -103,7 +94,6 @@
       margin-left: auto;
       align-items: center;
     }
-
     nav.navbar ul.menu li a {
       color: #ddd;
       text-decoration: none;
@@ -113,13 +103,11 @@
       border-radius: 6px;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
-
     nav.navbar ul.menu li a:hover,
     nav.navbar ul.menu li a.active {
       background-color: #4b3ca7;
       color: white;
     }
-
     #theme-toggle {
       margin-left: 20px;
       background: none;
@@ -137,8 +125,6 @@
       background-color: #4b3ca7;
       color: white;
     }
-
-    /* ==== RESPONSIVE ==== */
     @media (max-width: 768px) {
       nav.navbar {
         flex-wrap: wrap;
@@ -160,7 +146,6 @@
       }
     }
 
-    /* ==== ANIMAZIONI ==== */
     @keyframes fadeInDown {
       0% { opacity: 0; transform: translateY(-30px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -174,7 +159,6 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* ==== TEMA CHIARO ==== */
     body.light-theme {
       background: #f4f4f7;
       color: #222;
@@ -198,7 +182,6 @@
       color: white;
     }
 
-    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
     #bubble-canvas {
       position: fixed;
       top: 0;
@@ -209,7 +192,6 @@
       z-index: 1;
     }
 
-    /* ==== GOCCE (DAVANTI A TUTTO) ==== */
     #raindrop-container {
       position: fixed;
       top: 0;
@@ -217,9 +199,8 @@
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      z-index: 9999; /* Davanti a tutto */
+      z-index: 9999;
     }
-
     .raindrop {
       position: absolute;
       width: 32px;
@@ -235,12 +216,10 @@
       animation-name: fall;
       animation-timing-function: linear;
     }
-
     @keyframes fall {
       to { transform: translateY(110vh); }
     }
 
-    /* +BTC testo animato */
     .btc-gained {
       position: fixed;
       font-weight: 900;
@@ -272,7 +251,7 @@
 
   <main>
     <h1>AFK Zone</h1>
-    <p class="welcome">Stai accumulando BTC automaticamente! Il timer scorre... ma puoi ridurlo cliccando sulle gocce.</p>
+    <p class="welcome">Stai accumulando BTC automaticamente! Il timer scorre... ma puoi ridurlo cliccando sulle gocce o sulle sfere.</p>
     <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Tempo rimanente">03:00</div>
     <div id="btc-stats" aria-live="polite" aria-atomic="true">BTC Guadagnati: 0.0000</div>
   </main>
@@ -281,7 +260,7 @@
   <canvas id="bubble-canvas" aria-hidden="true"></canvas>
 
   <script>
-    // THEME TOGGLE + memorizza in localStorage
+    // THEME TOGGLE
     const themeToggleBtn = document.getElementById('theme-toggle');
     function applyTheme(theme) {
       if (theme === 'light') {
@@ -298,11 +277,11 @@
       applyTheme(savedTheme);
     });
 
-    // TIMER LOGIC
-    let totalSeconds = 180; // 3 minuti
+    // TIMER
+    let totalSeconds = 180;
     let btcEarned = 0;
-    let timerElem = document.getElementById('timer');
-    let btcStatsElem = document.getElementById('btc-stats');
+    const timerElem = document.getElementById('timer');
+    const btcStatsElem = document.getElementById('btc-stats');
 
     function formatTime(sec) {
       const m = Math.floor(sec / 60).toString().padStart(2, '0');
@@ -314,14 +293,11 @@
       timerElem.textContent = formatTime(totalSeconds);
     }
 
-    // Funzione per aggiornare BTC nel backend
     async function updateBTCBackend(newBTC) {
       try {
         await fetch('/update-btc', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ btc: newBTC }),
         });
       } catch (error) {
@@ -329,7 +305,6 @@
       }
     }
 
-    // Funzione per mostrare testo +BTC animato
     function showBtcGainText(x, y, amount) {
       const elem = document.createElement('div');
       elem.className = 'btc-gained';
@@ -340,59 +315,55 @@
       setTimeout(() => elem.remove(), 1200);
     }
 
-    // Logica timer: ogni 1s guadagniamo 0.0005 BTC (esempio)
+    function resetTimer() {
+      totalSeconds = 180;
+      updateTimerDisplay();
+    }
+
+    updateTimerDisplay();
+
+    // Timer decrementa ogni secondo e accumula BTC (0.0005 al secondo)
     setInterval(() => {
       if (totalSeconds > 0) {
         totalSeconds--;
         updateTimerDisplay();
 
-        // Guadagno BTC ogni secondo
         const btcIncrement = 0.0005;
         btcEarned += btcIncrement;
         btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
-
-        // Aggiorno database con nuovo valore
         updateBTCBackend(btcEarned);
       }
     }, 1000);
 
-    updateTimerDisplay();
+    // RAINDROPS
 
-    // RAINDROP INTERACTION
     const raindropContainer = document.getElementById('raindrop-container');
 
     function createRaindrop() {
       const drop = document.createElement('div');
       drop.classList.add('raindrop');
-      drop.style.left = Math.random() * window.innerWidth + 'px';
+      drop.style.left = Math.random() * (window.innerWidth - 32) + 'px';
       drop.style.top = '-40px';
-      const duration = 3 + Math.random() * 2; // caduta 3-5 sec
+      const duration = 3 + Math.random() * 2; // 3-5 sec
       drop.style.animationDuration = duration + 's';
 
-      // Click: riduci timer di 15 secondi e aggiungi BTC 0.001
+      // Abilita pointer events per click
+      drop.style.pointerEvents = 'auto';
+
       drop.addEventListener('click', e => {
         e.stopPropagation();
-
-        if (totalSeconds > 15) {
-          totalSeconds -= 15;
-        } else {
-          totalSeconds = 0;
-        }
-        updateTimerDisplay();
-
+        // Guadagno BTC +0.001
         const gain = 0.001;
         btcEarned += gain;
         btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
         showBtcGainText(e.clientX, e.clientY, gain);
-
-        // Aggiorna backend subito
         updateBTCBackend(btcEarned);
 
-        // Rimuovo goccia subito
+        resetTimer();
+
         drop.remove();
       });
 
-      // Quando animazione finisce (goccia caduta), rimuovo
       drop.addEventListener('animationend', () => {
         drop.remove();
       });
@@ -400,10 +371,10 @@
       raindropContainer.appendChild(drop);
     }
 
-    // Genera gocce ogni 500ms circa
-    setInterval(createRaindrop, 500);
+    // Massimo 10 gocce al minuto => 1 ogni 6 secondi
+    setInterval(createRaindrop, 6000);
 
-    // ==== BUBBLE CANVAS ANIMATION ====
+    // BUBBLES CANVAS
 
     const canvas = document.getElementById('bubble-canvas');
     const ctx = canvas.getContext('2d');
@@ -416,7 +387,6 @@
       canvas.width = width;
       canvas.height = height;
     }
-
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
@@ -446,11 +416,16 @@
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
       }
+      isPointInside(px, py) {
+        const dx = px - this.x;
+        const dy = py - this.y;
+        return dx * dx + dy * dy <= this.radius * this.radius;
+      }
     }
 
     function initBubbles(count = 30) {
       bubbles = [];
-      for(let i=0; i<count; i++) {
+      for (let i = 0; i < count; i++) {
         bubbles.push(new Bubble());
       }
     }
@@ -463,6 +438,26 @@
       });
       requestAnimationFrame(animate);
     }
+
+    canvas.style.pointerEvents = 'auto'; // abilita click
+
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      for (let i = 0; i < bubbles.length; i++) {
+        if (bubbles[i].isPointInside(x, y)) {
+          const gain = 0.001;
+          btcEarned += gain;
+          btcStatsElem.textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
+          showBtcGainText(e.clientX, e.clientY, gain);
+          updateBTCBackend(btcEarned);
+          resetTimer();
+          break;
+        }
+      }
+    });
 
     initBubbles();
     animate();
