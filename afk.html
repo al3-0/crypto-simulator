@@ -3,393 +3,411 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crypto Simulator - AFK Zone</title>
+  <title>AFK Zone - Crypto Simulator</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    /* ==== BODY & MAIN ==== */
-    body {
+    * {
       margin: 0;
-      min-height: 100vh;
-      padding: 100px 20px 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #eee;
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
-      overflow-x: hidden;
-      position: relative;
-      transition: background 0.3s ease, color 0.3s ease;
+      padding: 0;
+      box-sizing: border-box;
     }
-
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #drop-canvas {
+      pointer-events: auto;
+      z-index: 3;
+    }
+    nav.navbar {
+      background: rgba(30, 30, 60, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 10px 30px;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 1100px;
+      margin: auto;
+      justify-content: space-between;
+    }
+    .logo-link img {
+      height: 40px;
+    }
+    #nav-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      width: 30px;
+      height: 25px;
+      justify-content: space-between;
+    }
+    #nav-toggle span {
+      display: block;
+      height: 4px;
+      background: #bbb;
+      border-radius: 2px;
+    }
+    ul.nav-menu {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+      align-items: center;
+      font-weight: 600;
+    }
+    ul.nav-menu li a,
+    ul.nav-menu li button {
+      color: #eee;
+      text-decoration: none;
+      font-size: 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    ul.nav-menu li button:hover,
+    ul.nav-menu li a:hover {
+      color: #bb86fc;
+    }
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
       padding: 40px 60px;
       max-width: 600px;
-      margin: auto;
+      margin: 140px auto 60px auto;
       box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
       backdrop-filter: blur(12px);
       position: relative;
-      z-index: 2;
+      z-index: 5;
       text-align: center;
+      color: #eee;
     }
-
-    h1 {
-      font-size: 2.8rem;
-      margin-bottom: 16px;
-      font-weight: 800;
-      color: #bb86fc;
-      animation: fadeInDown 1s ease forwards;
-      opacity: 0;
-    }
-
-    #countdown {
+    p.timer {
       font-size: 2rem;
+      margin-bottom: 20px;
       font-weight: 700;
-      color: #e0d4ff;
+      text-shadow: 0 0 8px #bb86fcaa;
+    }
+    p.btc-earned {
+      font-size: 1.5rem;
+      margin-top: -20px;
       margin-bottom: 40px;
-      animation: fadeIn 1.5s ease forwards;
-      opacity: 0;
-    }
-
-    button#fun-btn {
-      background: #4b3ca7;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 12px;
-      color: white;
+      color: #b5f4a5;
+      text-shadow: 0 0 8px #a5f47faa;
       font-weight: 700;
-      font-size: 1.2rem;
-      cursor: pointer;
-      box-shadow: 0 0 20px #7e5fffcc;
-      transition: background-color 0.3s ease;
-      user-select: none;
-      outline-offset: 2px;
-    }
-    button#fun-btn:hover {
-      background-color: #6e5ffe;
-      box-shadow: 0 0 30px #a48fffcc;
     }
 
-    /* ==== NAVBAR ==== */
-    nav.navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #1c1c3a;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-      z-index: 10;
-      user-select: none;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-    }
-
-    .logo-link img {
-      height: 36px;
-      cursor: pointer;
-    }
-
-    .nav-menu {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      margin: 0;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .nav-menu li a,
-    #theme-toggle {
-      color: #ddd;
-      background: none;
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    .nav-menu li a:hover,
-    #theme-toggle:hover {
-      background-color: #4b3ca7;
-      color: white;
-    }
-
-    #theme-toggle {
-      margin-left: 6px;
-    }
-
-    #nav-toggle {
-      display: none;
-      position: relative;
-      width: 30px;
-      height: 22px;
-      cursor: pointer;
-      z-index: 15;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #nav-toggle span {
-      position: absolute;
-      height: 4px;
-      width: 100%;
-      background: #ddd;
-      border-radius: 2px;
-      transition: 0.3s ease;
-      left: 0;
-    }
-    #nav-toggle span:nth-child(1) {
-      top: 0;
-    }
-    #nav-toggle span:nth-child(2) {
-      top: 9px;
-    }
-    #nav-toggle span:nth-child(3) {
-      top: 18px;
-    }
-
+    /* Responsive menu toggle */
     @media (max-width: 768px) {
-      .nav-menu {
+      #nav-toggle {
+        display: flex;
+      }
+      ul.nav-menu {
         position: fixed;
         top: 60px;
-        left: 0;
-        right: 0;
-        background: #1c1c3a;
+        right: -100%;
+        background: #1a1a2e;
+        height: calc(100vh - 60px);
+        width: 220px;
         flex-direction: column;
-        gap: 16px;
-        padding: 20px 0;
-        margin: 0;
-        transform: translateY(-150%);
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        text-align: center;
-        font-size: 1.2rem;
+        padding: 20px;
+        gap: 15px;
+        transition: right 0.3s ease;
+        box-shadow: -3px 0 15px rgba(0,0,0,0.7);
       }
-      .nav-menu.open {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-      }
-      #nav-toggle {
-        display: block;
-      }
-      #theme-toggle {
-        margin-left: 0;
+      ul.nav-menu.active {
+        right: 0;
       }
     }
 
-    #nav-toggle.open span:nth-child(1) {
-      transform: rotate(45deg);
-      top: 9px;
-    }
-    #nav-toggle.open span:nth-child(2) {
-      opacity: 0;
-    }
-    #nav-toggle.open span:nth-child(3) {
-      transform: rotate(-45deg);
-      top: 9px;
-    }
-
-    /* ==== ANIMAZIONI ==== */
-    @keyframes fadeInDown {
-      0% { opacity: 0; transform: translateY(-30px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* ==== CANVAS PARTICELLE ==== */
-    #particles-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
+    /* Theme toggle button */
+    #theme-toggle {
+      font-size: 1.2rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #eee;
+      user-select: none;
     }
   </style>
 </head>
 <body>
-  <!-- PARTICLES CANVAS -->
-  <canvas id="particles-canvas"></canvas>
+  <canvas id="bubble-canvas"></canvas>
+  <canvas id="drop-canvas"></canvas>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Main Navigation">
     <div class="nav-container">
       <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
         <img src="logo.png" alt="CryptoSim Logo" />
       </a>
-
-      <!-- HAMBURGER -->
-      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
+      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false" aria-controls="nav-menu">
+        <span></span><span></span><span></span>
       </div>
-
-      <ul class="nav-menu" id="nav-menu">
-        <li><a href="dashboard.html">Home</a></li>
-        <li><a href="exchange.html">Exchange</a></li>
-        <li><a href="vouch-create.html">Vouch Create</a></li>
-        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
-        <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account</a></li>
-        <li><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
+      <ul class="nav-menu" id="nav-menu" role="menu">
+        <li role="none"><a role="menuitem" href="dashboard.html">Home</a></li>
+        <li role="none"><a role="menuitem" href="exchange.html">Exchange</a></li>
+        <li role="none"><a role="menuitem" href="vouch-create.html">Vouch Create</a></li>
+        <li role="none"><a role="menuitem" href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li role="none"><a role="menuitem" href="afk.html">AFK Zone</a></li>
+        <li role="none"><a role="menuitem" href="account.html">Account</a></li>
+        <li role="none"><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
       </ul>
     </div>
   </nav>
 
   <main>
     <h1>AFK Zone</h1>
-    <div id="countdown" aria-live="polite" aria-atomic="true">Caricamento countdown...</div>
-    <button id="fun-btn" aria-label="Divertiti con le particelle">Fai partire le particelle!</button>
+    <p class="timer" id="countdown">Tempo rimasto: 02:00</p>
+    <p class="btc-earned" id="btc-earned">BTC Guadagnati: 0.000</p>
+    <p>Clicca sulle gocce che cadono per togliere 5 secondi dal timer e guadagnare BTC!</p>
   </main>
 
-  <script>
-    // NAVBAR TOGGLE
+  <script type="module">
+    // NAVBAR menu toggle
     const navToggle = document.getElementById('nav-toggle');
     const navMenu = document.getElementById('nav-menu');
+
     navToggle.addEventListener('click', () => {
-      navToggle.classList.toggle('open');
-      navMenu.classList.toggle('open');
       const expanded = navToggle.getAttribute('aria-expanded') === 'true';
       navToggle.setAttribute('aria-expanded', String(!expanded));
+      navMenu.classList.toggle('active');
     });
+
     navToggle.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         navToggle.click();
       }
     });
-    navMenu.querySelectorAll('a, button').forEach(el => {
-      el.addEventListener('click', () => {
-        if(navMenu.classList.contains('open')) {
-          navToggle.click();
-        }
-      });
-    });
 
-    // THEME TOGGLE
-    const themeBtn = document.getElementById('theme-toggle');
-    if(localStorage.getItem('theme') === 'light') {
-      document.body.classList.add('light-theme');
-      themeBtn.textContent = '☀️';
-    }
-    themeBtn.addEventListener('click', () => {
-      if(document.body.classList.toggle('light-theme')) {
-        localStorage.setItem('theme', 'light');
-        themeBtn.textContent = '☀️';
+    // Theme toggle (light/dark)
+    const themeToggle = document.getElementById('theme-toggle');
+    const darkThemeClass = 'dark-theme';
+
+    function applyTheme(isDark) {
+      if(isDark) {
+        document.body.style.background = '#121212';
+        document.body.style.color = '#ddd';
+        themeToggle.textContent = '☀️';
       } else {
-        localStorage.setItem('theme', 'dark');
-        themeBtn.textContent = '🌙';
+        document.body.style.background = '#1a1a2e';
+        document.body.style.color = '#eee';
+        themeToggle.textContent = '🌙';
       }
+    }
+
+    // inizialmente tema scuro
+    let darkMode = true;
+    applyTheme(darkMode);
+
+    themeToggle.addEventListener('click', () => {
+      darkMode = !darkMode;
+      applyTheme(darkMode);
     });
 
-    // COUNTDOWN TIMER
-    const countdownEl = document.getElementById('countdown');
-    // Impostiamo un timer 5 minuti nel futuro da ora, solo come esempio:
-    const countdownTarget = new Date(Date.now() + 5 * 60 * 1000);
+    // Canvas setup
+    const bubbleCanvas = document.getElementById('bubble-canvas');
+    const bubbleCtx = bubbleCanvas.getContext('2d');
+    const dropCanvas = document.getElementById('drop-canvas');
+    const dropCtx = dropCanvas.getContext('2d');
+    let width, height;
 
-    function updateCountdown() {
-      const now = new Date();
-      const diff = countdownTarget - now;
-      if(diff <= 0) {
-        countdownEl.textContent = "Il tempo è scaduto!";
-        clearInterval(countdownInterval);
-        return;
-      }
-      const minutes = Math.floor(diff / 1000 / 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-      countdownEl.textContent = `Tempo rimasto: ${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-    }
-    updateCountdown();
-    const countdownInterval = setInterval(updateCountdown, 1000);
-
-    // PARTICLES ANIMATION (semplice effetto particelle che partono dal centro)
-    const canvas = document.getElementById('particles-canvas');
-    const ctx = canvas.getContext('2d');
-    let w, h;
     function resize() {
-      w = window.innerWidth;
-      h = window.innerHeight;
-      canvas.width = w;
-      canvas.height = h;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      bubbleCanvas.width = width;
+      bubbleCanvas.height = height;
+      dropCanvas.width = width;
+      dropCanvas.height = height;
     }
     window.addEventListener('resize', resize);
     resize();
 
-    class Particle {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.radius = Math.random() * 3 + 2;
-        this.color = `rgba(187,134,252,${Math.random() * 0.8 + 0.3})`;
-        this.speedX = (Math.random() - 0.5) * 6;
-        this.speedY = (Math.random() - 0.5) * 6;
-        this.life = 60;
+    // BUBBLES
+    class Bubble {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 100;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.5 + Math.random() * 1.5;
+        this.alpha = 0.1 + Math.random() * 0.3;
+        this.phase = Math.random() * 2 * Math.PI;
       }
       update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.life--;
-        this.radius *= 0.95;
+        this.y -= this.speed;
+        this.x += Math.sin(this.phase) * 0.3;
+        this.phase += 0.03;
+        if (this.y + this.radius < 0) this.reset();
       }
       draw(ctx) {
         ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 8;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        gradient.addColorStop(1, 'rgba(187,134,252,0)');
+        ctx.fillStyle = gradient;
         ctx.fill();
-        ctx.shadowBlur = 0;
+      }
+    }
+    let bubbles = [];
+    function initBubbles() {
+      bubbles = [];
+      for (let i = 0; i < 50; i++) bubbles.push(new Bubble());
+    }
+    initBubbles();
+
+    // DROPS
+    class Drop {
+      constructor() {
+        this.reset();
+        this.clicked = false;
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = -10 - Math.random() * 100;
+        this.radius = 15 + Math.random() * 10;
+        this.speed = 1.5 + Math.random() * 2;
+        this.clicked = false;
+      }
+      update() {
+        this.y += this.speed;
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(187,134,252,0.8)';
+        ctx.shadowColor = '#bb86fc';
+        ctx.shadowBlur = 8;
+        ctx.moveTo(this.x, this.y - this.radius);
+        ctx.bezierCurveTo(
+          this.x + this.radius, this.y - this.radius / 2,
+          this.x + this.radius / 2, this.y + this.radius,
+          this.x, this.y + this.radius
+        );
+        ctx.bezierCurveTo(
+          this.x - this.radius / 2, this.y + this.radius,
+          this.x - this.radius, this.y - this.radius / 2,
+          this.x, this.y - this.radius
+        );
+        ctx.fill();
+      }
+      isClicked(mx, my) {
+        const dx = mx - this.x;
+        const dy = my - this.y;
+        return dx*dx + dy*dy <= this.radius*this.radius;
       }
     }
 
-    let particles = [];
-    let animating = false;
+    let drops = [];
 
-    function animate() {
-      if (!animating) return;
-      ctx.clearRect(0, 0, w, h);
-      particles.forEach((p, i) => {
-        p.update();
-        p.draw(ctx);
-        if (p.life <= 0 || p.radius < 0.1) {
-          particles.splice(i, 1);
-        }
-      });
-      if (particles.length > 0) {
-        requestAnimationFrame(animate);
-      } else {
-        animating = false;
-        ctx.clearRect(0, 0, w, h);
+    // Spawn drops max 10 al minuto (una ogni 6 sec)
+    let lastDropSpawnTime = 0;
+    const dropInterval = 6000; // ms
+
+    function spawnDrop(time) {
+      // Rimuove gocce fuori schermo
+      drops = drops.filter(d => d.y - d.radius <= height);
+
+      if (drops.length < 10) {
+        drops.push(new Drop());
       }
+      lastDropSpawnTime = time;
     }
 
-    document.getElementById('fun-btn').addEventListener('click', () => {
-      if(animating) return; // non sovrapporre animazioni
-      const centerX = w / 2;
-      const centerY = h / 2;
-      for(let i=0; i<50; i++) {
-        particles.push(new Particle(centerX, centerY));
-      }
-      animating = true;
-      animate();
+    // TIMER
+    let timerSeconds = 120; // 2 minuti
+    let timerRunning = true;
+    const countdownEl = document.getElementById('countdown');
+    const btcEarnedEl = document.getElementById('btc-earned');
+    let btcEarned = 0;
+
+    function updateTimerText() {
+      const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(timerSeconds % 60).toString().padStart(2, '0');
+      countdownEl.textContent = `Tempo rimasto: ${m}:${s}`;
+    }
+
+    function updateBtcText() {
+      btcEarnedEl.textContent = `BTC Guadagnati: ${btcEarned.toFixed(3)}`;
+    }
+
+    // Blocca timer se scheda non attiva
+    document.addEventListener('visibilitychange', () => {
+      timerRunning = !document.hidden;
     });
+
+    // Gestione click sulle gocce
+    dropCanvas.addEventListener('click', (e) => {
+      const rect = dropCanvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      for (const drop of drops) {
+        if (!drop.clicked && drop.isClicked(mx, my)) {
+          drop.clicked = true;
+          timerSeconds = Math.max(0, timerSeconds - 5);
+          btcEarned += 0.001;
+          updateTimerText();
+          updateBtcText();
+          drops = drops.filter(d => d !== drop);
+          break;
+        }
+      }
+    });
+
+    function animate(time = 0) {
+      bubbleCtx.clearRect(0, 0, width, height);
+      dropCtx.clearRect(0, 0, width, height);
+
+      for (const b of bubbles) {
+        b.update();
+        b.draw(bubbleCtx);
+      }
+
+      for (const d of drops) {
+        d.update();
+        d.draw(dropCtx);
+      }
+
+      if (!lastDropSpawnTime || time - lastDropSpawnTime > dropInterval) {
+        spawnDrop(time);
+      }
+
+      if (timerRunning) {
+        timerSeconds -= 1/60;
+        if (timerSeconds <= 0) {
+          timerSeconds = 120; // reset timer
+        }
+        updateTimerText();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    updateTimerText();
+    updateBtcText();
+    animate();
   </script>
 </body>
 </html>
