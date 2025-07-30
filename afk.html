@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crypto Simulator - AFK Zone</title>
+  <title>Crypto Simulator - Dashboard</title>
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
     /* ==== BODY & MAIN ==== */
@@ -29,7 +29,6 @@
       backdrop-filter: blur(12px);
       position: relative;
       z-index: 2;
-      text-align: center;
     }
 
     h1 {
@@ -37,6 +36,7 @@
       margin-bottom: 8px;
       font-weight: 800;
       color: #bb86fc;
+      text-align: center;
       animation: fadeInDown 1s ease forwards;
       opacity: 0;
     }
@@ -44,29 +44,54 @@
     p.welcome {
       font-size: 1.1rem;
       color: #ccc;
+      text-align: center;
       font-weight: 500;
       margin-bottom: 40px;
       animation: fadeIn 1.5s ease forwards;
       opacity: 0;
     }
 
-    #timer {
-      font-size: 3rem;
-      font-weight: 900;
-      color: #bb86fc;
-      margin-bottom: 20px;
-      font-family: 'Courier New', Courier, monospace;
+    .wallet {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
       animation: fadeInUp 1.8s ease forwards;
       opacity: 0;
     }
 
-    #btc-stats {
-      font-size: 1.3rem;
+    .coin-card {
+      background: linear-gradient(145deg, #3b3b6a, #2a2a4f);
+      border-radius: 16px;
+      padding: 20px 30px;
+      box-shadow: inset 0 0 12px #7e5fff88, 0 6px 18px rgba(123, 85, 255, 0.4);
+      color: #f0e6ff;
       font-weight: 700;
-      color: #d6bfff;
-      margin-top: 10px;
-      min-height: 24px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+    }
+    .coin-card:hover {
+      transform: scale(1.05);
+      box-shadow: inset 0 0 16px #a48fffcc, 0 10px 30px rgba(123, 85, 255, 0.7);
+    }
+
+    .coin-name {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.5rem;
+      text-shadow: 0 0 6px #bb86fcaa;
+    }
+
+    .coin-amount {
       font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 2px;
+      font-size: 1.7rem;
+      color: #e0d4ff;
+      text-shadow: 0 0 4px #b68fffcc;
     }
 
     /* ==== NAVBAR ==== */
@@ -96,6 +121,7 @@
       cursor: pointer;
     }
 
+    /* Centratura nav-menu: */
     .nav-menu {
       list-style: none;
       display: flex;
@@ -131,6 +157,7 @@
     }
 
     /* ==== RESPONSIVE ==== */
+    /* Nascondi menu e mostra hamburger su mobile */
     #nav-toggle {
       display: none;
       position: relative;
@@ -149,10 +176,17 @@
       transition: 0.3s ease;
       left: 0;
     }
-    #nav-toggle span:nth-child(1) { top: 0; }
-    #nav-toggle span:nth-child(2) { top: 9px; }
-    #nav-toggle span:nth-child(3) { top: 18px; }
+    #nav-toggle span:nth-child(1) {
+      top: 0;
+    }
+    #nav-toggle span:nth-child(2) {
+      top: 9px;
+    }
+    #nav-toggle span:nth-child(3) {
+      top: 18px;
+    }
 
+    /* Menu nascosto di default */
     @media (max-width: 768px) {
       .nav-menu {
         position: fixed;
@@ -184,6 +218,7 @@
       }
     }
 
+    /* Hamburger animazione al click */
     #nav-toggle.open span:nth-child(1) {
       transform: rotate(45deg);
       top: 9px;
@@ -220,22 +255,6 @@
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
-    body.light-theme nav.navbar {
-      background: #ddd;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-    body.light-theme .nav-menu li a,
-    body.light-theme #theme-toggle {
-      color: #444;
-    }
-    body.light-theme .nav-menu li a:hover,
-    body.light-theme #theme-toggle:hover {
-      background-color: #8861ff;
-      color: white;
-    }
-    body.light-theme #nav-toggle span {
-      background: #444;
-    }
 
     /* ==== CANVAS ANIMAZIONE BOLLE ==== */
     #bubble-canvas {
@@ -248,298 +267,235 @@
       z-index: 1;
     }
 
-    /* ==== GOCCE (DAVANTI A TUTTO) ==== */
-    #raindrop-container {
+    /* ==== DROPS CSS ==== */
+    .drop {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 9999; /* Davanti a tutto */
-    }
-
-    .raindrop {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background: radial-gradient(circle at center, #a3c9ff 40%, #3a6eff 90%);
-      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-      box-shadow: 0 0 8px #4d79ffcc;
+      top: -50px;
+      width: 40px;
+      height: 40px;
+      background: url('https://i.imgur.com/7r5XxqI.png') no-repeat center/contain;
       cursor: pointer;
-      pointer-events: auto;
+      z-index: 9999; /* davanti a tutto */
       user-select: none;
-      filter: drop-shadow(0 0 5px #5b7affcc);
-      animation-fill-mode: forwards;
-      animation-name: fall;
-      animation-timing-function: linear;
+      transition: transform 0.2s ease;
+    }
+    .drop:active {
+      transform: scale(0.8);
     }
 
-    @keyframes fall {
-      to { transform: translateY(110vh); }
-    }
-
-    /* +BTC testo animato */
-    .btc-gained {
+    /* BTC guadagnati */
+    #btc-earned {
       position: fixed;
-      font-weight: 900;
-      color: #bb86fc;
-      text-shadow: 0 0 8px #bb86fccc;
-      font-family: 'Courier New', Courier, monospace;
+      top: 80px;
+      right: 20px;
+      background: #3b3b6a;
+      color: #e0d4ff;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #bb86fcaa;
+      font-family: 'Courier New', monospace;
       user-select: none;
-      pointer-events: none;
-      animation: floatUp 1.2s ease forwards;
-      z-index: 10000;
-    }
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-60px); }
+      z-index: 20;
+      max-width: 150px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <nav class="navbar" aria-label="Main Navigation">
+  <!-- CANVAS ANIMAZIONE BOLLE -->
+  <canvas id="bubble-canvas"></canvas>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
     <div class="nav-container">
-      <a href="index.html" class="logo-link" aria-label="Homepage">
-        <img src="logo.png" alt="Crypto Simulator Logo" />
+      <a href="dashboard.html" class="logo-link" aria-label="Logo CryptoSim">
+        <img src="logo.png" alt="CryptoSim Logo" />
       </a>
-      <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
-        <span></span><span></span><span></span>
-      </button>
-      <ul class="nav-menu" id="nav-menu" role="menu">
-        <li role="none"><a href="index.html" role="menuitem" tabindex="0">Home</a></li>
-        <li role="none"><a href="affiliates.html" role="menuitem" tabindex="0">Affiliates</a></li>
-        <li role="none"><a href="afkzone.html" role="menuitem" tabindex="0" aria-current="page">AFK Zone</a></li>
-        <li role="none"><a href="dashboard.html" role="menuitem" tabindex="0">Dashboard</a></li>
+
+      <!-- HAMBURGER -->
+      <div id="nav-toggle" aria-label="Apri menu" role="button" tabindex="0" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="logout.html">Logout</a></li>
+        <li><button id="theme-toggle" aria-label="Cambia tema">🌙</button></li>
       </ul>
-      <button id="theme-toggle" aria-label="Toggle light/dark theme">Toggle Theme</button>
     </div>
   </nav>
 
   <main>
-    <h1>AFK Zone</h1>
-    <p class="welcome">Stai accumulando BTC automaticamente! Il timer scorre... ma puoi ridurlo cliccando sulle gocce.</p>
-    <div id="timer" aria-live="polite" aria-atomic="true" aria-label="Tempo rimanente">03:00</div>
-    <div id="btc-stats" aria-live="polite" aria-atomic="true">BTC Guadagnati: 0.0000</div>
+    <h1>Benvenuto, <span id="username-display">utente</span>!</h1>
+    <p class="welcome">Il tuo portafoglio di criptovalute:</p>
+
+    <div class="wallet" aria-live="polite">
+      <div class="coin-card">
+        <div class="coin-name">₿ Bitcoin (BTC)</div>
+        <div class="coin-amount" id="btc-amount">0.0000</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-name">Ξ Ethereum (ETH)</div>
+        <div class="coin-amount" id="eth-amount">0.0000</div>
+      </div>
+      <div class="coin-card">
+        <div class="coin-name">Ł Litecoin (LTC)</div>
+        <div class="coin-amount" id="ltc-amount">0.0000</div>
+      </div>
+    </div>
   </main>
 
-  <div id="raindrop-container" aria-hidden="true"></div>
-  <canvas id="bubble-canvas" aria-hidden="true"></canvas>
+  <div id="btc-earned">BTC Guadagnati: 0.0000</div>
+
+  <!-- FIREBASE SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // NAV TOGGLE
+    // === CONFIG FIREBASE ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ==== VARIABILI ====
+    const username = localStorage.getItem('user') || 'ospite';
+    document.getElementById('username-display').textContent = username;
+
+    // === NAV MENU & THEME TOGGLE ===
     const navToggle = document.getElementById('nav-toggle');
     const navMenu = document.getElementById('nav-menu');
     navToggle.addEventListener('click', () => {
-      const isOpen = navMenu.classList.toggle('open');
-      navToggle.classList.toggle('open', isOpen);
-      navToggle.setAttribute('aria-expanded', isOpen);
+      const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+      navToggle.setAttribute('aria-expanded', String(!expanded));
+      navToggle.classList.toggle('open');
+      navMenu.classList.toggle('open');
+    });
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+      const btn = document.getElementById('theme-toggle');
+      btn.textContent = document.body.classList.contains('light-theme') ? '🌞' : '🌙';
     });
 
-    // THEME TOGGLE + memorizza in localStorage
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const body = document.body;
-    const currentTheme = localStorage.getItem('theme') || 'dark';
-
-    function applyTheme(theme) {
-      if (theme === 'light') body.classList.add('light-theme');
-      else body.classList.remove('light-theme');
-      localStorage.setItem('theme', theme);
+    // === LISTENER DATABASE: aggiorna UI in realtime ===
+    function updateUI(data) {
+      if (!data) return;
+      if (data.BTC !== undefined) document.getElementById('btc-amount').textContent = data.BTC.toFixed(4);
+      if (data.ETH !== undefined) document.getElementById('eth-amount').textContent = data.ETH.toFixed(4);
+      if (data.LTC !== undefined) document.getElementById('ltc-amount').textContent = data.LTC.toFixed(4);
     }
 
-    applyTheme(currentTheme);
-
-    themeToggleBtn.addEventListener('click', () => {
-      const newTheme = body.classList.contains('light-theme') ? 'dark' : 'light';
-      applyTheme(newTheme);
+    const userWalletRef = db.ref(`users/${username}/wallet`);
+    userWalletRef.on('value', snapshot => {
+      const val = snapshot.val();
+      updateUI(val);
     });
 
-    // TIMER E BTC
-    let timer = 180; // 3 minuti in secondi
-    let btc = 0;
-    let timerInterval;
-    const timerElement = document.getElementById('timer');
-    const btcStats = document.getElementById('btc-stats');
-
-    function updateTimerDisplay() {
-      const minutes = Math.floor(timer / 60);
-      const seconds = timer % 60;
-      timerElement.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    // === FUNZIONE PER AGGIUNGERE BTC ===
+    function addBTC(amountToAdd) {
+      userWalletRef.child('BTC').get().then(snapshot => {
+        let currentBTC = snapshot.val() || 0;
+        let newBTC = currentBTC + amountToAdd;
+        userWalletRef.child('BTC').set(newBTC).then(() => {
+          console.log(`BTC aggiornati: ${newBTC.toFixed(4)}`);
+          // Aggiorna contatore guadagno
+          btcEarned += amountToAdd;
+          document.getElementById('btc-earned').textContent = `BTC Guadagnati: ${btcEarned.toFixed(4)}`;
+        });
+      }).catch(err => {
+        console.error('Errore nel leggere o aggiornare BTC:', err);
+      });
     }
-    updateTimerDisplay();
-    btcStats.textContent = `BTC Guadagnati: ${btc.toFixed(4)}`;
 
-    // Gestione visibilità pagina (pausa timer se non visibile)
-    let isPageVisible = true;
+    // ==== SIMULAZIONE GUADAGNO BTC OGNI 10 SECONDI ====
+    let btcEarned = 0;
+
+    let intervalId;
+    function startEarning() {
+      intervalId = setInterval(() => {
+        addBTC(0.001);
+      }, 10000);
+    }
+    function stopEarning() {
+      clearInterval(intervalId);
+    }
+
+    // FERMA guadagno quando la scheda è nascosta, riprendi se visibile
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        isPageVisible = true;
-        startTimer();
-      } else {
-        isPageVisible = false;
-        stopTimer();
-      }
+      if (document.hidden) stopEarning();
+      else startEarning();
     });
 
-    function startTimer() {
-      if (timerInterval || timer <= 0) return;
-      timerInterval = setInterval(() => {
-        if (!isPageVisible) return;
-        if (timer <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          return;
-        }
-        timer--;
-        updateTimerDisplay();
-      }, 1000);
-    }
+    startEarning();
 
-    function stopTimer() {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      }
-    }
-    startTimer();
-
-    // BOLLE CANVAS (animazioni 1,3,8) - semplificato per performance
+    // ==== CANVAS ANIMAZIONE BOLLE ====
     const canvas = document.getElementById('bubble-canvas');
     const ctx = canvas.getContext('2d');
-    let bubbles = [];
     let width, height;
-
-    function resizeCanvas() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resize);
+    resize();
 
     class Bubble {
       constructor() {
         this.x = Math.random() * width;
-        this.y = height + 50 + Math.random() * 100;
-        this.radius = 8 + Math.random() * 15;
-        this.speed = 0.6 + Math.random() * 1.2;
-        this.alpha = 0.1 + Math.random() * 0.15;
-        this.animationType = [1,3,8][Math.floor(Math.random() * 3)];
-        this.time = 0;
-        this.maxTime = 300 + Math.random() * 200;
+        this.y = height + 20 + Math.random() * 100;
+        this.radius = 10 + Math.random() * 20;
+        this.speed = 0.5 + Math.random();
+        this.opacity = 0.1 + Math.random() * 0.3;
+        this.color = `rgba(187, 134, 252, ${this.opacity})`;
       }
       update() {
         this.y -= this.speed;
-        this.time++;
-        if (this.y + this.radius < -10 || this.time > this.maxTime) {
-          this.reset();
+        if (this.y < -this.radius) {
+          this.x = Math.random() * width;
+          this.y = height + 20;
+          this.radius = 10 + Math.random() * 20;
+          this.speed = 0.5 + Math.random();
+          this.opacity = 0.1 + Math.random() * 0.3;
+          this.color = `rgba(187, 134, 252, ${this.opacity})`;
         }
-        // Animazioni
-        if(this.animationType === 1){
-          // oscillazione laterale lenta
-          this.x += Math.sin(this.time / 30) * 0.3;
-        } else if(this.animationType === 3){
-          // leggera variazione di dimensione
-          this.radius += Math.sin(this.time / 15) * 0.05;
-          if (this.radius < 7) this.radius = 7;
-          if (this.radius > 23) this.radius = 23;
-        } else if(this.animationType === 8){
-          // oscillazione più ampia
-          this.x += Math.sin(this.time / 10) * 0.6;
-        }
-      }
-      reset() {
-        this.x = Math.random() * width;
-        this.y = height + 50 + Math.random() * 100;
-        this.radius = 8 + Math.random() * 15;
-        this.speed = 0.6 + Math.random() * 1.2;
-        this.alpha = 0.1 + Math.random() * 0.15;
-        this.time = 0;
-        this.maxTime = 300 + Math.random() * 200;
-        this.animationType = [1,3,8][Math.floor(Math.random() * 3)];
       }
       draw() {
         ctx.beginPath();
-        ctx.fillStyle = `rgba(187, 134, 252, ${this.alpha})`;
-        ctx.shadowColor = `rgba(187, 134, 252, 0.6)`;
-        ctx.shadowBlur = 12;
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = '#bb86fc';
+        ctx.shadowBlur = 8;
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    for(let i=0; i<30; i++) {
-      bubbles.push(new Bubble());
-    }
+    const bubbles = [];
+    for (let i = 0; i < 20; i++) bubbles.push(new Bubble());
 
-    function animateBubbles() {
+    function animate() {
       ctx.clearRect(0, 0, width, height);
-      bubbles.forEach(b => {
+      for (const b of bubbles) {
         b.update();
         b.draw();
-      });
-      requestAnimationFrame(animateBubbles);
+      }
+      requestAnimationFrame(animate);
     }
-    animateBubbles();
-
-    // GOCCE CADENTI
-    const raindropContainer = document.getElementById('raindrop-container');
-
-    let raindropCount = 0;
-    const maxRaindropsPerMinute = 10;
-    const raindropIntervalMs = 60000 / maxRaindropsPerMinute;
-    let lastRaindropTime = 0;
-
-    function createRaindrop() {
-      const now = Date.now();
-      if (now - lastRaindropTime < raindropIntervalMs) return;
-      lastRaindropTime = now;
-
-      const drop = document.createElement('div');
-      drop.classList.add('raindrop');
-      drop.style.left = Math.random() * (window.innerWidth - 32) + 'px';
-      drop.style.top = '-40px';
-      drop.style.pointerEvents = 'auto';
-
-      // Durata caduta variabile 5-8 secondi (velocità diversa)
-      const duration = 5000 + Math.random() * 3000;
-      drop.style.animation = `fall ${duration}ms linear forwards`;
-
-      raindropContainer.appendChild(drop);
-
-      // Click goccia: toglie 5 secondi dal timer, animazioni scoppio e +BTC
-      drop.addEventListener('click', () => {
-        if (drop.classList.contains('pop')) return; // Previeni multi click
-        drop.classList.add('pop');
-
-        const btcEarned = 0.001;
-        btc += btcEarned;
-        btcStats.textContent = `BTC Guadagnati: ${btc.toFixed(4)}`;
-
-        timer = Math.max(0, timer - 5);
-        updateTimerDisplay();
-
-        const btcText = document.createElement('div');
-        btcText.className = 'btc-gained';
-        btcText.textContent = `+${btcEarned.toFixed(3)} BTC`;
-        btcText.style.left = drop.offsetLeft + 'px';
-        btcText.style.top = drop.offsetTop + 'px';
-        document.body.appendChild(btcText);
-        setTimeout(() => btcText.remove(), 1200);
-
-        setTimeout(() => drop.remove(), 400);
-      });
-
-      // Rimuovi goccia dopo la caduta
-      setTimeout(() => {
-        if (drop.parentNode) drop.remove();
-      }, duration);
-    }
-
-    // Loop gocce, crea massimo 10 al minuto (1 ogni 6 secondi circa)
-    setInterval(createRaindrop, 1000);
-
+    animate();
   </script>
 </body>
 </html>
