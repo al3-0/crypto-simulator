@@ -224,6 +224,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -238,22 +239,36 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
-    const username = localStorage.getItem("user");
-    if (!username) window.location.href = "index.html";
+    const auth = getAuth();
 
     const rates = { BTC: 1, ETH: 15, LTC: 100 };
-
     const exchangeBtn = document.getElementById("exchange-btn");
     const result = document.getElementById("result");
 
+    let currentUser = null;
+
+    // Controlla autenticazione anonima e reindirizza se non loggato
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+      } else {
+        // Se non autenticato, reindirizza a login o index
+        window.location.href = "index.html";
+      }
+    });
+
     exchangeBtn.addEventListener("click", async () => {
       try {
+        if (!currentUser) {
+          result.textContent = "Utente non autenticato.";
+          return;
+        }
+
         const from = document.getElementById("from-coin").value;
         const to = document.getElementById("to-coin").value;
         const amount = parseFloat(document.getElementById("amount").value);
 
-        result.textContent = ""; // reset messaggio
+        result.textContent = "";
 
         if (from === to) {
           result.textContent = "Scegli due valute diverse.";
@@ -264,15 +279,7 @@
           return;
         }
 
-        // Ottieni l'UID associato all'username
-        const uidSnapshot = await get(ref(db, `usernames/${username}`));
-        if (!uidSnapshot.exists()) {
-          result.textContent = "Utente non trovato.";
-          return;
-        }
-        const uid = uidSnapshot.val();
-
-        // Ottieni il wallet dell'utente usando l'UID
+        const uid = currentUser.uid;
         const walletRef = ref(db, `users/${uid}/wallet`);
         const snapshot = await get(walletRef);
         const wallet = snapshot.val() || {};
@@ -284,9 +291,11 @@
 
         const converted = amount * (rates[from] / rates[to]);
 
+        // Aggiorna il wallet localmente
         wallet[from] -= amount;
         wallet[to] = (wallet[to] || 0) + converted;
 
+        // Salva il nuovo wallet
         await set(walletRef, wallet);
 
         result.textContent = `Scambio completato! Hai ricevuto ${converted.toFixed(3)} ${to}.`;
@@ -317,7 +326,7 @@
       themeToggle.textContent = isLight ? "☀️" : "🌙";
     });
 
-    // Canvas bubbles
+    // Canvas bubbles - il tuo codice originale qui
     const canvas = document.getElementById("bubble-canvas");
     const ctx = canvas.getContext("2d");
     let width, height, bubbles;
