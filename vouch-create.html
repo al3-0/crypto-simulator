@@ -261,155 +261,178 @@
     </form>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-      authDomain: "coins-7104d.firebaseapp.com",
-      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-      projectId: "coins-7104d",
-      storageBucket: "coins-7104d.appspot.com",
-      messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F"
+  const firebaseConfig = {
+    apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+    authDomain: "coins-7104d.firebaseapp.com",
+    databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+    projectId: "coins-7104d",
+    storageBucket: "coins-7104d.appspot.com",
+    messagingSenderId: "893938643778",
+    appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+    measurementId: "G-QSY10CVX1F"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Prendiamo username da localStorage
+  const username = localStorage.getItem("user");
+  if (!username) window.location.href = "index.html";
+
+  // Lista username autorizzati
+  const authorizedUsers = ["Ale"];
+
+  if (!authorizedUsers.includes(username)) {
+    alert("Non sei autorizzato a creare vouch.");
+    window.location.href = "dashboard.html";
+  }
+
+  // Funzione per ottenere userId da username
+  async function getUserIdByUsername(username) {
+    try {
+      const usernameRef = ref(db, `usernames/${username}`);
+      const snapshot = await get(usernameRef);
+      return snapshot.exists() ? snapshot.val() : null;
+    } catch (e) {
+      console.error("Errore recuperando userId:", e);
+      return null;
+    }
+  }
+
+  let userId = null;
+
+  // Dopo aver ottenuto userId, carichiamo i vouch
+  async function init() {
+    userId = await getUserIdByUsername(username);
+    if (!userId) {
+      alert("Utente non trovato.");
+      window.location.href = "index.html";
+      return;
+    }
+    loadUserVouches();
+  }
+
+  const form = document.getElementById("vouch-form");
+  const msg = document.getElementById("message");
+
+  // Container vouch come nel tuo originale (non modificato)
+  const validVouchesContainer = document.createElement("div");
+  validVouchesContainer.id = "valid-vouches";
+  validVouchesContainer.style.marginTop = "30px";
+
+  const expiredVouchesContainer = document.createElement("div");
+  expiredVouchesContainer.id = "expired-vouches";
+  expiredVouchesContainer.style.marginTop = "20px";
+
+  form.parentNode.appendChild(validVouchesContainer);
+  form.parentNode.appendChild(expiredVouchesContainer);
+
+  async function loadUserVouches() {
+    try {
+      const vouchesRef = ref(db, 'vouches');
+      const snapshot = await get(vouchesRef);
+      const allVouches = snapshot.val() || {};
+
+      const now = Date.now();
+
+      const validVouches = [];
+      const expiredVouches = [];
+
+      // Ora filtriamo i vouch confrontando vouch.from con userId (non username)
+      Object.entries(allVouches).forEach(([code, vouch]) => {
+        if (vouch.from === userId) {
+          if (vouch.expired === true || (vouch.expiryDate && vouch.expiryDate < now)) {
+            expiredVouches.push({ code, ...vouch });
+          } else {
+            validVouches.push({ code, ...vouch });
+          }
+        }
+      });
+
+      validVouchesContainer.innerHTML = `
+        <h3>Vouch Validi</h3>
+        ${validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
+          `<ul>${validVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
+      `;
+
+      expiredVouchesContainer.innerHTML = `
+        <h3>Vouch Scaduti</h3>
+        ${expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
+          `<ul>${expiredVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
+      `;
+    } catch (e) {
+      console.error("Errore caricando i vouch:", e);
+    }
+  }
+
+  let codeGenerated = false;
+
+  function generateCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let raw = "";
+    for (let i = 0; i < 12; i++) {
+      raw += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return raw;
+  }
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (codeGenerated) {
+      msg.textContent = "Hai già generato un codice. Ricarica la pagina per crearne un altro.";
+      return;
+    }
+    const coin = form.coin.value;
+    const amount = parseFloat(form.amount.value);
+
+    if (!coin || isNaN(amount) || amount <= 0) {
+      msg.textContent = "Inserisci dati validi.";
+      return;
+    }
+
+    if (!userId) {
+      msg.textContent = "Utente non identificato, ricarica la pagina.";
+      return;
+    }
+
+    msg.textContent = "Generazione codice...";
+    const newCode = generateCode();
+
+    const vouchData = {
+      from: userId,  // qui inseriamo userId
+      coin,
+      amount,
+      expired: false,
+      createdAt: Date.now(),
+      expiryDate: Date.now() + 30 * 24 * 3600 * 1000,
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    try {
+      await set(ref(db, `vouches/${newCode}`), vouchData);
 
-const user = localStorage.getItem("user");
-if (!user) window.location.href = "index.html";
+      msg.innerHTML = `
+        <p>Vouch creato: <code>${newCode}</code></p>
+        <button id="copy-code">Copia codice</button>
+      `;
+      codeGenerated = true;
 
-const authorizedUsers = ["Ale"]; // metti i nomi autorizzati
-
-if (!authorizedUsers.includes(user)) {
-  const submitButton = document.querySelector('button[type="submit"]');
-  submitButton.disabled = true;
-  submitButton.style.cursor = "not-allowed";
-  alert("Non sei autorizzato a creare vouch.");
-  window.location.href = "dashboard.html";
-}
-
-    const form = document.getElementById("vouch-form");
-    const msg = document.getElementById("message");
-
-    const validVouchesContainer = document.createElement("div");
-    validVouchesContainer.id = "valid-vouches";
-    validVouchesContainer.style.marginTop = "30px";
-
-    const expiredVouchesContainer = document.createElement("div");
-    expiredVouchesContainer.id = "expired-vouches";
-    expiredVouchesContainer.style.marginTop = "20px";
-
-    form.parentNode.appendChild(validVouchesContainer);
-    form.parentNode.appendChild(expiredVouchesContainer);
-
-    // Funzione per caricare e mostrare i vouch
-    async function loadUserVouches() {
-      try {
-        const vouchesRef = ref(db, 'vouches');
-        const snapshot = await get(vouchesRef);
-        const allVouches = snapshot.val() || {};
-
-        const now = Date.now();
-
-        // Divide i vouch per validi e scaduti
-        const validVouches = [];
-        const expiredVouches = [];
-
-        Object.entries(allVouches).forEach(([code, vouch]) => {
-          if (vouch.from === user) {
-            if (vouch.expired === true) {
-              expiredVouches.push({ code, ...vouch });
-            } else if (vouch.expiryDate && vouch.expiryDate < now) {
-              expiredVouches.push({ code, ...vouch });
-            } else {
-              validVouches.push({ code, ...vouch });
-            }
-          }
+      document.getElementById("copy-code").addEventListener("click", () => {
+        navigator.clipboard.writeText(newCode).then(() => {
+          msg.textContent = "Codice copiato negli appunti!";
         });
+      });
 
-        validVouchesContainer.innerHTML = `
-          <h3>Vouch Validi</h3>
-          ${validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
-            `<ul>${validVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
-        `;
+      loadUserVouches();
 
-        expiredVouchesContainer.innerHTML = `
-          <h3>Vouch Scaduti</h3>
-          ${expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
-            `<ul>${expiredVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
-        `;
-      } catch (e) {
-        console.error("Errore caricando i vouch:", e);
-      }
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "Errore nella creazione del vouch.";
     }
-
-    loadUserVouches();
-
-    let codeGenerated = false; // blocca nuova generazione dopo copia
-
-    function generateCode() {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      let raw = "";
-      for (let i = 0; i < 12; i++) {
-        raw += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return raw;
-    }
-
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      if (codeGenerated) {
-        msg.textContent = "Hai già generato un codice. Ricarica la pagina per crearne un altro.";
-        return;
-      }
-      const coin = form.coin.value;
-      const amount = parseFloat(form.amount.value);
-
-      if (!coin || isNaN(amount) || amount <= 0) {
-        msg.textContent = "Inserisci dati validi.";
-        return;
-      }
-
-      msg.textContent = "Generazione codice...";
-      const newCode = generateCode();
-
-      // Salvataggio nel DB
-      const vouchData = {
-        from: user,
-        coin,
-        amount,
-        expired: false,
-        createdAt: Date.now(),
-        expiryDate: Date.now() + 30 * 24 * 3600 * 1000, // scade in 30 giorni
-      };
-
-      try {
-        await set(ref(db, `vouches/${newCode}`), vouchData);
-
-        // Mostra codice generato con copia
-        msg.innerHTML = `
-          <p>Vouch creato: <code>${newCode}</code></p>
-          <button id="copy-code">Copia codice</button>
-        `;
-        codeGenerated = true;
-
-        document.getElementById("copy-code").addEventListener("click", () => {
-          navigator.clipboard.writeText(newCode).then(() => {
-            msg.textContent = "Codice copiato negli appunti!";
-          });
-        });
-
-        loadUserVouches();
-
-      } catch (err) {
-        console.error(err);
-        msg.textContent = "Errore nella creazione del vouch.";
-      }
-    });
+  });
 
     // NAVBAR TOGGLE
     const navToggle = document.getElementById("nav-toggle");
