@@ -270,12 +270,12 @@
     const user = localStorage.getItem("user");
     if (!user) window.location.href = "index.html";
 
-    const usernameEl = document.getElementById("username");
-    const passwordEl = document.getElementById("password");
-btcEl.textContent = (data.wallet?.BTC || 0).toFixed(3);
-ethEl.textContent = (data.wallet?.ETH || 0).toFixed(3);
-ltcEl.textContent = (data.wallet?.LTC || 0).toFixed(3);
-    const togglePasswordEl = document.querySelector(".toggle-password");
+const usernameEl = document.getElementById("username");
+const passwordEl = document.getElementById("password");
+const btcEl = document.getElementById("btc");
+const ethEl = document.getElementById("eth");
+const ltcEl = document.getElementById("ltc");
+const togglePasswordEl = document.querySelector(".toggle-password");
 
     // Recupera i dati utente da Firebase
     get(ref(db, `users/${user}`))
