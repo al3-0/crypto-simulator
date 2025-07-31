@@ -370,11 +370,20 @@
     const db = getDatabase(app);
 
     // Utente loggato (localStorage)
-    const user = localStorage.getItem("user");
-    if (!user) {
-      window.location.href = "index.html";
-      throw new Error("Utente non loggato");
-    }
+const allowedUsers = ["Ale"]; // aggiungi i nomi permessi qui
+
+const user = localStorage.getItem("user");
+
+if (!user) {
+  window.location.href = "index.html";
+  throw new Error("Utente non loggato");
+}
+
+if (!allowedUsers.includes(user)) {
+  window.location.href = "dashboard.html";
+  throw new Error("Accesso negato per questo utente");
+}
+
 
     const form = document.getElementById("redeem-form");
     const input = form['vouch-code'];
@@ -447,7 +456,7 @@
           return;
         }
         redeemedList.innerHTML = redeemed
-          .map(v => <li><span>${v.code}</span><span>${v.redeemedAt ? new Date(v.redeemedAt).toLocaleString() : ""}</span></li>)
+          .map(v => `<li><span>${v.code}</span><span>${v.redeemedAt ? new Date(v.redeemedAt).toLocaleString() : ""}</span></li>`)
           .join("");
       } catch (err) {
         redeemedList.innerHTML = "<li>Errore nel caricamento dei vouch.</li>";
@@ -587,7 +596,7 @@
       }
       draw() {
         ctx.beginPath();
-        ctx.fillStyle = rgba(123, 85, 255, ${this.alpha});
+        ctx.fillStyle = `rgba(123, 85, 255, ${this.alpha})`;
         ctx.shadowColor = "rgba(123, 85, 255, 0.8)";
         ctx.shadowBlur = 10;
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
