@@ -507,18 +507,17 @@ body.light-theme #nav-toggle span {
       init();
     })();
 
-    // Nuovo: controllo visibilità scheda e limitazione gocce a 10 al minuto
+    // Modifica spawnRaindrops per limitare a max 10 gocce al minuto
     let raindropInterval;
     let dropCountPerMinute = 0;
-    let dropCountResetInterval;
 
-    function spawnRaindropsLimited() {
+    function spawnRaindrops() {
       raindropInterval = setInterval(() => {
         if (dropCountPerMinute >= 10) return;
         const drop = document.createElement("div");
         drop.className = "raindrop";
         drop.style.left = Math.random() * 100 + "vw";
-        drop.style.top = "-30px";
+        drop.style.top = "-30px"; // parte dall'alto
         drop.addEventListener("click", () => {
           if (drop.dataset.clicked) return;
           drop.dataset.clicked = "true";
@@ -537,41 +536,36 @@ body.light-theme #nav-toggle span {
           drop.remove();
           dropCountPerMinute--;
         }, 6000);
-      }, 6000); // 6 sec interval = max 10 drops per minute approx
+      }, 6000); // 6 sec intervallo per massimo 10 gocce/minuto
     }
 
-    // Resetta il contatore di gocce ogni minuto
-    function startDropCountReset() {
-      dropCountResetInterval = setInterval(() => {
-        dropCountPerMinute = 0;
-      }, 60000);
-    }
+    // Resetta dropCountPerMinute ogni 60 secondi (già presente in codice)
+    // Mantieni la funzione originale
 
-    // Gestione visibilità scheda per mettere in pausa/riavviare il timer e le gocce
+    // Gestione visibilità scheda per bloccare timer e spawn gocce
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         clearInterval(timerInterval);
         clearInterval(raindropInterval);
       } else {
         startCountdown();
-        spawnRaindropsLimited();
+        spawnRaindrops();
       }
     });
 
-    // Inizializza il gioco modificato
-    async function initGameModified() {
+    // Inizializza gioco con le modifiche
+    async function initGame() {
       const snap = await get(ref(db, `users/${user}`));
       if (!snap.exists()) return;
       const userData = snap.val();
       btc = userData.wallet?.BTC ?? 0;
       updateBtc(btc);
       startCountdown();
-      spawnRaindropsLimited();
+      spawnRaindrops();
       startDropCountReset();
     }
 
-    initGameModified();
-
+    initGame();
   </script>
 </body>
 </html>
