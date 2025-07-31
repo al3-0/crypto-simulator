@@ -80,6 +80,7 @@
 
   <!-- Import Firebase con ESM inline -->
 <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -100,11 +101,20 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 let user = null;
+
+const submitButton = document.querySelector('#register-form button[type="submit"]');
+submitButton.disabled = true; // disabilita subito il bottone finché non c’è user
+
 signInAnonymously(auth).catch((error) => {
   console.error("Errore login anonimo:", error);
 });
+
 onAuthStateChanged(auth, (u) => {
   user = u;
+  console.log("Utente autenticato:", user ? user.uid : null);
+  if (user) {
+    submitButton.disabled = false; // abilita il bottone appena user è pronto
+  }
 });
 
 async function getIP() {
@@ -128,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const submitButton = form.querySelector('button[type="submit"]');
     submitButton.disabled = true;
 
     try {
@@ -178,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      console.log("Scrivo username -> uid:", user.uid);
       // Scrivi username -> uid
       await set(usernameRef, user.uid);
 
