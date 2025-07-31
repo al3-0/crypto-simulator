@@ -78,24 +78,26 @@
 
   <script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
-  <!-- Import Firebase con ESM inline -->
+  <!-- Firebase e codice di registrazione -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-  authDomain: "coins-7104d.firebaseapp.com",
-  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-  projectId: "coins-7104d",
-  storageBucket: "coins-7104d.firebasestorage.app",
-  messagingSenderId: "893938643778",
-  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-  measurementId: "G-QSY10CVX1F"
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.firebasestorage.app",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
     async function getIP() {
       try {
@@ -137,18 +139,14 @@
         }
 
         try {
-          const userRef = ref(db, `users/${username}`);
-          const snapshot = await get(userRef);
-
-          if (snapshot.exists()) {
-            alert("Username già in uso.");
-            return;
-          }
-
+          // Usa email fittizia per Firebase Auth
+          const fakeEmail = `${username}@al3-0.fake`;
+          const userCred = await createUserWithEmailAndPassword(auth, fakeEmail, password);
+          const uid = userCred.user.uid;
           const ip = await getIP();
 
-          await set(userRef, {
-            password,
+          await set(ref(db, `users/${uid}`), {
+            username,
             ip,
             wallet: {
               BTC: 0,
@@ -158,11 +156,15 @@
             recaptchaToken: token
           });
 
-          localStorage.setItem("user", username);
+          localStorage.setItem("user", uid);
           window.location.href = "dashboard.html";
         } catch (error) {
           console.error(error);
-          alert("Errore durante la registrazione.");
+          if (error.code === "auth/email-already-in-use") {
+            alert("Username già registrato.");
+          } else {
+            alert("Errore durante la registrazione.");
+          }
         }
       });
     });
