@@ -301,7 +301,7 @@ ltcEl.textContent = (data.wallet?.LTC || 0).toFixed(3);
     function togglePassword() {
       passwordVisible = !passwordVisible;
       passwordEl.textContent = passwordVisible ? togglePasswordEl.dataset.password : '••••••';
-      togglePasswordEl.textContent = passwordVisible ? '🙈' : '👁️';
+      togglePasswordEl.textContent = passwordVisible ? '👁️' : '🔒';
     }
 
     togglePasswordEl.addEventListener('click', togglePassword);
