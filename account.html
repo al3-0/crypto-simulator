@@ -5,17 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Account</title>
   <link rel="icon" href="logo.png" type="image/png" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
+    /* Body e stili principali */
     body {
       margin: 0;
-      padding: 100px 20px 20px; /* padding top per navbar fissa */
+      min-height: 100vh;
+      padding: 100px 20px 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
       overflow-x: hidden;
       position: relative;
-      min-height: 100vh;
       transition: background 0.3s ease, color 0.3s ease;
     }
 
@@ -50,7 +51,7 @@
     }
 
     .info div {
-      background: #38386a;
+      background: #3b3b65;
       padding: 16px 20px;
       border-radius: 12px;
       display: flex;
@@ -71,18 +72,15 @@
     .value {
       font-weight: bold;
       color: #fff;
-      display: flex;
-      align-items: center;
     }
 
     .toggle-password {
       cursor: pointer;
       margin-left: 10px;
       color: #7e5fff;
-      user-select: none;
     }
 
-    /* ==== NAVBAR VERSIONE VOUCH-CREATE ==== */
+    /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
     nav.navbar {
       position: fixed;
       top: 0;
@@ -133,11 +131,6 @@
     }
 
     .nav-menu li a:hover, #theme-toggle:hover {
-      background-color: #4b3ca7;
-      color: white;
-    }
-
-    .nav-menu li a.active {
       background-color: #4b3ca7;
       color: white;
     }
@@ -203,24 +196,44 @@
     #nav-toggle.open span:nth-child(2) { opacity: 0; }
     #nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
 
-    /* CANVAS BOLLE */
-    #bubble-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 1;
+    /* BODY LIGHT THEME */
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+
+    body.light-theme .info div {
+      background: #e2e2ff;
+      color: #222;
+    }
+
+    body.light-theme .info div:hover {
+      background: #d0d0ff;
+    }
+
+    body.light-theme .info label {
+      color: #444;
+    }
+
+    body.light-theme .value {
+      color: #111;
+    }
+
+    body.light-theme .toggle-password {
+      color: #7b5fff;
     }
   </style>
 </head>
 <body>
-  <canvas id="bubble-canvas"></canvas>
-
-  <nav class="navbar">
+  <nav class="navbar" role="navigation" aria-label="Primary Navigation">
     <div class="nav-container">
-      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <a href="dashboard.html" class="logo-link" aria-label="Homepage"><img src="logo.png" alt="Logo" /></a>
       <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
@@ -228,7 +241,7 @@
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html" class="active">Account</a></li>
+        <li><a href="account.html">Account</a></li>
         <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
       </ul>
     </div>
@@ -242,7 +255,7 @@
         <label>Password:</label>
         <span class="value">
           <span id="password">••••••</span>
-          <span class="toggle-password" onclick="togglePassword()">👁️</span>
+          <span class="toggle-password" role="button" tabindex="0" aria-label="Mostra/nascondi password">👁️</span>
         </span>
       </div>
       <div><label>Bitcoin (BTC):</label><span class="value" id="btc">0.000</span></div>
@@ -252,133 +265,82 @@
   </main>
 
   <script type="module">
-    import { db, ref, get, onValue } from './js/firebase.js';
+    import { db, ref, get } from './js/firebase.js';
 
-    // Gestione menu mobile navbar
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-    navToggle.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      navToggle.classList.toggle('open');
-      navToggle.setAttribute('aria-expanded', navToggle.classList.contains('open'));
+    const user = localStorage.getItem("user");
+    if (!user) window.location.href = "index.html";
+
+    const usernameEl = document.getElementById("username");
+    const passwordEl = document.getElementById("password");
+    const btcEl = document.getElementById("btc");
+    const ethEl = document.getElementById("eth");
+    const ltcEl = document.getElementById("ltc");
+    const togglePasswordEl = document.querySelector(".toggle-password");
+
+    // Recupera i dati utente da Firebase
+    get(ref(db, `users/${user}`))
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          usernameEl.textContent = user;
+          passwordEl.textContent = '••••••';
+          btcEl.textContent = (data.btc || 0).toFixed(3);
+          ethEl.textContent = (data.eth || 0).toFixed(3);
+          ltcEl.textContent = (data.ltc || 0).toFixed(3);
+          togglePasswordEl.dataset.password = data.password || '';
+        } else {
+          alert("Utente non trovato");
+        }
+      })
+      .catch((error) => {
+        console.error("Errore nel recupero dati:", error);
+      });
+
+    // Toggle password visibilità
+    let passwordVisible = false;
+    function togglePassword() {
+      passwordVisible = !passwordVisible;
+      passwordEl.textContent = passwordVisible ? togglePasswordEl.dataset.password : '••••••';
+      togglePasswordEl.textContent = passwordVisible ? '🙈' : '👁️';
+    }
+
+    togglePasswordEl.addEventListener('click', togglePassword);
+    togglePasswordEl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') togglePassword();
     });
 
-    // Toggle tema semplice (non presente nel codice originale, ma presente nel vouch-create)
-    const themeToggle = document.getElementById('theme-toggle');
-    themeToggle.addEventListener('click', () => {
-      if(document.body.dataset.theme === 'dark'){
-        document.body.dataset.theme = 'light';
+    // Toggle navbar menu mobile
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    navToggle.addEventListener("click", () => {
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", navToggle.classList.contains("open"));
+    });
+
+    // Toggle tema chiaro/scuro con salvataggio locale
+    const themeToggle = document.getElementById("theme-toggle");
+
+    function setTheme(theme) {
+      if (theme === 'light') {
+        document.body.classList.add('light-theme');
         themeToggle.textContent = '🌙';
       } else {
-        document.body.dataset.theme = 'dark';
+        document.body.classList.remove('light-theme');
         themeToggle.textContent = '☀️';
       }
+      localStorage.setItem('theme', theme);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+      setTheme(currentTheme === 'light' ? 'dark' : 'light');
     });
 
-    // Toggle password visibile/nascosta
-    function togglePassword() {
-      const pwdSpan = document.getElementById('password');
-      if(pwdSpan.textContent === '••••••') {
-        pwdSpan.textContent = window.userPassword || '********';
-      } else {
-        pwdSpan.textContent = '••••••';
-      }
-    }
-
-    // Funzione per caricare dati utente
-    function loadUserData(uid) {
-      const userRef = ref(db, 'users/' + uid);
-      onValue(userRef, (snapshot) => {
-        if(snapshot.exists()){
-          const data = snapshot.val();
-          document.getElementById('username').textContent = data.username || '--';
-          window.userPassword = data.password || '';
-          document.getElementById('password').textContent = '••••••';
-          document.getElementById('btc').textContent = data.btc || 0;
-          document.getElementById('eth').textContent = data.eth || 0;
-          document.getElementById('ltc').textContent = data.ltc || 0;
-        } else {
-          alert('Utente non trovato');
-        }
-      });
-    }
-
-    // Carica dati utente appena la pagina si carica
-    // Simuliamo il login con UID da sessionStorage
-    const loggedInUID = sessionStorage.getItem('uid');
-    if(loggedInUID) {
-      loadUserData(loggedInUID);
-    } else {
-      alert('Devi effettuare il login per vedere i dati dell\'account');
-      window.location.href = 'login.html';
-    }
-
-    // --- CANVAS BOLLE ----
-    const canvas = document.getElementById('bubble-canvas');
-    const ctx = canvas.getContext('2d');
-    let bubbles = [];
-    const colors = ['#bb86fc', '#7e5fff', '#5c4b9d', '#4b3ca7'];
-    const maxBubbles = 60;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    class Bubble {
-      constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + Math.random() * 100;
-        this.radius = 8 + Math.random() * 12;
-        this.speed = 0.3 + Math.random() * 1.0;
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.opacity = 0.2 + Math.random() * 0.3;
-      }
-      update() {
-        this.y -= this.speed;
-        if(this.y < -this.radius) {
-          this.reset();
-        }
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(${hexToRgb(this.color)},${this.opacity})`;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 10;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function hexToRgb(hex) {
-      const bigint = parseInt(hex.slice(1), 16);
-      const r = (bigint >> 16) & 255;
-      const g = (bigint >> 8) & 255;
-      const b = bigint & 255;
-      return `${r},${g},${b}`;
-    }
-
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for(let bubble of bubbles) {
-        bubble.update();
-        bubble.draw();
-      }
-      requestAnimationFrame(animate);
-    }
-
-    // Inizializza le bolle
-    for(let i=0; i < maxBubbles; i++) {
-      bubbles.push(new Bubble());
-    }
-    animate();
-
-    window.togglePassword = togglePassword; // rendi la funzione globale
+    // Carica il tema salvato
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
   </script>
 </body>
 </html>
