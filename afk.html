@@ -351,17 +351,20 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const user = localStorage.getItem("user");
-if (!user) window.location.href = "index.html";
+if (!user) {
+  // Se non c'è utente loggato, rimanda alla login
+  window.location.href = "index.html";
+}
 
 let countdown = 180;
 let timerInterval;
-let dropCountPerMinute = 0;
 let btc = 0;
-let isPageVisible = true;
 let uid = null;
+let isPageVisible = true;
 
 async function initGame() {
   try {
+    // Recupero l'UID tramite username
     const usernameSnap = await get(ref(db, `usernames/${user}`));
     if (!usernameSnap.exists()) {
       alert("Utente non trovato");
@@ -370,6 +373,7 @@ async function initGame() {
     }
     uid = usernameSnap.val();
 
+    // Recupero i dati utente tramite UID
     const userSnap = await get(ref(db, `users/${uid}`));
     if (!userSnap.exists()) {
       alert("Dati utente non trovati");
@@ -378,7 +382,8 @@ async function initGame() {
     }
     const userData = userSnap.val();
 
-    btc = userData.wallet?.BTC ?? 0;
+    // Se non c'è wallet o BTC, inizializza a 0
+    btc = (userData.wallet && userData.wallet.BTC) ? userData.wallet.BTC : 0;
     updateBtc(btc);
 
     startCountdown();
@@ -395,15 +400,13 @@ function saveBtc() {
     console.warn("UID non definito, impossibile salvare BTC");
     return;
   }
-  console.log("Salvataggio BTC nel DB:", btc);
   update(ref(db, `users/${uid}/wallet`), { BTC: btc }).catch((err) => {
     console.error("Errore salvataggio BTC:", err);
   });
 }
 
 function updateBtc(amount) {
-  const btcStats = document.getElementById("btc-stats");
-  btcStats.textContent = `BTC: ${amount.toFixed(4)}`;
+  document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(4)}`;
 }
 
 function gainBtc(amount) {
@@ -420,16 +423,13 @@ function showBtcGain(amount) {
   document.body.appendChild(gainElem);
   gainElem.style.left = `${window.innerWidth / 2}px`;
   gainElem.style.top = `${window.innerHeight / 2}px`;
-  setTimeout(() => {
-    gainElem.remove();
-  }, 1200);
+  setTimeout(() => gainElem.remove(), 1200);
 }
 
 function startCountdown() {
   const timerElem = document.getElementById("timer");
   timerInterval = setInterval(() => {
     if (!isPageVisible) return;
-
     countdown--;
     const minutes = String(Math.floor(countdown / 60)).padStart(2, "0");
     const seconds = String(countdown % 60).padStart(2, "0");
@@ -437,36 +437,10 @@ function startCountdown() {
 
     if (countdown <= 0) {
       gainBtc(0.001); // Guadagni 0.001 BTC ogni 3 minuti
-      countdown = 180; // Reset timer
+      countdown = 180;
     }
   }, 1000);
 }
-
-const themeToggle = document.getElementById("theme-toggle");
-function applyTheme(theme) {
-  if (theme === "light") {
-    document.body.classList.add("light-theme");
-    themeToggle.textContent = "🌙";
-  } else {
-    document.body.classList.remove("light-theme");
-    themeToggle.textContent = "☀️";
-  }
-  localStorage.setItem("theme", theme);
-}
-themeToggle.addEventListener("click", () => {
-  const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
-  applyTheme(currentTheme === "light" ? "dark" : "light");
-});
-const savedTheme = localStorage.getItem("theme") || "dark";
-applyTheme(savedTheme);
-
-const navToggle = document.getElementById("nav-toggle");
-const navMenu = document.getElementById("nav-menu");
-navToggle.addEventListener("click", () => {
-  const isOpen = navMenu.classList.toggle("open");
-  navToggle.classList.toggle("open", isOpen);
-  navToggle.setAttribute("aria-expanded", isOpen);
-});
 
 document.addEventListener("visibilitychange", () => {
   isPageVisible = !document.hidden;
