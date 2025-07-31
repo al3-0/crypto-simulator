@@ -47,6 +47,16 @@
       background: #7a68e2;
       outline: none;
     }
+    input.input-error {
+      background-color: #a94442;
+    }
+    .error-message {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-top: -12px;
+      margin-bottom: 8px;
+      text-align: left;
+    }
     button {
       padding: 12px;
       border: none;
@@ -78,164 +88,155 @@
 
   <script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
-  <!-- Import Firebase con ESM inline -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-  authDomain: "coins-7104d.firebaseapp.com",
-  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-  projectId: "coins-7104d",
-  storageBucket: "coins-7104d.firebasestorage.app",
-  messagingSenderId: "893938643778",
-  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-  measurementId: "G-QSY10CVX1F"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.firebasestorage.app",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-let user = null;
-
-const submitButton = document.querySelector('#register-form button[type="submit"]');
-submitButton.disabled = true; // disabilita subito il bottone finché non c’è user
-
-// Login anonimo una volta all'inizio
-signInAnonymously(auth).catch((error) => {
-  console.error("Errore login anonimo:", error);
-});
-
-// Aggiorna user e abilita/disabilita bottone solo se autenticato anonimamente
-onAuthStateChanged(auth, (u) => {
-  user = u;
-  console.log("Utente autenticato:", user ? user.uid : null);
-  if (user && user.isAnonymous) {
-    submitButton.disabled = false;
-  } else {
+    let user = null;
+    const submitButton = document.querySelector('#register-form button[type="submit"]');
     submitButton.disabled = true;
-  }
-});
 
-async function getIP() {
-  try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const data = await res.json();
-    return data.ip;
-  } catch {
-    return '0.0.0.0';
-  }
-}
+    signInAnonymously(auth).catch((error) => {
+      console.error("Errore login anonimo:", error);
+    });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById('register-form');
+    onAuthStateChanged(auth, (u) => {
+      user = u;
+      submitButton.disabled = !(user && user.isAnonymous);
+    });
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    if (!user) {
-      alert("Attendi l'autenticazione...");
-      return;
+    async function getIP() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        return data.ip;
+      } catch {
+        return '0.0.0.0';
+      }
     }
 
-    submitButton.disabled = true;
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById('register-form');
+      const usernameInput = form.username;
+      const errorDiv = document.getElementById("username-error");
 
-    try {
-      const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'register' });
-      if (!token) {
-        alert("Errore nella verifica reCAPTCHA. Riprova.");
-        submitButton.disabled = false;
-        return;
-      }
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-      const username = form.username.value.trim();
-      const password = form.password.value;
-      const passwordConfirm = form.passwordConfirm.value;
-
-      if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
-        alert("Username non valido.");
-        submitButton.disabled = false;
-        return;
-      }
-      if (password.length < 6) {
-        alert("La password deve essere almeno di 6 caratteri.");
-        submitButton.disabled = false;
-        return;
-      }
-      if (password !== passwordConfirm) {
-        alert("Le password non corrispondono.");
-        submitButton.disabled = false;
-        return;
-      }
-
-      const userRef = ref(db, `users/${user.uid}`);
-      const usernameRef = ref(db, `usernames/${username}`);
-
-      // Controlla se utente esiste già
-      const userSnap = await get(userRef);
-      if (userSnap.exists()) {
-        alert("Utente già registrato.");
-        submitButton.disabled = false;
-        return;
-      }
-
-      // Controlla se username è già in uso
-      const usernameSnap = await get(usernameRef);
-      if (usernameSnap.exists()) {
-        alert("Username già in uso.");
-        submitButton.disabled = false;
-        return;
-      }
-
-      const ip = await getIP();
-
-      // Scrivi dati utente PRIMA
-      await set(userRef, {
-        username,
-        password,
-        ip,
-        wallet: {
-          BTC: 0,
-          ETH: 0,
-          LTC: 0
-        },
-        recaptchaToken: token
-      });
-
-      // Poi scrivi username -> uid
-      await set(usernameRef, user.uid);
-
-      localStorage.setItem("user", username);
-      window.location.href = "dashboard.html";
-
-    } catch (error) {
-      console.error(error);
-      alert(error.message || "Errore durante la registrazione.");
-
-      // rollback username se scritto
-      if (user && form.username.value.trim()) {
-        try {
-          const usernameRef = ref(db, `usernames/${form.username.value.trim()}`);
-          await remove(usernameRef);
-        } catch (removeError) {
-          console.error("Rollback fallito:", removeError);
+        if (!user) {
+          alert("Attendi l'autenticazione...");
+          return;
         }
-      }
-    } finally {
-      submitButton.disabled = false;
-    }
-  });
-});
-</script>
+
+        submitButton.disabled = true;
+        usernameInput.classList.remove("input-error");
+        errorDiv.textContent = "";
+
+        try {
+          const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'register' });
+          if (!token) {
+            alert("Errore nella verifica reCAPTCHA. Riprova.");
+            submitButton.disabled = false;
+            return;
+          }
+
+          const username = usernameInput.value.trim();
+          const password = form.password.value;
+          const passwordConfirm = form.passwordConfirm.value;
+
+          if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
+            alert("Username non valido.");
+            submitButton.disabled = false;
+            return;
+          }
+          if (password.length < 6) {
+            alert("La password deve essere almeno di 6 caratteri.");
+            submitButton.disabled = false;
+            return;
+          }
+          if (password !== passwordConfirm) {
+            alert("Le password non corrispondono.");
+            submitButton.disabled = false;
+            return;
+          }
+
+          const userRef = ref(db, `users/${user.uid}`);
+          const usernameRef = ref(db, `usernames/${username}`);
+
+          const userSnap = await get(userRef);
+          if (userSnap.exists()) {
+            alert("Utente già registrato.");
+            submitButton.disabled = false;
+            return;
+          }
+
+          const usernameSnap = await get(usernameRef);
+          if (usernameSnap.exists()) {
+            usernameInput.classList.add("input-error");
+            errorDiv.textContent = "Questo username è già in uso.";
+            submitButton.disabled = false;
+            return;
+          }
+
+          const ip = await getIP();
+
+          await set(userRef, {
+            username,
+            password,
+            ip,
+            wallet: {
+              BTC: 0,
+              ETH: 0,
+              LTC: 0
+            },
+            recaptchaToken: token
+          });
+
+          await set(usernameRef, user.uid);
+
+          localStorage.setItem("user", username);
+          window.location.href = "dashboard.html";
+
+        } catch (error) {
+          console.error(error);
+          alert(error.message || "Errore durante la registrazione.");
+          if (user && form.username.value.trim()) {
+            try {
+              const usernameRef = ref(db, `usernames/${form.username.value.trim()}`);
+              await remove(usernameRef);
+            } catch (removeError) {
+              console.error("Rollback fallito:", removeError);
+            }
+          }
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+    });
+  </script>
 </head>
 <body>
   <main role="main" aria-label="Registrazione Crypto Simulator">
     <h1>Registrazione</h1>
     <form id="register-form" novalidate>
       <input type="text" name="username" placeholder="Username" required />
+      <div id="username-error" class="error-message"></div>
       <input type="password" name="password" placeholder="Password" required />
       <input type="password" name="passwordConfirm" placeholder="Conferma Password" required />
       <button type="submit">Registrati</button>
