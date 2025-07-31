@@ -391,7 +391,11 @@ async function initGame() {
 }
 
 function saveBtc() {
-  if (!uid) return;
+  if (!uid) {
+    console.warn("UID non definito, impossibile salvare BTC");
+    return;
+  }
+  console.log("Salvataggio BTC nel DB:", btc);
   update(ref(db, `users/${uid}/wallet`), { BTC: btc }).catch((err) => {
     console.error("Errore salvataggio BTC:", err);
   });
