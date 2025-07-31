@@ -277,9 +277,18 @@
       if (from === to) return result.textContent = "Scegli due valute diverse.";
       if (isNaN(amount) || amount <= 0) return result.textContent = "Inserisci una quantità valida.";
 
-      const walletRef = ref(db, `users/${username}/wallet`);
-      const snapshot = await get(walletRef);
-      const wallet = snapshot.val() || {};
+// Ottieni l'UID associato all'username
+const uidSnapshot = await get(ref(db, `usernames/${username}`));
+if (!uidSnapshot.exists()) {
+  result.textContent = "Utente non trovato.";
+  return;
+}
+const uid = uidSnapshot.val();
+
+// Ottieni il wallet dell'utente usando l'UID
+const walletRef = ref(db, `users/${uid}/wallet`);
+const snapshot = await get(walletRef);
+const wallet = snapshot.val() || {};
 
       if (!wallet[from] || wallet[from] < amount) {
         result.textContent = "Fondi insufficienti.";
