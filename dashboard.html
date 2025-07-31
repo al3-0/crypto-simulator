@@ -321,7 +321,7 @@
   <!-- SCRIPT JS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -339,21 +339,38 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       // Check user logged in
-      const username = localStorage.getItem('user');
-      if (!username) {
-        window.location.href = "index.html";
-        return;
-      }
-      document.getElementById('username').textContent = username;
+const username = localStorage.getItem('user');
+if (!username) {
+  window.location.href = "index.html";
+  return;
+}
+document.getElementById('username').textContent = username;
 
-      // Real-time wallet update
-      const walletRef = ref(db, `users/${username}/wallet`);
+// Ottieni l'UID dal nodo "usernames"
+const usernameRef = ref(db, `usernames/${username}`);
+get(usernameRef)
+  .then((snapshot) => {
+    if (snapshot.exists()) {
+      const uid = snapshot.val();
+
+      // Ora ottieni il wallet con l'uid
+      const walletRef = ref(db, `users/${uid}/wallet`);
       onValue(walletRef, (snapshot) => {
         const wallet = snapshot.val() || {};
         document.getElementById("btc-amount").textContent = (wallet.BTC || 0).toFixed(3);
         document.getElementById("eth-amount").textContent = (wallet.ETH || 0).toFixed(3);
         document.getElementById("ltc-amount").textContent = (wallet.LTC || 0).toFixed(3);
       });
+    } else {
+      alert("Errore: utente non trovato nel database.");
+      localStorage.removeItem('user');
+      window.location.href = "index.html";
+    }
+  })
+  .catch((error) => {
+    console.error("Errore nel recupero UID:", error);
+    alert("Errore nel caricamento dei dati.");
+  });
 
       // Theme toggle
       const themeBtn = document.getElementById('theme-toggle');
