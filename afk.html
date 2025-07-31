@@ -236,34 +236,6 @@
       z-index: 1;
     }
 
-    /* ==== BOLLE CADENTI ==== */
-    #raindrop-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 5;
-      overflow: visible;
-    }
-    .raindrop {
-      position: absolute;
-      top: -50px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #4488ffdd;
-      box-shadow: 0 0 8px #4488ffcc;
-      cursor: pointer;
-      pointer-events: auto;
-      user-select: none;
-      transition: transform 0.2s ease;
-    }
-    .raindrop:active {
-      transform: scale(0.8);
-    }
-
     /* ==== GAIN ANIMATIONS ==== */
     .btc-gained {
       position: fixed;
@@ -287,6 +259,32 @@
         transform: translateY(-60px);
       }
     }
+
+    /* ==== RAINDROP BOLLE CADENTI ==== */
+    #raindrop-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 5;
+      overflow: visible;
+    }
+
+    .raindrop {
+      position: fixed;
+      width: 15px;
+      height: 15px;
+      background: rgba(187, 134, 252, 0.8);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #bb86fc;
+      cursor: pointer;
+      user-select: none;
+      pointer-events: auto;
+      z-index: 5;
+      transition: opacity 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -301,8 +299,9 @@
         aria-label="Toggle navigation menu"
         role="button"
         aria-expanded="false"
-        ><span></span><span></span><span></span></div
       >
+        <span></span><span></span><span></span>
+      </div>
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
@@ -334,152 +333,139 @@
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-      authDomain: "coins-7104d.firebaseapp.com",
-      databaseURL:
-        "https://coins-7104d-default-rtdb.firebaseio.com",
-      projectId: "coins-7104d",
-      storageBucket: "coins-7104d.appspot.com",
-      messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F",
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9VTQ",
+      authDomain: "test-9a519.firebaseapp.com",
+      databaseURL: "https://test-9a519-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "test-9a519",
+      storageBucket: "test-9a519.appspot.com",
+      messagingSenderId: "870240406897",
+      appId: "1:870240406897:web:5d8d9f362c08cda0fa16ef",
+      measurementId: "G-MRS7VTT6RD"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Recupero utente da localStorage come redeem.html
-    const user = localStorage.getItem("user");
-    if (!user) {
-      window.location.href = "index.html";
-      throw new Error("Utente non loggato");
+    // UTENTI SIMULATI
+    const user = "user1";
+
+    // ELEMENTI DOM
+    const btcStats = document.getElementById("btc-stats");
+    const timerDisplay = document.getElementById("timer");
+
+    // TIMER 3 MINUTI
+    let timeLeft = 180;
+    let timerId = null;
+
+    function formatTime(t) {
+      const m = Math.floor(t / 60).toString().padStart(2, "0");
+      const s = (t % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
     }
 
-    let countdown = 180;
-    let timerInterval;
-
-    async function initGame() {
-      const snap = await get(ref(db, `users/${user}`));
-      if (!snap.exists()) {
-        alert("Utente non trovato.");
-        return (window.location.href = "login.html");
-      }
-      const userData = snap.val();
-      let btc = userData.wallet?.BTC ?? 0;
-      updateBtc(btc);
-      startCountdown(btc);
-      startRaindrops(btc);
-    }
-
-    function updateBtc(amount) {
-      document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(
-        4
-      )}`;
-    }
-
-    function startCountdown(btc) {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        countdown--;
-        const min = String(Math.floor(countdown / 60)).padStart(2, "0");
-        const sec = String(countdown % 60).padStart(2, "0");
-        document.getElementById("timer").textContent = `${min}:${sec}`;
-
-        if (countdown <= 0) {
-          countdown = 180;
-          btc += 0.05;
-          updateBtc(btc);
-          update(ref(db, `users/${user}/wallet`), { BTC: btc });
-          spawnDrop("+0.05 BTC");
-        }
-      }, 1000);
+    function updateBtc(btc) {
+      btcStats.textContent = `BTC: ${btc.toFixed(4)}`;
     }
 
     function spawnDrop(text) {
       const drop = document.createElement("div");
       drop.className = "btc-gained";
-      drop.style.left = Math.random() * 80 + 10 + "vw";
-      drop.style.top = Math.random() * 60 + 10 + "vh";
       drop.textContent = text;
+      drop.style.left = Math.random() * window.innerWidth + "px";
+      drop.style.top = window.innerHeight - 100 + "px";
       document.body.appendChild(drop);
       setTimeout(() => drop.remove(), 1200);
     }
 
-    // NAVBAR MOBILE TOGGLE
-    const navToggle = document.getElementById("nav-toggle");
-    const navMenu = document.getElementById("nav-menu");
+    // TIMER CON AGGIORNAMENTO DEL DATABASE
+    function startTimer() {
+      timerId = setInterval(async () => {
+        if (timeLeft <= 0) {
+          clearInterval(timerId);
+          timerDisplay.textContent = "Tempo scaduto";
+          return;
+        }
+        timeLeft--;
+        timerDisplay.textContent = formatTime(timeLeft);
 
-    navToggle.addEventListener("click", () => {
-      const expanded = navToggle.getAttribute("aria-expanded") === "true";
-      navToggle.setAttribute("aria-expanded", !expanded);
-      navToggle.classList.toggle("open");
-      navMenu.classList.toggle("open");
-    });
+        // Incrementa BTC ogni secondo
+        try {
+          const snap = await get(ref(db, `users/${user}`));
+          if (snap.exists()) {
+            let btc = snap.val().wallet?.BTC ?? 0;
+            btc = btc + 0.0001; // Incremento costante nel tempo
+            btc = parseFloat(btc.toFixed(8));
+            updateBtc(btc);
+            await update(ref(db, `users/${user}/wallet`), { BTC: btc });
+          }
+        } catch (e) {
+          console.error("Errore aggiornamento BTC", e);
+        }
+      }, 1000);
+    }
 
-    navToggle.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        navToggle.click();
-      }
-    });
+    startTimer();
 
-    // BUBBLE ANIMAZIONE CANVAS
+    // ==== CANVAS BUBBLES (BOLLE CHE SALGONO) ====
     const canvas = document.getElementById("bubble-canvas");
     const ctx = canvas.getContext("2d");
-    let width, height;
 
+    let w, h;
     function resize() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
     }
     resize();
     window.addEventListener("resize", resize);
 
     class Bubble {
       constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = Math.random() * width;
-        this.y = height + Math.random() * 100;
-        this.radius = 5 + Math.random() * 15;
-        this.speed = 1 + Math.random() * 2;
-        this.alpha = 0.4 + Math.random() * 0.6;
-        this.angle = Math.random() * Math.PI * 2;
-        this.angleSpeed = (Math.random() - 0.5) * 0.02;
+        this.x = Math.random() * w;
+        this.y = h + Math.random() * 300;
+        this.size = 10 + Math.random() * 20;
+        this.speed = 1 + Math.random() * 3;
+        this.alpha = 0.2 + Math.random() * 0.3;
       }
       update() {
         this.y -= this.speed;
-        this.x += Math.sin(this.angle) * 0.5;
-        this.angle += this.angleSpeed;
-        if (this.y + this.radius < 0) this.reset();
+        if (this.y < -this.size) {
+          this.y = h + Math.random() * 300;
+          this.x = Math.random() * w;
+        }
       }
       draw() {
         ctx.beginPath();
-        ctx.fillStyle = `rgba(123, 85, 255, ${this.alpha})`;
-        ctx.shadowColor = "rgba(123, 85, 255, 0.5)";
-        ctx.shadowBlur = 10;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(
+          this.x,
+          this.y,
+          0,
+          this.x,
+          this.y,
+          this.size
+        );
+        gradient.addColorStop(0, `rgba(187, 134, 252, ${this.alpha})`);
+        gradient.addColorStop(1, "rgba(187, 134, 252, 0)");
+        ctx.fillStyle = gradient;
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    const bubbles = [];
-    for (let i = 0; i < 50; i++) bubbles.push(new Bubble());
+    const bubbles = Array.from({ length: 50 }, () => new Bubble());
 
     function animate() {
-      ctx.clearRect(0, 0, width, height);
-      for (const b of bubbles) {
-        b.update();
-        b.draw();
-      }
+      ctx.clearRect(0, 0, w, h);
+      bubbles.forEach((bubble) => {
+        bubble.update();
+        bubble.draw();
+      });
       requestAnimationFrame(animate);
     }
     animate();
 
-    // RAINDROPS CADENTI CLICCABILI
+    // ==== BOLLE CADENTI (RAINDROPS) ====
     const raindropContainer = document.getElementById("raindrop-container");
 
     class Raindrop {
@@ -512,21 +498,33 @@
       }
       async collect() {
         if (!this.active) return;
+        const now = Date.now();
+        if (now - lastRewardTime < REWARD_INTERVAL) {
+          // Troppo presto, ignora
+          this.active = false;
+          this.el.style.display = "none";
+          setTimeout(() => {
+            this.el.style.display = "block";
+            this.reset();
+            this.active = true;
+          }, 2000);
+          return;
+        }
+        lastRewardTime = now;
         this.active = false;
-        spawnDrop("+0.01 BTC");
+        spawnDrop(`+${REWARD_AMOUNT.toFixed(4)} BTC`);
         try {
-          // Aggiorna BTC
           const snap = await get(ref(db, `users/${user}`));
           if (snap.exists()) {
             let btc = snap.val().wallet?.BTC ?? 0;
-            btc += 0.01;
+            btc = (btc + REWARD_AMOUNT);
+            btc = parseFloat(btc.toFixed(8));
             updateBtc(btc);
             await update(ref(db, `users/${user}/wallet`), { BTC: btc });
           }
         } catch (e) {
           console.error("Errore aggiornamento BTC", e);
         }
-        // Sparisci subito (rimuovi o reset)
         this.el.style.display = "none";
         setTimeout(() => {
           this.el.style.display = "block";
@@ -536,37 +534,53 @@
       }
     }
 
-    const raindrops = [];
-    for (let i = 0; i < 12; i++) raindrops.push(new Raindrop());
+    const REWARD_INTERVAL = 6000; // minimo 6 secondi tra premi (max 10/minuto)
+    const REWARD_AMOUNT = 0.0005;
+    let lastRewardTime = 0;
 
-    function raindropAnimate() {
-      for (const drop of raindrops) drop.fall();
-      requestAnimationFrame(raindropAnimate);
+    const raindrops = Array.from({ length: 5 }, () => new Raindrop());
+
+    function fallRaindrops() {
+      raindrops.forEach((r) => r.fall());
+      requestAnimationFrame(fallRaindrops);
     }
-    raindropAnimate();
+    fallRaindrops();
 
-    // TEMA DARK/LIGHT TOGGLE
+    // ==== NAV TOGGLE ====
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    navToggle.addEventListener("click", () => {
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+      navToggle.setAttribute(
+        "aria-expanded",
+        navToggle.classList.contains("open")
+      );
+    });
+
+    // ==== THEME TOGGLE ====
     const themeToggle = document.getElementById("theme-toggle");
-    function setTheme(theme) {
+
+    function applyTheme(theme) {
       if (theme === "light") {
         document.body.classList.add("light-theme");
-        themeToggle.textContent = "🌙";
-        localStorage.setItem("theme", "light");
+        themeToggle.textContent = "☀️";
       } else {
         document.body.classList.remove("light-theme");
-        themeToggle.textContent = "☀️";
-        localStorage.setItem("theme", "dark");
+        themeToggle.textContent = "🌙";
       }
     }
-    themeToggle.addEventListener("click", () => {
-      const current = localStorage.getItem("theme") || "dark";
-      setTheme(current === "dark" ? "light" : "dark");
-    });
-    // Carica tema da locale
-    setTheme(localStorage.getItem("theme") || "dark");
 
-    // Avvia tutto
-    initGame();
+    // Carica tema da localStorage
+    let savedTheme = localStorage.getItem("theme") || "dark";
+    applyTheme(savedTheme);
+
+    themeToggle.addEventListener("click", () => {
+      savedTheme = savedTheme === "dark" ? "light" : "dark";
+      applyTheme(savedTheme);
+      localStorage.setItem("theme", savedTheme);
+    });
   </script>
 </body>
 </html>
