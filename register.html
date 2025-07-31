@@ -99,9 +99,15 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// Esegui login anonimo
+let user = null;
+
+// Effettua login anonimo e aggiorna la variabile user
 signInAnonymously(auth).catch((error) => {
   console.error("Errore login anonimo:", error);
+});
+
+onAuthStateChanged(auth, (u) => {
+  user = u;
 });
 
 async function getIP() {
@@ -116,21 +122,6 @@ async function getIP() {
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById('register-form');
-
-  // Variabile per tenere traccia se utente anonimo è autenticato
-  let user = null;
-
-  // Aspetta che l’utente anonimo sia pronto prima di abilitare il form
-  onAuthStateChanged(auth, (usr) => {
-    user = usr;
-    if (user) {
-      // Utente anonimo autenticato, abilita il form
-      form.querySelector('button[type="submit"]').disabled = false;
-    }
-  });
-
-  // Disabilita il bottone finché non è autenticato
-  form.querySelector('button[type="submit"]').disabled = true;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -147,6 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'register' });
       if (!token) {
         alert("Errore nella verifica reCAPTCHA. Riprova.");
+        submitButton.disabled = false;
         return;
       }
 
@@ -156,28 +148,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
         alert("Username non valido.");
+        submitButton.disabled = false;
         return;
       }
       if (password.length < 6) {
         alert("La password deve essere almeno di 6 caratteri.");
+        submitButton.disabled = false;
         return;
       }
       if (password !== passwordConfirm) {
         alert("Le password non corrispondono.");
+        submitButton.disabled = false;
         return;
       }
 
-      const userRef = ref(db, `users/${username}`);
-      const snapshot = await get(userRef);
+      // Riferimenti al nodo username e utente
+      const usernameRef = ref(db, `usernames/${username}`);
+      const userRef = ref(db, `users/${user.uid}`);
 
-      if (snapshot.exists()) {
+      // Verifica se username esiste già
+      const usernameSnap = await get(usernameRef);
+      if (usernameSnap.exists()) {
         alert("Username già in uso.");
+        submitButton.disabled = false;
         return;
       }
+
+      // Riserva username
+      await set(usernameRef, user.uid);
 
       const ip = await getIP();
 
+      // Scrivi dati utente
       await set(userRef, {
+        username,
         password,
         ip,
         wallet: {
@@ -190,10 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       localStorage.setItem("user", username);
       window.location.href = "dashboard.html";
+
     } catch (error) {
       console.error(error);
       alert("Errore durante la registrazione.");
-    } finally {
       submitButton.disabled = false;
     }
   });
