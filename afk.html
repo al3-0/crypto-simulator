@@ -382,7 +382,7 @@
       const sec = String(countdown % 60).padStart(2, "0");
       document.getElementById("timer").textContent = `${min}:${sec}`;
       if (countdown <= 0) {
-        gainBtc(0.0005);
+        gainBtc(0.005);
         countdown = 180;
       }
     }
