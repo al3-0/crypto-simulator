@@ -279,8 +279,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const user = localStorage.getItem("user");
-    if (!user) window.location.href = "index.html";
+const user = localStorage.getItem("user");
+if (!user) window.location.href = "index.html";
+
+const authorizedUsers = ["Ale"]; // metti i nomi autorizzati
+
+if (!authorizedUsers.includes(user)) {
+  const submitButton = document.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  submitButton.style.cursor = "not-allowed";
+  alert("Non sei autorizzato a creare vouch.");
+  window.location.href = "dashboard.html";
+}
 
     const form = document.getElementById("vouch-form");
     const msg = document.getElementById("message");
