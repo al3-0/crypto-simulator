@@ -1,271 +1,299 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>AFK Zone BTC</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="logo.png" type="image/png" />
   <style>
-/* ==== BODY E MAIN ==== */
-body {
-  margin: 0;
-  min-height: 100vh;
-  padding: 100px 20px 40px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #eee;
-  background: linear-gradient(135deg, #1c1c3a, #12122b);
-  overflow-x: hidden;
-  position: relative;
-  transition: background 0.3s ease, color 0.3s ease;
-}
+    /* ==== BODY E MAIN ==== */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
 
-main {
-  background: #2a2a4fdd;
-  border-radius: 20px;
-  padding: 40px 60px;
-  max-width: 600px;
-  margin: auto;
-  box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
-  backdrop-filter: blur(12px);
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
 
-h1 {
-  font-size: 2.2rem;
-  margin-bottom: 30px;
-  color: #bb86fc;
-  text-align: center;
-}
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      color: #bb86fc;
+      text-align: center;
+    }
 
-p.welcome {
-  font-size: 1.1rem;
-  color: #ccc;
-  font-weight: 500;
-  margin-bottom: 30px;
-}
+    p.welcome {
+      font-size: 1.1rem;
+      color: #ccc;
+      font-weight: 500;
+      margin-bottom: 30px;
+    }
 
-#timer {
-  font-size: 3rem;
-  font-weight: 900;
-  color: #bb86fc;
-  margin-bottom: 20px;
-  font-family: 'Courier New', Courier, monospace;
-}
+    #timer {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #bb86fc;
+      margin-bottom: 20px;
+      font-family: 'Courier New', Courier, monospace;
+    }
 
-#btc-stats {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #d6bfff;
-  margin-top: 10px;
-  min-height: 24px;
-  font-family: 'Courier New', Courier, monospace;
-}
+    #btc-stats {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #d6bfff;
+      margin-top: 10px;
+      min-height: 24px;
+      font-family: 'Courier New', Courier, monospace;
+    }
 
-/* ==== NAVBAR ==== */
-nav.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #1c1c3a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.8);
-  z-index: 10;
-}
+    /* ==== NAVBAR ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      z-index: 10;
+    }
 
-.nav-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-}
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
 
-.logo-link img {
-  height: 36px;
-  cursor: pointer;
-}
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
 
-.nav-menu {
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin: 0;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
 
-.nav-menu li a, #theme-toggle {
-  color: #ddd;
-  background: none;
-  font-weight: 600;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-.nav-menu li a:hover, #theme-toggle:hover {
-  background-color: #4b3ca7;
-  color: white;
-}
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
 
-#theme-toggle {
-  margin-left: 6px;
-}
+    #theme-toggle {
+      margin-left: 6px;
+    }
 
-#nav-toggle {
-  display: none;
-  position: relative;
-  width: 30px;
-  height: 22px;
-  cursor: pointer;
-  z-index: 15;
-}
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
 
-#nav-toggle span {
-  position: absolute;
-  height: 4px;
-  width: 100%;
-  background: #ddd;
-  border-radius: 2px;
-  transition: 0.3s ease;
-  left: 0;
-}
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
 
-#nav-toggle span:nth-child(1) { top: 0; }
-#nav-toggle span:nth-child(2) { top: 9px; }
-#nav-toggle span:nth-child(3) { top: 18px; }
+    #nav-toggle span:nth-child(1) {
+      top: 0;
+    }
+    #nav-toggle span:nth-child(2) {
+      top: 9px;
+    }
+    #nav-toggle span:nth-child(3) {
+      top: 18px;
+    }
 
-@media (max-width: 768px) {
-  .nav-menu {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    background: #1c1c3a;
-    flex-direction: column;
-    gap: 16px;
-    padding: 20px 0;
-    margin: 0;
-    transform: translateY(-150%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    text-align: center;
-    font-size: 1.2rem;
-  }
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
 
-  .nav-menu.open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
 
-  #nav-toggle {
-    display: block;
-  }
-}
+      #nav-toggle {
+        display: block;
+      }
+    }
 
-#nav-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
-#nav-toggle.open span:nth-child(2) { opacity: 0; }
-#nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
 
-/* ==== TEMA CHIARO ==== */
-body.light-theme {
-  background: #f4f4f7;
-  color: #222;
-}
-body.light-theme main {
-  background: #fff;
-  color: #222;
-  box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
-}
-body.light-theme nav.navbar {
-  background: #ddd;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-body.light-theme .nav-menu li a,
-body.light-theme #theme-toggle {
-  color: #444;
-}
-body.light-theme .nav-menu li a:hover,
-body.light-theme #theme-toggle:hover {
-  background-color: #8861ff;
-  color: white;
-}
-body.light-theme #nav-toggle span {
-  background: #444;
-}
+    /* ==== TEMA CHIARO ==== */
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+    body.light-theme nav.navbar {
+      background: #ddd;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    body.light-theme .nav-menu li a,
+    body.light-theme #theme-toggle {
+      color: #444;
+    }
+    body.light-theme .nav-menu li a:hover,
+    body.light-theme #theme-toggle:hover {
+      background-color: #8861ff;
+      color: white;
+    }
+    body.light-theme #nav-toggle span {
+      background: #444;
+    }
 
-/* ==== CANVAS ANIMAZIONE BOLLE ==== */
-#bubble-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 1;
-}
+    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
 
-/* ==== GAIN ANIMATIONS ==== */
-.btc-gained {
-  position: fixed;
-  font-weight: 900;
-  color: #bb86fc;
-  text-shadow: 0 0 8px #bb86fccc;
-  font-family: 'Courier New', Courier, monospace;
-  user-select: none;
-  pointer-events: none;
-  animation: floatUp 1.2s ease forwards;
-  z-index: 10000;
-}
+    /* ==== GAIN ANIMATIONS ==== */
+    .btc-gained {
+      position: fixed;
+      font-weight: 900;
+      color: #bb86fc;
+      text-shadow: 0 0 8px #bb86fccc;
+      font-family: 'Courier New', Courier, monospace;
+      user-select: none;
+      pointer-events: none;
+      animation: floatUp 1.2s ease forwards;
+      z-index: 10000;
+    }
 
-@keyframes floatUp {
-  0% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-60px); }
-}
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-60px);
+      }
+    }
 
-/* ==== Gocce cadenti ==== */
-#raindrop-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5;
-}
+    /* ==== Gocce cadenti ==== */
+    #raindrop-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
 
-.raindrop {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: #00aaff;
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
-  animation: fall 6s linear forwards;
-  cursor: pointer;
-  pointer-events: auto;
-  z-index: 10;
-}
+    .raindrop {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #00aaff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
+      animation: fall 6s linear forwards;
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 10;
+    }
 
-@keyframes fall {
-  0% { transform: translateY(-30px); opacity: 1; }
-  100% { transform: translateY(110vh); opacity: 0; }
-}
+    @keyframes fall {
+      0% {
+        transform: translateY(-30px);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -274,7 +302,15 @@ body.light-theme #nav-toggle span {
   <nav class="navbar">
     <div class="nav-container">
       <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
-      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
+      <div
+        id="nav-toggle"
+        tabindex="0"
+        aria-label="Toggle navigation menu"
+        role="button"
+        aria-expanded="false"
+      >
+        <span></span><span></span><span></span>
+      </div>
       <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
@@ -282,45 +318,58 @@ body.light-theme #nav-toggle span {
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html" aria-current="page">AFK Zone</a></li>
         <li><a href="account.html">Account</a></li>
-        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
+        <li><button id="theme-toggle" aria-pressed="false" aria-label="Toggle light/dark theme">🌙</button></li>
       </ul>
     </div>
   </nav>
 
   <main>
-    <h1>Benvenuto in AFK Zone</h1>
-    <p class="welcome">Ottieni BTC restando attivo o cliccando le gocce!</p>
+    <h1>AFK Zone BTC</h1>
+    <p class="welcome">Welcome back <span id="username">User</span>!</p>
     <div id="timer">03:00</div>
     <div id="btc-stats">BTC: 0.0000</div>
+    <div id="raindrop-container"></div>
   </main>
 
-  <div id="raindrop-container"></div>
-
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      update
+    } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-    // Config Firebase (da sostituire con la tua config)
     const firebaseConfig = {
-      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-      authDomain: "coins-7104d.firebaseapp.com",
-      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-      projectId: "coins-7104d",
-      storageBucket: "coins-7104d.appspot.com",
-      messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F"    };
+      apiKey: "AIzaSyDk9Qr1_lBLxNskIYoTyKsZMDCPNHPfPi4",
+      authDomain: "nearby-exchanger.firebaseapp.com",
+      databaseURL: "https://nearby-exchanger-default-rtdb.firebaseio.com",
+      projectId: "nearby-exchanger",
+      storageBucket: "nearby-exchanger.appspot.com",
+      messagingSenderId: "1097752962402",
+      appId: "1:1097752962402:web:21110e9cfcc3d131a70b5e",
+      measurementId: "G-7Z7NRKXZPL"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const user = localStorage.getItem("user");
-    if (!user) window.location.href = "index.html";
+    // Recupera user da sessionStorage
+    const user = sessionStorage.getItem("username") || "guest";
+
+    // Aggiorna username visualizzato
+    document.getElementById("username").textContent = user;
 
     let countdown = 180;
     let timerInterval;
     let dropCount = 0;
     let btc = 0;
+
+    let raindropInterval;
+    let dropCountResetInterval;
+
+    // Flag per visibilità pagina
+    let pageVisible = true;
 
     async function initGame() {
       const snap = await get(ref(db, `users/${user}`));
@@ -329,10 +378,11 @@ body.light-theme #nav-toggle span {
       btc = userData.wallet?.BTC ?? 0;
       updateBtc(btc);
       startCountdown();
-      spawnRaindrops();
+      startRaindropSpawner();
       startDropCountReset();
     }
 
+    // Funzione per aggiornare BTC mostrati
     function updateBtc(amount) {
       document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(4)}`;
     }
@@ -340,9 +390,10 @@ body.light-theme #nav-toggle span {
     function startCountdown() {
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
+        if (!pageVisible) return; // blocca se scheda nascosta
         countdown--;
-        const min = String(Math.floor(countdown / 60)).padStart(2, '0');
-        const sec = String(countdown % 60).padStart(2, '0');
+        const min = String(Math.floor(countdown / 60)).padStart(2, "0");
+        const sec = String(countdown % 60).padStart(2, "0");
         document.getElementById("timer").textContent = `${min}:${sec}`;
 
         if (countdown <= 0) {
@@ -366,15 +417,17 @@ body.light-theme #nav-toggle span {
       setTimeout(() => drop.remove(), 1200);
     }
 
-    function spawnRaindrops() {
-      setInterval(() => {
+    // Funzione per spawnare le gocce con limite di 10 al minuto (1 ogni 6 secondi max)
+    function startRaindropSpawner() {
+      clearInterval(raindropInterval);
+      raindropInterval = setInterval(() => {
+        if (!pageVisible) return; // blocca se scheda nascosta
         if (dropCount >= 10) return;
         const drop = document.createElement("div");
         drop.className = "raindrop";
         drop.style.left = Math.random() * 100 + "vw";
         drop.style.top = "-30px"; // parte dall'alto
         drop.addEventListener("click", () => {
-          // prevenire click multipli
           if (drop.dataset.clicked) return;
           drop.dataset.clicked = "true";
 
@@ -392,106 +445,51 @@ body.light-theme #nav-toggle span {
           drop.remove();
           dropCount--;
         }, 6000);
-      }, 1500); // crea gocce più frequentemente, ma limite a 10 simultanee
+      }, 6000); // genera una goccia ogni 6 secondi massimo (10 al minuto)
     }
 
-    // Resetta dropCount ogni 60 secondi per permettere di cliccare nuove gocce
+    // Resetta dropCount ogni 60 secondi per permettere nuove gocce
     function startDropCountReset() {
-      setInterval(() => {
+      clearInterval(dropCountResetInterval);
+      dropCountResetInterval = setInterval(() => {
+        if (!pageVisible) return;
         dropCount = 0;
       }, 60000);
     }
 
-    // Toggle nav menu mobile
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-
-    navToggle.addEventListener('click', () => {
-      const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-      navToggle.setAttribute('aria-expanded', !expanded);
-      navToggle.classList.toggle('open');
-      navMenu.classList.toggle('open');
-    });
-
-    // Toggle tema chiaro/scuro
-    const themeToggle = document.getElementById('theme-toggle');
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('light-theme');
-      if(document.body.classList.contains('light-theme')){
-        themeToggle.textContent = "🌞";
-        localStorage.setItem('theme', 'light');
+    // Gestione visibilità pagina
+    document.addEventListener("visibilitychange", () => {
+      pageVisible = !document.hidden;
+      if (pageVisible) {
+        startCountdown();
+        startRaindropSpawner();
+        startDropCountReset();
       } else {
-        themeToggle.textContent = "🌙";
-        localStorage.setItem('theme', 'dark');
+        clearInterval(timerInterval);
+        clearInterval(raindropInterval);
+        clearInterval(dropCountResetInterval);
       }
     });
 
-    // Imposta tema salvato
-    if(localStorage.getItem('theme') === 'light'){
-      document.body.classList.add('light-theme');
-      themeToggle.textContent = "🌞";
-    }
+    // Toggle tema
+    const themeToggle = document.getElementById("theme-toggle");
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("light-theme");
+      const isLight = document.body.classList.contains("light-theme");
+      themeToggle.textContent = isLight ? "🌙" : "☀️";
+      themeToggle.setAttribute("aria-pressed", isLight.toString());
+    });
 
-    // Canvas animazione bolle
-    (() => {
-      const canvas = document.getElementById("bubble-canvas");
-      const ctx = canvas.getContext("2d");
-      let width, height;
-      let bubbles = [];
+    // Nav menu toggle
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+    navToggle.addEventListener("click", () => {
+      const isOpen = navMenu.classList.toggle("open");
+      navToggle.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", isOpen.toString());
+    });
 
-      function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      function createBubble() {
-        return {
-          x: Math.random() * width,
-          y: height + 20,
-          radius: 10 + Math.random() * 15,
-          speed: 0.5 + Math.random() * 1.5,
-          opacity: 0.15 + Math.random() * 0.15
-        };
-      }
-
-      function update() {
-        ctx.clearRect(0, 0, width, height);
-        for(let i = 0; i < bubbles.length; i++) {
-          const b = bubbles[i];
-          b.y -= b.speed;
-          if(b.y + b.radius < 0) {
-            bubbles[i] = createBubble();
-          }
-          ctx.beginPath();
-          const gradient = ctx.createRadialGradient(b.x, b.y, b.radius * 0.4, b.x, b.y, b.radius);
-          gradient.addColorStop(0, `rgba(187,134,252,${b.opacity})`);
-          gradient.addColorStop(1, `rgba(187,134,252,0)`);
-          ctx.fillStyle = gradient;
-          ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      function loop() {
-        update();
-        requestAnimationFrame(loop);
-      }
-
-      function init() {
-        resize();
-        bubbles = [];
-        for(let i = 0; i < 25; i++) {
-          bubbles.push(createBubble());
-        }
-        loop();
-      }
-
-      window.addEventListener('resize', resize);
-      init();
-    })();
-
+    // Inizializza gioco
     initGame();
   </script>
 </body>
