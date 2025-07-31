@@ -521,13 +521,13 @@
       });
 
       drop.addEventListener("click", () => {
-        gainBtc(0.00005);
+        gainBtc(0.0005);
         dropCountPerMinute++;
         drop.remove();
         if (dropCountPerMinute >= 10) {
-          gainBtc(0.001);
+          gainBtc(0.0005);
           dropCountPerMinute = 0;
-          alert("Bonus 0.001 BTC per aver cliccato 10 gocce!");
+          alert("Bonus 0.0005 BTC per aver cliccato 10 gocce!");
         }
       });
 
