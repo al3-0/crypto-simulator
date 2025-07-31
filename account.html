@@ -2,55 +2,70 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Account</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
+    /* Stili di base e animazione bolle come in vouch-create.html */
     body {
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
     }
 
+    /* Navbar versione vouch-create */
     header.navbar {
       width: 100%;
-      background: #1c1c3aee;
-      padding: 14px 30px;
+      background: rgba(28, 28, 58, 0.9);
+      padding: 12px 30px;
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 999;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
       box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
       backdrop-filter: blur(12px);
     }
 
-    .navbar ul {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      margin: 0;
-      padding: 0;
+    header.navbar img.logo {
+      height: 40px;
+      margin-right: 20px;
     }
 
-    .navbar a {
+    header.navbar nav ul {
+      list-style: none;
+      display: flex;
+      gap: 28px;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    header.navbar nav ul li a {
       color: #eee;
       font-weight: 600;
       text-decoration: none;
       font-size: 1rem;
       transition: color 0.3s ease, border-bottom 0.3s ease;
       border-bottom: 2px solid transparent;
+      padding-bottom: 2px;
     }
 
-    .navbar a:hover {
+    header.navbar nav ul li a:hover,
+    header.navbar nav ul li a.active {
       color: #bb86fc;
       border-bottom: 2px solid #bb86fc;
     }
 
     main {
-      margin-top: 100px;
+      margin-top: 90px;
       padding: 40px 20px;
       max-width: 600px;
       margin-left: auto;
@@ -58,6 +73,8 @@
       background: #2a2a4f;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+      position: relative;
+      z-index: 10;
     }
 
     h1 {
@@ -100,11 +117,46 @@
       cursor: pointer;
       margin-left: 10px;
       color: #7e5fff;
+      user-select: none;
+    }
+
+    /* Animazione bolle */
+    .bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      background: rgba(187, 134, 252, 0.3);
+      border-radius: 50%;
+      animation: rise 15s linear infinite;
+      opacity: 0.6;
+      filter: blur(2px);
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-110vh) scale(1.3);
+        opacity: 0;
+      }
     }
   </style>
 </head>
 <body>
   <header class="navbar">
+    <img src="logo.png" alt="Logo" class="logo" />
     <nav>
       <ul>
         <li><a href="dashboard.html">Home</a></li>
@@ -112,10 +164,13 @@
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
-        <li><a href="account.html">Account</a></li>
+        <li><a href="account.html" class="active">Account</a></li>
       </ul>
     </nav>
   </header>
+
+  <!-- Bolle animate -->
+  <div class="bubbles" id="bubbles"></div>
 
   <main>
     <h1>Il tuo Account</h1>
@@ -135,7 +190,7 @@
   </main>
 
   <script type="module">
-    import { db, ref, get } from './js/firebase.js';
+    import { db, ref, get, onValue } from './js/firebase.js';
 
     const user = localStorage.getItem("user");
     if (!user) window.location.href = "index.html";
@@ -145,6 +200,7 @@
     const passwordEl = document.getElementById("password");
     let passwordVisible = false;
 
+    // Funzione per caricare dati e aggiornare valori wallet in tempo reale
     async function loadData() {
       try {
         const snapshot = await get(ref(db, `users/${user}`));
@@ -160,12 +216,46 @@
       }
     }
 
+    // Toggle visibilità password
     window.togglePassword = () => {
       passwordVisible = !passwordVisible;
       loadData();
     };
 
     loadData();
+
+    // Aggiornamento realtime su modifica dati wallet
+    onValue(ref(db, `users/${user}/wallet`), (snapshot) => {
+      const wallet = snapshot.val();
+      if (!wallet) return;
+      document.getElementById("btc").textContent = (wallet.BTC || 0).toFixed(3);
+      document.getElementById("eth").textContent = (wallet.ETH || 0).toFixed(3);
+      document.getElementById("ltc").textContent = (wallet.LTC || 0).toFixed(3);
+    });
+
+    // Animazione bolle (come vouch-create)
+    const bubblesContainer = document.getElementById('bubbles');
+
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      const size = Math.random() * 40 + 20 + 'px';
+      bubble.style.width = size;
+      bubble.style.height = size;
+      bubble.style.left = Math.random() * 100 + 'vw';
+      bubble.style.animationDuration = (10 + Math.random() * 10) + 's';
+      bubble.style.animationTimingFunction = 'linear';
+      bubblesContainer.appendChild(bubble);
+
+      // Rimuovi bubble dopo animazione per non appesantire DOM
+      setTimeout(() => {
+        bubble.remove();
+      }, 15000);
+    }
+
+    // Genera bolle ogni 500ms
+    setInterval(createBubble, 500);
+
   </script>
 </body>
 </html>
