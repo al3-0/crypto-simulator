@@ -473,7 +473,7 @@
       const cleanCode = code.replace(/-/g, "");
 
       try {
-        const vouchRef = ref(db, vouches/${cleanCode});
+        const vouchRef = ref(db, `vouches/${cleanCode}`);
         const snap = await get(vouchRef);
 
         if (!snap.exists()) {
