@@ -17,7 +17,6 @@
       position: relative;
       transition: background 0.3s ease, color 0.3s ease;
     }
-
     main {
       background: #2a2a4fdd;
       border-radius: 20px;
@@ -30,13 +29,11 @@
       z-index: 2;
       text-align: center;
     }
-
     h1 {
       font-size: 2.5rem;
       margin-bottom: 30px;
       color: #bb86fc;
     }
-
     select, input, button {
       padding: 12px;
       font-size: 1rem;
@@ -46,7 +43,6 @@
       width: 100%;
       max-width: 400px;
     }
-
     button {
       background-color: #6a4bbd;
       color: white;
@@ -54,16 +50,13 @@
       font-weight: bold;
       transition: background 0.3s ease;
     }
-
     button:hover {
       background-color: #5a3daa;
     }
-
     #result {
       margin-top: 20px;
       font-size: 1.2rem;
     }
-
     nav.navbar {
       position: fixed;
       top: 0;
@@ -74,7 +67,6 @@
       z-index: 10;
       user-select: none;
     }
-
     .nav-container {
       max-width: 1200px;
       margin: auto;
@@ -84,12 +76,10 @@
       justify-content: space-between;
       position: relative;
     }
-
     .logo-link img {
       height: 36px;
       cursor: pointer;
     }
-
     .nav-menu {
       list-style: none;
       display: flex;
@@ -100,7 +90,6 @@
       left: 50%;
       transform: translateX(-50%);
     }
-
     .nav-menu li a,
     #theme-toggle {
       color: #ddd;
@@ -114,13 +103,11 @@
       text-decoration: none;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
-
     .nav-menu li a:hover,
     #theme-toggle:hover {
       background-color: #4b3ca7;
       color: white;
     }
-
     #nav-toggle {
       display: none;
       position: relative;
@@ -129,7 +116,6 @@
       cursor: pointer;
       z-index: 15;
     }
-
     #nav-toggle span {
       position: absolute;
       height: 4px;
@@ -139,11 +125,9 @@
       transition: 0.3s ease;
       left: 0;
     }
-
     #nav-toggle span:nth-child(1) { top: 0; }
     #nav-toggle span:nth-child(2) { top: 9px; }
     #nav-toggle span:nth-child(3) { top: 18px; }
-
     @media (max-width: 768px) {
       .nav-menu {
         position: fixed;
@@ -161,43 +145,35 @@
         text-align: center;
         font-size: 1.2rem;
       }
-
       .nav-menu.open {
         transform: translateY(0);
         opacity: 1;
         pointer-events: auto;
       }
-
       #nav-toggle {
         display: block;
       }
     }
-
     #nav-toggle.open span:nth-child(1) {
       transform: rotate(45deg);
       top: 9px;
     }
-
     #nav-toggle.open span:nth-child(2) {
       opacity: 0;
     }
-
     #nav-toggle.open span:nth-child(3) {
       transform: rotate(-45deg);
       top: 9px;
     }
-
     body.light-theme {
       background: #f4f4f7;
       color: #222;
     }
-
     body.light-theme main {
       background: #fff;
       color: #222;
       box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
     }
-
     #bubble-canvas {
       position: fixed;
       top: 0;
@@ -268,39 +244,56 @@
 
     const rates = { BTC: 1, ETH: 15, LTC: 100 };
 
-    document.getElementById("exchange-btn").addEventListener("click", async () => {
-      const from = document.getElementById("from-coin").value;
-      const to = document.getElementById("to-coin").value;
-      const amount = parseFloat(document.getElementById("amount").value);
-      const result = document.getElementById("result");
+    const exchangeBtn = document.getElementById("exchange-btn");
+    const result = document.getElementById("result");
 
-      if (from === to) return result.textContent = "Scegli due valute diverse.";
-      if (isNaN(amount) || amount <= 0) return result.textContent = "Inserisci una quantità valida.";
+    exchangeBtn.addEventListener("click", async () => {
+      try {
+        const from = document.getElementById("from-coin").value;
+        const to = document.getElementById("to-coin").value;
+        const amount = parseFloat(document.getElementById("amount").value);
 
-// Ottieni l'UID associato all'username
-const uidSnapshot = await get(ref(db, `usernames/${username}`));
-if (!uidSnapshot.exists()) {
-  result.textContent = "Utente non trovato.";
-  return;
-}
-const uid = uidSnapshot.val();
+        result.textContent = ""; // reset messaggio
 
-// Ottieni il wallet dell'utente usando l'UID
-const walletRef = ref(db, `users/${uid}/wallet`);
-const snapshot = await get(walletRef);
-const wallet = snapshot.val() || {};
+        if (from === to) {
+          result.textContent = "Scegli due valute diverse.";
+          return;
+        }
+        if (isNaN(amount) || amount <= 0) {
+          result.textContent = "Inserisci una quantità valida.";
+          return;
+        }
 
-      if (!wallet[from] || wallet[from] < amount) {
-        result.textContent = "Fondi insufficienti.";
-        return;
+        // Ottieni l'UID associato all'username
+        const uidSnapshot = await get(ref(db, `usernames/${username}`));
+        if (!uidSnapshot.exists()) {
+          result.textContent = "Utente non trovato.";
+          return;
+        }
+        const uid = uidSnapshot.val();
+
+        // Ottieni il wallet dell'utente usando l'UID
+        const walletRef = ref(db, `users/${uid}/wallet`);
+        const snapshot = await get(walletRef);
+        const wallet = snapshot.val() || {};
+
+        if (!wallet[from] || wallet[from] < amount) {
+          result.textContent = "Fondi insufficienti.";
+          return;
+        }
+
+        const converted = amount * (rates[from] / rates[to]);
+
+        wallet[from] -= amount;
+        wallet[to] = (wallet[to] || 0) + converted;
+
+        await set(walletRef, wallet);
+
+        result.textContent = `Scambio completato! Hai ricevuto ${converted.toFixed(3)} ${to}.`;
+      } catch (error) {
+        console.error("Errore nello scambio:", error);
+        result.textContent = "Errore durante lo scambio. Riprova più tardi.";
       }
-
-      const converted = amount * (rates[from] / rates[to]);
-      wallet[from] -= amount;
-      wallet[to] = (wallet[to] || 0) + converted;
-
-      await set(walletRef, wallet);
-      result.textContent = `Scambio completato! Hai ricevuto ${converted.toFixed(3)} ${to}.`;
     });
 
     // Hamburger menu
@@ -318,7 +311,6 @@ const wallet = snapshot.val() || {};
       document.body.classList.add("light-theme");
       themeToggle.textContent = "☀️";
     }
-
     themeToggle.addEventListener("click", () => {
       const isLight = document.body.classList.toggle("light-theme");
       localStorage.setItem("theme", isLight ? "light" : "dark");
