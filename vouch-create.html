@@ -315,7 +315,9 @@
     }
     loadUserVouches();
   }
-
+  
+init();
+  
   const form = document.getElementById("vouch-form");
   const msg = document.getElementById("message");
 
@@ -343,15 +345,15 @@
       const expiredVouches = [];
 
       // Ora filtriamo i vouch confrontando vouch.from con userId (non username)
-      Object.entries(allVouches).forEach(([code, vouch]) => {
-        if (vouch.from === userId) {
-          if (vouch.expired === true || (vouch.expiryDate && vouch.expiryDate < now)) {
-            expiredVouches.push({ code, ...vouch });
-          } else {
-            validVouches.push({ code, ...vouch });
-          }
-        }
-      });
+Object.entries(allVouches).forEach(([code, vouch]) => {
+  if (vouch.from === userId) {   // <-- qui
+    if (vouch.expired === true || (vouch.expiryDate && vouch.expiryDate < now)) {
+      expiredVouches.push({ code, ...vouch });
+    } else {
+      validVouches.push({ code, ...vouch });
+    }
+  }
+});
 
       validVouchesContainer.innerHTML = `
         <h3>Vouch Validi</h3>
@@ -402,14 +404,15 @@
     msg.textContent = "Generazione codice...";
     const newCode = generateCode();
 
-    const vouchData = {
-      from: userId,  // qui inseriamo userId
-      coin,
-      amount,
-      expired: false,
-      createdAt: Date.now(),
-      expiryDate: Date.now() + 30 * 24 * 3600 * 1000,
-    };
+const vouchData = {
+  from: userId,  // usa sempre userId, non username
+  coin,
+  amount,
+  expired: false,
+  createdAt: Date.now(),
+  expiryDate: Date.now() + 30 * 24 * 3600 * 1000, // scadenza 30 giorni
+};
+await set(ref(db, `vouches/${newCode}`), vouchData);
 
     try {
       await set(ref(db, `vouches/${newCode}`), vouchData);
