@@ -104,15 +104,19 @@ let user = null;
 const submitButton = document.querySelector('#register-form button[type="submit"]');
 submitButton.disabled = true; // disabilita subito il bottone finché non c’è user
 
+// Login anonimo una volta all'inizio
 signInAnonymously(auth).catch((error) => {
   console.error("Errore login anonimo:", error);
 });
 
+// Aggiorna user e abilita/disabilita bottone solo se autenticato anonimamente
 onAuthStateChanged(auth, (u) => {
   user = u;
   console.log("Utente autenticato:", user ? user.uid : null);
-  if (user) {
-    submitButton.disabled = false; // abilita il bottone appena user è pronto
+  if (user && user.isAnonymous) {
+    submitButton.disabled = false;
+  } else {
+    submitButton.disabled = true;
   }
 });
 
@@ -167,8 +171,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const usernameRef = ref(db, `usernames/${username}`);
       const userRef = ref(db, `users/${user.uid}`);
+      const usernameRef = ref(db, `usernames/${username}`);
+
+      // Controlla se utente esiste già
+      const userSnap = await get(userRef);
+      if (userSnap.exists()) {
+        alert("Utente già registrato.");
+        submitButton.disabled = false;
+        return;
+      }
 
       // Controlla se username è già in uso
       const usernameSnap = await get(usernameRef);
@@ -178,21 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Controlla se utente esiste già (per evitare riscrittura)
-      const userSnap = await get(userRef);
-      if (userSnap.exists()) {
-        alert("Utente già registrato.");
-        submitButton.disabled = false;
-        return;
-      }
-
-      console.log("Scrivo username -> uid:", user.uid);
-      // Scrivi username -> uid
-      await set(usernameRef, user.uid);
-
       const ip = await getIP();
 
-      // Scrivi dati utente
+      // Scrivi dati utente PRIMA
       await set(userRef, {
         username,
         password,
@@ -205,14 +205,17 @@ document.addEventListener("DOMContentLoaded", () => {
         recaptchaToken: token
       });
 
+      // Poi scrivi username -> uid
+      await set(usernameRef, user.uid);
+
       localStorage.setItem("user", username);
       window.location.href = "dashboard.html";
 
     } catch (error) {
       console.error(error);
-      alert("Errore durante la registrazione.");
+      alert(error.message || "Errore durante la registrazione.");
 
-      // Se username è stato già scritto, fallo rimuovere (rollback)
+      // rollback username se scritto
       if (user && form.username.value.trim()) {
         try {
           const usernameRef = ref(db, `usernames/${form.username.value.trim()}`);
