@@ -427,19 +427,19 @@
       localStorage.setItem("theme", theme);
     }
     themeToggle.addEventListener("click", () => {
-      const newTheme = document.body.classList.contains("light-theme") ? "dark" : "light";
-      applyTheme(newTheme);
+      const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
+      applyTheme(currentTheme === "light" ? "dark" : "light");
     });
-    const savedTheme = localStorage.getItem("theme") ?? "dark";
+    const savedTheme = localStorage.getItem("theme") || "dark";
     applyTheme(savedTheme);
 
-    // Nav mobile toggle
+    // Navbar toggle
     const navToggle = document.getElementById("nav-toggle");
     const navMenu = document.getElementById("nav-menu");
     navToggle.addEventListener("click", () => {
-      navToggle.classList.toggle("open");
-      navMenu.classList.toggle("open");
-      navToggle.setAttribute("aria-expanded", navMenu.classList.contains("open"));
+      const isOpen = navMenu.classList.toggle("open");
+      navToggle.classList.toggle("open", isOpen);
+      navToggle.setAttribute("aria-expanded", isOpen);
     });
 
     // Visibilità pagina
@@ -447,44 +447,37 @@
       isPageVisible = !document.hidden;
     });
 
-    // ==== Gocce cadenti ====
-    const raindropContainer = document.getElementById("raindrop-container");
-
-    function createRaindrop() {
-      const drop = document.createElement("div");
-      drop.classList.add("raindrop");
-      drop.style.left = `${Math.random() * window.innerWidth}px`;
-      drop.style.animationDuration = `${4 + Math.random() * 4}s`;
-      drop.title = "+0.0005 BTC";
-      drop.addEventListener("click", () => {
-        gainBtc(0.0005);
-        drop.remove();
-      });
-      raindropContainer.appendChild(drop);
-      setTimeout(() => {
-        drop.remove();
-      }, 8000);
-    }
-
-    function spawnRaindrops() {
-      setInterval(() => {
-        createRaindrop();
-      }, 800);
-    }
-
-    // ==== Resetta contatore gocce ogni minuto (se vuoi conteggiare drop per premi o altro) ====
-    function startDropCountReset() {
-      setInterval(() => {
-        dropCountPerMinute = 0;
-      }, 60000);
-    }
-
-    initGame();
-
-    // ==== CANVAS BUBBLE ANIMATION ====
+    // Bubble animation on canvas
     const canvas = document.getElementById("bubble-canvas");
     const ctx = canvas.getContext("2d");
     let bubbles = [];
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    class Bubble {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = random(0, window.innerWidth);
+        this.y = random(window.innerHeight, window.innerHeight + 200);
+        this.radius = random(5, 12);
+        this.speed = random(0.4, 1);
+        this.alpha = random(0.1, 0.5);
+      }
+      update() {
+        this.y -= this.speed;
+        if (this.y < -this.radius) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(187, 134, 252, ${this.alpha})`;
+        ctx.fill();
+      }
+    }
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
@@ -493,53 +486,61 @@
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    class Bubble {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = canvas.height + Math.random() * 100;
-        this.radius = 10 + Math.random() * 15;
-        this.speed = 0.5 + Math.random() * 1.5;
-        this.opacity = 0.2 + Math.random() * 0.3;
-      }
-      update() {
-        this.y -= this.speed;
-        if (this.y + this.radius < 0) {
-          this.x = Math.random() * canvas.width;
-          this.y = canvas.height + Math.random() * 100;
-          this.radius = 10 + Math.random() * 15;
-          this.speed = 0.5 + Math.random() * 1.5;
-          this.opacity = 0.2 + Math.random() * 0.3;
-        }
-      }
-      draw() {
-        ctx.beginPath();
-        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.3, this.x, this.y, this.radius);
-        gradient.addColorStop(0, `rgba(187, 134, 252, ${this.opacity})`);
-        gradient.addColorStop(1, "rgba(187, 134, 252, 0)");
-        ctx.fillStyle = gradient;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    for (let i = 0; i < 100; i++) {
+      bubbles.push(new Bubble());
     }
 
-    function createBubbles() {
-      bubbles = [];
-      for (let i = 0; i < 40; i++) {
-        bubbles.push(new Bubble());
-      }
-    }
-
-    function animateBubbles() {
+    function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const bubble of bubbles) {
-        bubble.update();
-        bubble.draw();
-      }
-      requestAnimationFrame(animateBubbles);
+      bubbles.forEach((b) => {
+        b.update();
+        b.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Gocce cadenti (raindrops)
+    const raindropContainer = document.getElementById("raindrop-container");
+    let raindropInterval;
+
+    function spawnRaindrops() {
+      raindropInterval = setInterval(() => {
+        createRaindrop();
+      }, 700);
     }
 
-    createBubbles();
-    animateBubbles();
+    function createRaindrop() {
+      const drop = document.createElement("div");
+      drop.className = "raindrop";
+      drop.style.left = `${Math.random() * 100}vw`;
+      drop.style.animationDuration = `${4 + Math.random() * 3}s`;
+
+      drop.addEventListener("animationend", () => {
+        drop.remove();
+      });
+
+      drop.addEventListener("click", () => {
+        gainBtc(0.00005);
+        dropCountPerMinute++;
+        drop.remove();
+        if (dropCountPerMinute >= 10) {
+          gainBtc(0.001);
+          dropCountPerMinute = 0;
+          alert("Bonus 0.001 BTC per aver cliccato 10 gocce!");
+        }
+      });
+
+      raindropContainer.appendChild(drop);
+    }
+
+    function startDropCountReset() {
+      setInterval(() => {
+        dropCountPerMinute = 0;
+      }, 60000);
+    }
+
+    initGame();
   </script>
 </body>
 </html>
