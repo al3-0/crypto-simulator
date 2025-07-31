@@ -82,7 +82,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
@@ -117,8 +117,28 @@ async function getIP() {
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById('register-form');
 
+  // Variabile per tenere traccia se utente anonimo è autenticato
+  let user = null;
+
+  // Aspetta che l’utente anonimo sia pronto prima di abilitare il form
+  onAuthStateChanged(auth, (usr) => {
+    user = usr;
+    if (user) {
+      // Utente anonimo autenticato, abilita il form
+      form.querySelector('button[type="submit"]').disabled = false;
+    }
+  });
+
+  // Disabilita il bottone finché non è autenticato
+  form.querySelector('button[type="submit"]').disabled = true;
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (!user) {
+      alert("Attendi l'autenticazione...");
+      return;
+    }
 
     const submitButton = form.querySelector('button[type="submit"]');
     submitButton.disabled = true;
@@ -152,12 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (snapshot.exists()) {
         alert("Username già in uso.");
-        return;
-      }
-
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Autenticazione fallita.");
         return;
       }
 
