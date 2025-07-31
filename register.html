@@ -179,13 +179,6 @@
           const userRef = ref(db, `users/${user.uid}`);
           const usernameRef = ref(db, `usernames/${username}`);
 
-          const userSnap = await get(userRef);
-          if (userSnap.exists()) {
-            alert("Utente già registrato.");
-            submitButton.disabled = false;
-            return;
-          }
-
           const usernameSnap = await get(usernameRef);
           if (usernameSnap.exists()) {
             usernameInput.classList.add("input-error");
