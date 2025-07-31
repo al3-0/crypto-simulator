@@ -81,7 +81,7 @@
   <!-- Import Firebase con ESM inline -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -100,12 +100,9 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 let user = null;
-
-// Effettua login anonimo e aggiorna la variabile user
 signInAnonymously(auth).catch((error) => {
   console.error("Errore login anonimo:", error);
 });
-
 onAuthStateChanged(auth, (u) => {
   user = u;
 });
@@ -162,11 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Riferimenti al nodo username e utente
       const usernameRef = ref(db, `usernames/${username}`);
       const userRef = ref(db, `users/${user.uid}`);
 
-      // Verifica se username esiste già
+      // Controlla se username è già in uso
       const usernameSnap = await get(usernameRef);
       if (usernameSnap.exists()) {
         alert("Username già in uso.");
@@ -174,7 +170,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Riserva username
+      // Controlla se utente esiste già (per evitare riscrittura)
+      const userSnap = await get(userRef);
+      if (userSnap.exists()) {
+        alert("Utente già registrato.");
+        submitButton.disabled = false;
+        return;
+      }
+
+      // Scrivi username -> uid
       await set(usernameRef, user.uid);
 
       const ip = await getIP();
@@ -198,6 +202,17 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error(error);
       alert("Errore durante la registrazione.");
+
+      // Se username è stato già scritto, fallo rimuovere (rollback)
+      if (user && form.username.value.trim()) {
+        try {
+          const usernameRef = ref(db, `usernames/${form.username.value.trim()}`);
+          await remove(usernameRef);
+        } catch (removeError) {
+          console.error("Rollback fallito:", removeError);
+        }
+      }
+    } finally {
       submitButton.disabled = false;
     }
   });
