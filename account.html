@@ -4,93 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crypto Simulator - Account</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* Stili di base e animazione bolle come in vouch-create.html */
     body {
       margin: 0;
-      padding: 0;
+      padding: 100px 20px 20px; /* padding top per navbar fissa */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #1c1c3a, #12122b);
       color: #eee;
       overflow-x: hidden;
       position: relative;
       min-height: 100vh;
-    }
-
-    /* Navbar versione vouch-create */
-    header.navbar {
-      width: 100%;
-      background: rgba(28, 28, 58, 0.9);
-      padding: 12px 30px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(187, 134, 252, 0.3);
-      backdrop-filter: blur(12px);
-    }
-
-    header.navbar img.logo {
-      height: 40px;
-      margin-right: 20px;
-    }
-
-    header.navbar nav ul {
-      list-style: none;
-      display: flex;
-      gap: 28px;
-      margin: 0;
-      padding: 0;
-      align-items: center;
-      flex-grow: 1;
-    }
-
-    header.navbar nav ul li a {
-      color: #eee;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease, border-bottom 0.3s ease;
-      border-bottom: 2px solid transparent;
-      padding-bottom: 2px;
-    }
-
-    header.navbar nav ul li a:hover,
-    header.navbar nav ul li a.active {
-      color: #bb86fc;
-      border-bottom: 2px solid #bb86fc;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     main {
-      margin-top: 90px;
-      padding: 40px 20px;
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
       max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      background: #2a2a4f;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
       position: relative;
-      z-index: 10;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     h1 {
-      text-align: center;
-      color: #bb86fc;
+      font-size: 2.2rem;
       margin-bottom: 30px;
+      color: #bb86fc;
+      text-align: center;
+      width: 100%;
     }
 
     .info {
       display: flex;
       flex-direction: column;
       gap: 20px;
+      width: 100%;
     }
 
     .info div {
-      background: #3b3b65;
+      background: #38386a;
       padding: 16px 20px;
       border-radius: 12px;
       display: flex;
@@ -111,6 +71,8 @@
     .value {
       font-weight: bold;
       color: #fff;
+      display: flex;
+      align-items: center;
     }
 
     .toggle-password {
@@ -120,57 +82,157 @@
       user-select: none;
     }
 
-    /* Animazione bolle */
-    .bubbles {
+    /* ==== NAVBAR VERSIONE VOUCH-CREATE ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a, #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover, #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    .nav-menu li a.active {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
+    #nav-toggle.open span:nth-child(2) { opacity: 0; }
+    #nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
+
+    /* CANVAS BOLLE */
+    #bubble-canvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      overflow: hidden;
-      z-index: 0;
-    }
-
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: rgba(187, 134, 252, 0.3);
-      border-radius: 50%;
-      animation: rise 15s linear infinite;
-      opacity: 0.6;
-      filter: blur(2px);
-    }
-
-    @keyframes rise {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.6;
-      }
-      100% {
-        transform: translateY(-110vh) scale(1.3);
-        opacity: 0;
-      }
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <header class="navbar">
-    <img src="logo.png" alt="Logo" class="logo" />
-    <nav>
-      <ul>
+  <canvas id="bubble-canvas"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
         <li><a href="dashboard.html">Home</a></li>
         <li><a href="exchange.html">Exchange</a></li>
         <li><a href="vouch-create.html">Vouch Create</a></li>
         <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
         <li><a href="afk.html">AFK Zone</a></li>
         <li><a href="account.html" class="active">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
       </ul>
-    </nav>
-  </header>
-
-  <!-- Bolle animate -->
-  <div class="bubbles" id="bubbles"></div>
+    </div>
+  </nav>
 
   <main>
     <h1>Il tuo Account</h1>
@@ -192,70 +254,131 @@
   <script type="module">
     import { db, ref, get, onValue } from './js/firebase.js';
 
-    const user = localStorage.getItem("user");
-    if (!user) window.location.href = "index.html";
+    // Gestione menu mobile navbar
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      navToggle.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', navToggle.classList.contains('open'));
+    });
 
-    document.getElementById("username").textContent = user;
+    // Toggle tema semplice (non presente nel codice originale, ma presente nel vouch-create)
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+      if(document.body.dataset.theme === 'dark'){
+        document.body.dataset.theme = 'light';
+        themeToggle.textContent = '🌙';
+      } else {
+        document.body.dataset.theme = 'dark';
+        themeToggle.textContent = '☀️';
+      }
+    });
 
-    const passwordEl = document.getElementById("password");
-    let passwordVisible = false;
-
-    // Funzione per caricare dati e aggiornare valori wallet in tempo reale
-    async function loadData() {
-      try {
-        const snapshot = await get(ref(db, `users/${user}`));
-        if (!snapshot.exists()) return;
-
-        const data = snapshot.val();
-        passwordEl.textContent = passwordVisible ? data.password : "••••••";
-        document.getElementById("btc").textContent = (data.wallet?.BTC || 0).toFixed(3);
-        document.getElementById("eth").textContent = (data.wallet?.ETH || 0).toFixed(3);
-        document.getElementById("ltc").textContent = (data.wallet?.LTC || 0).toFixed(3);
-      } catch (e) {
-        console.error("Errore nel caricamento account:", e);
+    // Toggle password visibile/nascosta
+    function togglePassword() {
+      const pwdSpan = document.getElementById('password');
+      if(pwdSpan.textContent === '••••••') {
+        pwdSpan.textContent = window.userPassword || '********';
+      } else {
+        pwdSpan.textContent = '••••••';
       }
     }
 
-    // Toggle visibilità password
-    window.togglePassword = () => {
-      passwordVisible = !passwordVisible;
-      loadData();
-    };
-
-    loadData();
-
-    // Aggiornamento realtime su modifica dati wallet
-    onValue(ref(db, `users/${user}/wallet`), (snapshot) => {
-      const wallet = snapshot.val();
-      if (!wallet) return;
-      document.getElementById("btc").textContent = (wallet.BTC || 0).toFixed(3);
-      document.getElementById("eth").textContent = (wallet.ETH || 0).toFixed(3);
-      document.getElementById("ltc").textContent = (wallet.LTC || 0).toFixed(3);
-    });
-
-    // Animazione bolle (come vouch-create)
-    const bubblesContainer = document.getElementById('bubbles');
-
-    function createBubble() {
-      const bubble = document.createElement('div');
-      bubble.classList.add('bubble');
-      const size = Math.random() * 40 + 20 + 'px';
-      bubble.style.width = size;
-      bubble.style.height = size;
-      bubble.style.left = Math.random() * 100 + 'vw';
-      bubble.style.animationDuration = (10 + Math.random() * 10) + 's';
-      bubble.style.animationTimingFunction = 'linear';
-      bubblesContainer.appendChild(bubble);
-
-      // Rimuovi bubble dopo animazione per non appesantire DOM
-      setTimeout(() => {
-        bubble.remove();
-      }, 15000);
+    // Funzione per caricare dati utente
+    function loadUserData(uid) {
+      const userRef = ref(db, 'users/' + uid);
+      onValue(userRef, (snapshot) => {
+        if(snapshot.exists()){
+          const data = snapshot.val();
+          document.getElementById('username').textContent = data.username || '--';
+          window.userPassword = data.password || '';
+          document.getElementById('password').textContent = '••••••';
+          document.getElementById('btc').textContent = data.btc || 0;
+          document.getElementById('eth').textContent = data.eth || 0;
+          document.getElementById('ltc').textContent = data.ltc || 0;
+        } else {
+          alert('Utente non trovato');
+        }
+      });
     }
 
-    // Genera bolle ogni 500ms
-    setInterval(createBubble, 500);
+    // Carica dati utente appena la pagina si carica
+    // Simuliamo il login con UID da sessionStorage
+    const loggedInUID = sessionStorage.getItem('uid');
+    if(loggedInUID) {
+      loadUserData(loggedInUID);
+    } else {
+      alert('Devi effettuare il login per vedere i dati dell\'account');
+      window.location.href = 'login.html';
+    }
 
+    // --- CANVAS BOLLE ----
+    const canvas = document.getElementById('bubble-canvas');
+    const ctx = canvas.getContext('2d');
+    let bubbles = [];
+    const colors = ['#bb86fc', '#7e5fff', '#5c4b9d', '#4b3ca7'];
+    const maxBubbles = 60;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Bubble {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + Math.random() * 100;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.3 + Math.random() * 1.0;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.opacity = 0.2 + Math.random() * 0.3;
+      }
+      update() {
+        this.y -= this.speed;
+        if(this.y < -this.radius) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${hexToRgb(this.color)},${this.opacity})`;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 10;
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function hexToRgb(hex) {
+      const bigint = parseInt(hex.slice(1), 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return `${r},${g},${b}`;
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for(let bubble of bubbles) {
+        bubble.update();
+        bubble.draw();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    // Inizializza le bolle
+    for(let i=0; i < maxBubbles; i++) {
+      bubbles.push(new Bubble());
+    }
+    animate();
+
+    window.togglePassword = togglePassword; // rendi la funzione globale
   </script>
 </body>
 </html>
