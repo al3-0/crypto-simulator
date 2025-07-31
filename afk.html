@@ -333,74 +333,67 @@
   <div id="raindrop-container"></div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    // Config Firebase (da sostituire con la tua config)
-    const firebaseConfig = {
-      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-      authDomain: "coins-7104d.firebaseapp.com",
-      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-      projectId: "coins-7104d",
-      storageBucket: "coins-7104d.appspot.com",
-      messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F",
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+  authDomain: "coins-7104d.firebaseapp.com",
+  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+  projectId: "coins-7104d",
+  storageBucket: "coins-7104d.appspot.com",
+  messagingSenderId: "893938643778",
+  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+  measurementId: "G-QSY10CVX1F",
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    const user = localStorage.getItem("user");
-    if (!user) window.location.href = "index.html";
+const user = localStorage.getItem("user");
+if (!user) window.location.href = "index.html";
 
-    let countdown = 180;
-    let timerInterval;
-    let dropCountPerMinute = 0;
-    let btc = 0;
-    let isPageVisible = true;
+let countdown = 180;
+let timerInterval;
+let dropCountPerMinute = 0;
+let btc = 0;
+let isPageVisible = true;
+let uid = null;
 
-    async function initGame() {
-      const snap = await get(ref(db, `users/${user}`));
-      if (!snap.exists()) return;
-      const userData = snap.val();
-      btc = userData.wallet?.BTC ?? 0;
-      updateBtc(btc);
-      startCountdown();
-      spawnRaindrops();
-      startDropCountReset();
+async function initGame() {
+  try {
+    const usernameSnap = await get(ref(db, `usernames/${user}`));
+    if (!usernameSnap.exists()) {
+      alert("Utente non trovato");
+      window.location.href = "index.html";
+      return;
     }
+    uid = usernameSnap.val();
 
-    function updateBtc(amount) {
-      document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(4)}`;
+    const userSnap = await get(ref(db, `users/${uid}`));
+    if (!userSnap.exists()) {
+      alert("Dati utente non trovati");
+      window.location.href = "index.html";
+      return;
     }
+    const userData = userSnap.val();
 
-    function tickCountdown() {
-      if (!isPageVisible) return;
-      countdown--;
-      const min = String(Math.floor(countdown / 60)).padStart(2, "0");
-      const sec = String(countdown % 60).padStart(2, "0");
-      document.getElementById("timer").textContent = `${min}:${sec}`;
-      if (countdown <= 0) {
-        gainBtc(0.005);
-        countdown = 180;
-      }
-    }
+    btc = userData.wallet?.BTC ?? 0;
+    updateBtc(btc);
 
-    function startCountdown() {
-      timerInterval = setInterval(tickCountdown, 1000);
-    }
+    startCountdown();
+    spawnRaindrops();
+    startDropCountReset();
 
-    function gainBtc(amount) {
-      btc += amount;
-      updateBtc(btc);
-      showBtcGain(amount);
-      saveBtc();
-    }
+  } catch (error) {
+    console.error("Errore initGame:", error);
+  }
+}
 
-    function saveBtc() {
-      update(ref(db, `users/${user}/wallet`), { BTC: btc });
-    }
+function saveBtc() {
+  if (!uid) return;
+  update(ref(db, `users/${uid}/wallet`), { BTC: btc });
+}
 
     function showBtcGain(amount) {
       const gainElem = document.createElement("div");
