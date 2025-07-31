@@ -79,12 +79,12 @@
   <script src="https://www.google.com/recaptcha/api.js?render=6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU"></script>
 
   <!-- Import Firebase con ESM inline -->
-  <script type="module">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
   authDomain: "coins-7104d.firebaseapp.com",
   databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
@@ -93,81 +93,98 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gsta
   messagingSenderId: "893938643778",
   appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
   measurementId: "G-QSY10CVX1F"
-    };
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-    async function getIP() {
-      try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        return data.ip;
-      } catch {
-        return '0.0.0.0';
+// Esegui login anonimo
+signInAnonymously(auth).catch((error) => {
+  console.error("Errore login anonimo:", error);
+});
+
+async function getIP() {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip;
+  } catch {
+    return '0.0.0.0';
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById('register-form');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
+    try {
+      const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'register' });
+      if (!token) {
+        alert("Errore nella verifica reCAPTCHA. Riprova.");
+        return;
       }
-    }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById('register-form');
+      const username = form.username.value.trim();
+      const password = form.password.value;
+      const passwordConfirm = form.passwordConfirm.value;
 
-      form.addEventListener('submit', async e => {
-        e.preventDefault();
+      if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
+        alert("Username non valido.");
+        return;
+      }
+      if (password.length < 6) {
+        alert("La password deve essere almeno di 6 caratteri.");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        alert("Le password non corrispondono.");
+        return;
+      }
 
-        const token = await grecaptcha.execute('6LfTk5IrAAAAAJ2nd3NtRSy8_kJMJb7d_g4mFQoU', { action: 'register' });
-        if (!token) {
-          alert("Errore nella verifica reCAPTCHA. Riprova.");
-          return;
-        }
+      const userRef = ref(db, `users/${username}`);
+      const snapshot = await get(userRef);
 
-        const username = form.username.value.trim();
-        const password = form.password.value;
-        const passwordConfirm = form.passwordConfirm.value;
+      if (snapshot.exists()) {
+        alert("Username già in uso.");
+        return;
+      }
 
-        if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
-          alert("Username non valido.");
-          return;
-        }
-        if (password.length < 6) {
-          alert("La password deve essere almeno di 6 caratteri.");
-          return;
-        }
-        if (password !== passwordConfirm) {
-          alert("Le password non corrispondono.");
-          return;
-        }
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Autenticazione fallita.");
+        return;
+      }
 
-        try {
-          const userRef = ref(db, `users/${username}`);
-          const snapshot = await get(userRef);
+      const ip = await getIP();
 
-          if (snapshot.exists()) {
-            alert("Username già in uso.");
-            return;
-          }
-
-          const ip = await getIP();
-
-          await set(userRef, {
-            password,
-            ip,
-            wallet: {
-              BTC: 0,
-              ETH: 0,
-              LTC: 0
-            },
-            recaptchaToken: token
-          });
-
-          localStorage.setItem("user", username);
-          window.location.href = "dashboard.html";
-        } catch (error) {
-          console.error(error);
-          alert("Errore durante la registrazione.");
-        }
+      await set(userRef, {
+        password,
+        ip,
+        wallet: {
+          BTC: 0,
+          ETH: 0,
+          LTC: 0
+        },
+        recaptchaToken: token
       });
-    });
-  </script>
+
+      localStorage.setItem("user", username);
+      window.location.href = "dashboard.html";
+    } catch (error) {
+      console.error(error);
+      alert("Errore durante la registrazione.");
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+});
+</script>
 </head>
 <body>
   <main role="main" aria-label="Registrazione Crypto Simulator">
