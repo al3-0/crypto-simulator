@@ -351,271 +351,289 @@
     </section>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, get, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
-      authDomain: "coins-7104d.firebaseapp.com",
-      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
-      projectId: "coins-7104d",
-      storageBucket: "coins-7104d.appspot.com",
-      messagingSenderId: "893938643778",
-      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
-      measurementId: "G-QSY10CVX1F"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+    authDomain: "coins-7104d.firebaseapp.com",
+    databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+    projectId: "coins-7104d",
+    storageBucket: "coins-7104d.appspot.com",
+    messagingSenderId: "893938643778",
+    appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+    measurementId: "G-QSY10CVX1F"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-    // Utente loggato (localStorage)
-const allowedUsers = ["Ale"]; // aggiungi i nomi permessi qui
+  const form = document.getElementById("redeem-form");
+  const input = form['vouch-code'];
+  const button = form.querySelector("button[type=submit]");
+  const msg = document.getElementById("message");
+  const loadingBar = document.getElementById("loading-bar");
+  const redeemedList = document.getElementById("redeemed-codes");
 
-const user = localStorage.getItem("user");
+  let userUID = localStorage.getItem("userUID");
 
-if (!user) {
-  window.location.href = "index.html";
-  throw new Error("Utente non loggato");
-}
-
-if (!allowedUsers.includes(user)) {
-  window.location.href = "dashboard.html";
-  throw new Error("Accesso negato per questo utente");
-}
-
-
-    const form = document.getElementById("redeem-form");
-    const input = form['vouch-code'];
-    const button = form.querySelector("button[type=submit]");
-    const msg = document.getElementById("message");
-    const loadingBar = document.getElementById("loading-bar");
-    const redeemedList = document.getElementById("redeemed-codes");
-
-    // FUNZIONE FORMATTAZIONE AUTOMATICA: Maiuscolo + inserisce trattini nel formato XXXX-XXXX-XXXX
-    function formatVouchCode(value) {
-      let clean = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (clean.length > 12) clean = clean.slice(0, 12);
-      // Inserisce trattini dopo ogni 4 caratteri
-      const parts = [];
-      for (let i = 0; i < clean.length; i += 4) {
-        parts.push(clean.substring(i, i + 4));
-      }
-      return parts.join("-");
-    }
-
-    input.addEventListener("input", e => {
-      const pos = input.selectionStart;
-      const oldVal = input.value;
-      const newVal = formatVouchCode(oldVal);
-      input.value = newVal;
-
-      // Mantieni la posizione del cursore ragionevole
-      let newPos = pos;
-      if (pos === oldVal.length) {
-        newPos = newVal.length;
-      } else if (oldVal[pos - 1] === "-" && newVal[pos - 1] !== "-") {
-        newPos = pos + 1;
-      }
-      input.setSelectionRange(newPos, newPos);
-
-      // Abilita/disabilita il bottone se il formato è corretto
-      button.disabled = !/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(newVal);
-      msg.textContent = "";
-      msg.className = "message info";
-    });
-
-    // Funzione per mostrare messaggi
-    function showMessage(text, type="info") {
-      msg.textContent = text;
-      msg.className = "message " + type;
-    }
-
-    // FUNZIONE PER CARICARE I CODICI RISCATTATI DELL'UTENTE
-    async function loadRedeemedCodes() {
-      redeemedList.innerHTML = "<li>Caricamento...</li>";
-      try {
-        const vouchesRef = ref(db, "vouches");
-        const snapshot = await get(vouchesRef);
-        const allVouches = snapshot.val() || {};
-
-        const redeemed = Object.entries(allVouches)
-          .filter(([code, v]) => v.expired && v.redeemedBy === user)
-          .map(([code, v]) => ({
-            code: code.toUpperCase(),
-            redeemedAt: v.redeemedAt || null
-          }))
-          .sort((a, b) => {
-            if (!a.redeemedAt) return 1;
-            if (!b.redeemedAt) return -1;
-            return b.redeemedAt.localeCompare(a.redeemedAt);
-          });
-
-        if (redeemed.length === 0) {
-          redeemedList.innerHTML = "<li>Non hai ancora riscattato vouch.</li>";
-          return;
+  // Assicura autenticazione anonima e salva UID
+  async function ensureAuth() {
+    return new Promise((resolve, reject) => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          userUID = user.uid;
+          localStorage.setItem("userUID", userUID);
+          resolve(userUID);
+        } else {
+          try {
+            const cred = await signInAnonymously(auth);
+            userUID = cred.user.uid;
+            localStorage.setItem("userUID", userUID);
+            resolve(userUID);
+          } catch (error) {
+            reject(error);
+          }
         }
-        redeemedList.innerHTML = redeemed
-          .map(v => `<li><span>${v.code}</span><span>${v.redeemedAt ? new Date(v.redeemedAt).toLocaleString() : ""}</span></li>`)
-          .join("");
-      } catch (err) {
-        redeemedList.innerHTML = "<li>Errore nel caricamento dei vouch.</li>";
-        console.error(err);
+      });
+    });
+  }
+
+  // Funzione per mostrare messaggi
+  function showMessage(text, type="info") {
+    msg.textContent = text;
+    msg.className = "message " + type;
+  }
+
+  // Carica codici riscattati da questo utente
+  async function loadRedeemedCodes() {
+    redeemedList.innerHTML = "<li>Caricamento...</li>";
+    try {
+      const vouchesRef = ref(db, "vouches");
+      const snapshot = await get(vouchesRef);
+      const allVouches = snapshot.val() || {};
+
+      const redeemed = Object.entries(allVouches)
+        .filter(([code, v]) => v.expired && v.redeemedBy === userUID)
+        .map(([code, v]) => ({
+          code: code.toUpperCase(),
+          redeemedAt: v.redeemedAt || null
+        }))
+        .sort((a, b) => {
+          if (!a.redeemedAt) return 1;
+          if (!b.redeemedAt) return -1;
+          return b.redeemedAt.localeCompare(a.redeemedAt);
+        });
+
+      if (redeemed.length === 0) {
+        redeemedList.innerHTML = "<li>Non hai ancora riscattato vouch.</li>";
+        return;
       }
+      redeemedList.innerHTML = redeemed
+        .map(v => `<li><span>${v.code}</span><span>${v.redeemedAt ? new Date(v.redeemedAt).toLocaleString() : ""}</span></li>`)
+        .join("");
+    } catch (err) {
+      redeemedList.innerHTML = "<li>Errore nel caricamento dei vouch.</li>";
+      console.error(err);
+    }
+  }
+
+  // Form submit: riscatta vouch
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    button.disabled = true;
+    showMessage("");
+    loadingBar.classList.add("active");
+
+    const code = input.value.toUpperCase();
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+      showMessage("Formato codice non valido.", "error");
+      button.disabled = false;
+      loadingBar.classList.remove("active");
+      return;
     }
 
-    // RISCATTO
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      button.disabled = true;
-      showMessage("");
-      loadingBar.classList.add("active");
+    const cleanCode = code.replace(/-/g, "");
 
-      const code = input.value.toUpperCase();
-      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
-        showMessage("Formato codice non valido.", "error");
+    try {
+      await ensureAuth();
+
+      const vouchRef = ref(db, `vouches/${cleanCode}`);
+      const snap = await get(vouchRef);
+
+      if (!snap.exists()) {
+        showMessage("Codice non trovato.", "error");
         button.disabled = false;
         loadingBar.classList.remove("active");
         return;
       }
 
-      const cleanCode = code.replace(/-/g, "");
+      const vouch = snap.val();
 
-      try {
-        const vouchRef = ref(db, `vouches/${cleanCode}`);
-        const snap = await get(vouchRef);
-
-        if (!snap.exists()) {
-          showMessage("Codice non trovato.", "error");
-          return;
-        }
-
-        const vouch = snap.val();
-
-        if (vouch.expired) {
-          showMessage("Codice già utilizzato.", "error");
-          return;
-        }
-
-        // Aggiorna vouch come riscattato
-        await update(vouchRef, {
-          expired: true,
-          redeemedBy: user,
-          redeemedAt: new Date().toISOString()
-        });
-
-        showMessage("Vouch riscattato con successo!", "success");
-        input.value = "";
-        button.disabled = true;
-
-        // Ricarica lista
-        loadRedeemedCodes();
-
-      } catch (err) {
-        console.error(err);
-        showMessage("Errore durante il riscatto. Riprova.", "error");
-      } finally {
-        loadingBar.classList.remove("active");
+      if (vouch.expired) {
+        showMessage("Codice già utilizzato.", "error");
         button.disabled = false;
+        loadingBar.classList.remove("active");
+        return;
       }
-    });
 
-    // NAV TOGGLE MOBILE
-    const navToggle = document.getElementById("nav-toggle");
-    const navMenu = document.getElementById("nav-menu");
+      // Aggiorna vouch come riscattato
+      await update(vouchRef, {
+        expired: true,
+        redeemedBy: userUID,
+        redeemedAt: new Date().toISOString()
+      });
 
-    navToggle.addEventListener("click", () => {
-      const expanded = navToggle.getAttribute("aria-expanded") === "true";
-      navToggle.setAttribute("aria-expanded", !expanded);
-      navToggle.classList.toggle("open");
-      navMenu.classList.toggle("open");
-    });
+      showMessage("Vouch riscattato con successo!", "success");
+      input.value = "";
+      button.disabled = true;
 
-    navToggle.addEventListener("keydown", e => {
-      if(e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        navToggle.click();
-      }
-    });
+      // Ricarica lista
+      loadRedeemedCodes();
 
-    // THEME TOGGLE
-    const themeToggle = document.getElementById("theme-toggle");
-    function applyTheme(theme) {
-      if (theme === "light") document.body.classList.add("light-theme");
-      else document.body.classList.remove("light-theme");
+    } catch (err) {
+      console.error(err);
+      showMessage("Errore durante il riscatto. Riprova.", "error");
+    } finally {
+      loadingBar.classList.remove("active");
+      button.disabled = false;
     }
-    // carica tema da localStorage
-    let savedTheme = localStorage.getItem("theme") || "dark";
+  });
+
+  // Funzione per formattare codice in maiuscolo con trattini
+  function formatVouchCode(value) {
+    let clean = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (clean.length > 12) clean = clean.slice(0, 12);
+    const parts = [];
+    for (let i = 0; i < clean.length; i += 4) {
+      parts.push(clean.substring(i, i + 4));
+    }
+    return parts.join("-");
+  }
+
+  // Input event per formattazione codice e abilitazione bottone
+  input.addEventListener("input", e => {
+    const pos = input.selectionStart;
+    const oldVal = input.value;
+    const newVal = formatVouchCode(oldVal);
+    input.value = newVal;
+
+    let newPos = pos;
+    if (pos === oldVal.length) {
+      newPos = newVal.length;
+    } else if (oldVal[pos - 1] === "-" && newVal[pos - 1] !== "-") {
+      newPos = pos + 1;
+    }
+    input.setSelectionRange(newPos, newPos);
+
+    button.disabled = !/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(newVal);
+    msg.textContent = "";
+    msg.className = "message info";
+  });
+
+  // NAV TOGGLE MOBILE
+  const navToggle = document.getElementById("nav-toggle");
+  const navMenu = document.getElementById("nav-menu");
+
+  navToggle.addEventListener("click", () => {
+    const expanded = navToggle.getAttribute("aria-expanded") === "true";
+    navToggle.setAttribute("aria-expanded", !expanded);
+    navToggle.classList.toggle("open");
+    navMenu.classList.toggle("open");
+  });
+
+  navToggle.addEventListener("keydown", e => {
+    if(e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navToggle.click();
+    }
+  });
+
+  // THEME TOGGLE
+  const themeToggle = document.getElementById("theme-toggle");
+  function applyTheme(theme) {
+    if (theme === "light") document.body.classList.add("light-theme");
+    else document.body.classList.remove("light-theme");
+  }
+  let savedTheme = localStorage.getItem("theme") || "dark";
+  applyTheme(savedTheme);
+  themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+
+  themeToggle.addEventListener("click", () => {
+    savedTheme = savedTheme === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", savedTheme);
     applyTheme(savedTheme);
     themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+  });
 
-    themeToggle.addEventListener("click", () => {
-      savedTheme = savedTheme === "dark" ? "light" : "dark";
-      localStorage.setItem("theme", savedTheme);
-      applyTheme(savedTheme);
-      themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+  // Carica codici riscattati dopo autenticazione
+  ensureAuth()
+    .then(loadRedeemedCodes)
+    .catch(err => {
+      showMessage("Errore autenticazione.", "error");
+      console.error(err);
     });
 
-    // CARICA CODICI ALL'AVVIO
-    loadRedeemedCodes();
+  // CANVAS BUBBLES ANIMATION
+  const canvas = document.getElementById('bubble-canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
 
-    // CANVAS BUBBLES ANIMATION
-    const canvas = document.getElementById('bubble-canvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-    function resize() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+  class Bubble {
+    constructor() {
+      this.reset();
     }
-    resize();
-    window.addEventListener('resize', resize);
-
-    class Bubble {
-      constructor() {
+    reset() {
+      this.x = Math.random() * width;
+      this.y = height + Math.random() * 100;
+      this.radius = 5 + Math.random() * 15;
+      this.speed = 1 + Math.random() * 2;
+      this.alpha = 0.4 + Math.random() * 0.6;
+      this.angle = Math.random() * Math.PI * 2;
+      this.angleSpeed = (Math.random() - 0.5) * 0.02;
+    }
+    update() {
+      this.y -= this.speed;
+      this.x += Math.sin(this.angle) * 0.5;
+      this.angle += this.angleSpeed;
+      if(this.y + this.radius < 0) {
         this.reset();
       }
-      reset() {
-        this.x = Math.random() * width;
-        this.y = height + Math.random() * 100;
-        this.radius = 5 + Math.random() * 15;
-        this.speed = 1 + Math.random() * 2;
-        this.alpha = 0.4 + Math.random() * 0.6;
-        this.angle = Math.random() * Math.PI * 2;
-        this.angleSpeed = (Math.random() - 0.5) * 0.02;
-      }
-      update() {
-        this.y -= this.speed;
-        this.x += Math.sin(this.angle) * 0.5;
-        this.angle += this.angleSpeed;
-        if (this.y + this.radius < 0) {
-          this.reset();
-        }
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(123, 85, 255, ${this.alpha})`;
-        ctx.shadowColor = "rgba(123, 85, 255, 0.8)";
-        ctx.shadowBlur = 10;
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
     }
-
-    const bubbles = [];
-    for (let i=0; i<30; i++) bubbles.push(new Bubble());
-
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      for (const b of bubbles) {
-        b.update();
-        b.draw();
-      }
-      requestAnimationFrame(animate);
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
+      ctx.fill();
     }
-    animate();
-  </script>
+  }
+
+  const bubbles = [];
+  for(let i = 0; i < 40; i++) {
+    bubbles.push(new Bubble());
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    bubbles.forEach(bubble => {
+      bubble.update();
+      bubble.draw();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
 </body>
 </html>
