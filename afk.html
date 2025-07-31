@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>AFK Zone BTC</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AFK Zone</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <style>
-    /* === TUTTO IL TUO CSS QUI SOTTO INCOLLATO INTEGRAMENTE === */
-    /* ==== BODY & MAIN ==== */
-    body {
+   body {
       margin: 0;
       min-height: 100vh;
       padding: 100px 20px 20px;
@@ -291,17 +290,22 @@
       100% { opacity: 0; transform: translateY(-60px); }
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
 <body>
-  <nav class="navbar">
+  <canvas id="bubble-canvas"></canvas>
+
+  <nav class="navbar" role="navigation">
     <div class="nav-container">
-      <div class="logo-link"><img src="logo.png" alt="Logo"></div>
-      <ul class="nav-menu">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Profilo</a></li>
-        <li><button id="theme-toggle">🌓</button></li>
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html" aria-current="page">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle">🌙</button></li>
       </ul>
     </div>
   </nav>
@@ -315,7 +319,10 @@
 
   <div id="raindrop-container"></div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
       authDomain: "coins-7104d.firebaseapp.com",
@@ -327,79 +334,45 @@
       measurementId: "G-QSY10CVX1F"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    let currentUser = null;
+    const user = localStorage.getItem("user");
+    if (!user) {
+      window.location.href = "index.html";
+      throw new Error("Utente non loggato");
+    }
+
+    const timerEl = document.getElementById("timer");
+    const btcStats = document.getElementById("btc-stats");
     let countdown = 180;
-    let timerInterval;
+    let btc = 0;
+    let interval;
 
-    async function getPublicIP() {
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return data.ip;
-      } catch {
-        return null;
-      }
+    async function loadUserBTC() {
+      const snap = await get(ref(db, "users/" + user));
+      if (!snap.exists()) return;
+      const userData = snap.val();
+      btc = userData.wallet?.BTC ?? 0;
+      updateBtcUI();
     }
 
-    async function authenticateUser() {
-      const ip = await getPublicIP();
-      if (!ip) return redirectToLogin();
-
-      db.ref("users").once("value", snapshot => {
-        const users = snapshot.val();
-        for (let username in users) {
-          if (users[username].ip === ip) {
-            currentUser = username;
-            return initGame(users[username]);
-          }
-        }
-        redirectToLogin();
-      });
+    function updateBtcUI() {
+      btcStats.textContent = `BTC: ${btc.toFixed(4)}`;
     }
 
-    function redirectToLogin() {
-      const username = prompt("Nome utente:");
-      const password = prompt("Password:");
-      if (!username || !password) return window.location.href = "login.html";
-
-      db.ref("users/" + username).once("value", snapshot => {
-        const user = snapshot.val();
-        if (user && user.password === password) {
-          currentUser = username;
-          initGame(user);
-        } else {
-          alert("Login fallito.");
-          window.location.href = "login.html";
-        }
-      });
-    }
-
-    function initGame(userData) {
-      let btc = userData.wallet?.BTC ?? 0;
-      updateBtc(btc);
-      startCountdown(btc);
-    }
-
-    function updateBtc(amount) {
-      document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(4)}`;
-    }
-
-    function startCountdown(btc) {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
+    function startCountdown() {
+      interval = setInterval(() => {
         countdown--;
         const min = String(Math.floor(countdown / 60)).padStart(2, '0');
         const sec = String(countdown % 60).padStart(2, '0');
-        document.getElementById("timer").textContent = `${min}:${sec}`;
+        timerEl.textContent = `${min}:${sec}`;
 
         if (countdown <= 0) {
           countdown = 180;
           btc += 0.05;
-          updateBtc(btc);
-          db.ref("users/" + currentUser + "/wallet").update({ BTC: btc });
+          update(ref(db, "users/" + user + "/wallet"), { BTC: btc });
+          updateBtcUI();
           spawnDrop("+0.05 BTC");
         }
       }, 1000);
@@ -415,11 +388,92 @@
       setTimeout(() => drop.remove(), 1200);
     }
 
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-      document.body.classList.toggle("light-theme");
+    // NAV TOGGLE
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+    navToggle.addEventListener("click", () => {
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", !expanded);
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+    });
+    navToggle.addEventListener("keydown", e => {
+      if(e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        navToggle.click();
+      }
     });
 
-    authenticateUser();
+    // TEMA
+    const themeToggle = document.getElementById("theme-toggle");
+    function applyTheme(theme) {
+      document.body.classList.toggle("light-theme", theme === "light");
+    }
+    let savedTheme = localStorage.getItem("theme") || "dark";
+    applyTheme(savedTheme);
+    themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+    themeToggle.addEventListener("click", () => {
+      savedTheme = savedTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", savedTheme);
+      applyTheme(savedTheme);
+      themeToggle.textContent = savedTheme === "dark" ? "🌙" : "☀️";
+    });
+
+    // CANVAS BOLLE
+    const canvas = document.createElement('canvas');
+    canvas.id = 'bubble-canvas';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Bubble {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 100;
+        this.radius = 5 + Math.random() * 15;
+        this.speed = 1 + Math.random() * 2;
+        this.alpha = 0.4 + Math.random() * 0.6;
+        this.angle = Math.random() * Math.PI * 2;
+        this.angleSpeed = (Math.random() - 0.5) * 0.02;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.angle) * 0.5;
+        this.angle += this.angleSpeed;
+        if (this.y + this.radius < 0) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(123, 85, 255, ${this.alpha})`;
+        ctx.shadowColor = "rgba(123, 85, 255, 0.8)";
+        ctx.shadowBlur = 10;
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const bubbles = Array.from({ length: 30 }, () => new Bubble());
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      bubbles.forEach(b => { b.update(); b.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // AVVIO
+    loadUserBTC().then(startCountdown);
   </script>
 </body>
 </html>
