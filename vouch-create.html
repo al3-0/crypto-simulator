@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vouch Create</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      color: #bb86fc;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    input, select, button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input, select {
+      background: #38386a;
+      color: #fff;
+    }
+
+    button {
+      background: #7b5fff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #a48fff;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #90ee90;
+      text-align: center;
+    }
+
+    /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a, #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover, #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
+    #nav-toggle.open span:nth-child(2) { opacity: 0; }
+    #nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
+
+    /* CANVAS BOLLE */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+
+    body.light-theme input, body.light-theme select {
+      background: #f0f0f0;
+      color: #111;
+    }
+
+    body.light-theme button {
+      background: #7b5fff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bubble-canvas"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Crea un Vouch</h1>
+    <form id="vouch-form">
+      <select id="coin">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="LTC">Litecoin (LTC)</option>
+      </select>
+      <input type="number" id="amount" min="0.001" step="0.001" placeholder="Quantità" required />
+      <button type="submit">Genera Vouch</button>
+      <div class="message" id="message"></div>
+    </form>
+  </main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+    authDomain: "coins-7104d.firebaseapp.com",
+    databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+    projectId: "coins-7104d",
+    storageBucket: "coins-7104d.appspot.com",
+    messagingSenderId: "893938643778",
+    appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+    measurementId: "G-QSY10CVX1F"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Prendiamo username da localStorage
+  const username = localStorage.getItem("user");
+  if (!username) window.location.href = "index.html";
+
+  // Lista username autorizzati
+  const authorizedUsers = ["Alessandro", "Admin"];
+
+  if (!authorizedUsers.includes(username)) {
+    alert("Non sei autorizzato a creare vouch.");
+    window.location.href = "dashboard.html";
+  }
+
+  // Funzione per ottenere userId da username
+  async function getUserIdByUsername(username) {
+    try {
+      const usernameRef = ref(db, `usernames/${username}`);
+      const snapshot = await get(usernameRef);
+      return snapshot.exists() ? snapshot.val() : null;
+    } catch (e) {
+      console.error("Errore recuperando userId:", e);
+      return null;
+    }
+  }
+
+  let userId = null;
+
+  // Dopo aver ottenuto userId, carichiamo i vouch
+  async function init() {
+    userId = await getUserIdByUsername(username);
+    if (!userId) {
+      alert("Utente non trovato.");
+      window.location.href = "index.html";
+      return;
+    }
+    loadUserVouches();
+  }
+  
+init();
+  
+  const form = document.getElementById("vouch-form");
+  const msg = document.getElementById("message");
+
+  // Container vouch come nel tuo originale (non modificato)
+  const validVouchesContainer = document.createElement("div");
+  validVouchesContainer.id = "valid-vouches";
+  validVouchesContainer.style.marginTop = "30px";
+
+  const expiredVouchesContainer = document.createElement("div");
+  expiredVouchesContainer.id = "expired-vouches";
+  expiredVouchesContainer.style.marginTop = "20px";
+
+  form.parentNode.appendChild(validVouchesContainer);
+  form.parentNode.appendChild(expiredVouchesContainer);
+
+  async function loadUserVouches() {
+    try {
+      const vouchesRef = ref(db, 'vouches');
+      const snapshot = await get(vouchesRef);
+      const allVouches = snapshot.val() || {};
+
+      const now = Date.now();
+
+      const validVouches = [];
+      const expiredVouches = [];
+
+      // Ora filtriamo i vouch confrontando vouch.from con userId (non username)
+Object.entries(allVouches).forEach(([code, vouch]) => {
+  if (vouch.from === userId) {   // <-- qui
+    if (vouch.expired === true || (vouch.expiryDate && vouch.expiryDate < now)) {
+      expiredVouches.push({ code, ...vouch });
+    } else {
+      validVouches.push({ code, ...vouch });
+    }
+  }
+});
+
+      validVouchesContainer.innerHTML = `
+        <h3>Vouch Validi</h3>
+        ${validVouches.length === 0 ? "<p>Nessun vouch valido.</p>" :
+          `<ul>${validVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
+      `;
+
+      expiredVouchesContainer.innerHTML = `
+        <h3>Vouch Scaduti</h3>
+        ${expiredVouches.length === 0 ? "<p>Nessun vouch scaduto.</p>" :
+          `<ul>${expiredVouches.map(v => `<li><strong>${v.code}</strong> - ${v.coin} ${v.amount}</li>`).join("")}</ul>`}
+      `;
+    } catch (e) {
+      console.error("Errore caricando i vouch:", e);
+    }
+  }
+
+  let codeGenerated = false;
+
+  function generateCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let raw = "";
+    for (let i = 0; i < 12; i++) {
+      raw += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return raw;
+  }
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (codeGenerated) {
+      msg.textContent = "Hai già generato un codice. Ricarica la pagina per crearne un altro.";
+      return;
+    }
+    const coin = form.coin.value;
+    const amount = parseFloat(form.amount.value);
+
+    if (!coin || isNaN(amount) || amount <= 0) {
+      msg.textContent = "Inserisci dati validi.";
+      return;
+    }
+
+    if (!userId) {
+      msg.textContent = "Utente non identificato, ricarica la pagina.";
+      return;
+    }
+
+    msg.textContent = "Generazione codice...";
+    const newCode = generateCode();
+
+const vouchData = {
+  from: userId,  // usa sempre userId, non username
+  coin,
+  amount,
+  expired: false,
+  createdAt: Date.now(),
+  expiryDate: Date.now() + 30 * 24 * 3600 * 1000, // scadenza 30 giorni
+};
+await set(ref(db, `vouches/${newCode}`), vouchData);
+
+    try {
+      await set(ref(db, `vouches/${newCode}`), vouchData);
+
+      msg.innerHTML = `
+        <p>Vouch creato: <code>${newCode}</code></p>
+        <button id="copy-code">Copia codice</button>
+      `;
+      codeGenerated = true;
+
+      document.getElementById("copy-code").addEventListener("click", () => {
+        navigator.clipboard.writeText(newCode).then(() => {
+          msg.textContent = "Codice copiato negli appunti!";
+        });
+      });
+
+      loadUserVouches();
+
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "Errore nella creazione del vouch.";
+    }
+  });
+
+    // NAVBAR TOGGLE
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    navToggle.addEventListener("click", () => {
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", !expanded);
+    });
+
+    navToggle.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        navToggle.click();
+      }
+    });
+
+    // THEME TOGGLE
+    const themeToggle = document.getElementById("theme-toggle");
+    const body = document.body;
+
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        body.classList.add("light-theme");
+        themeToggle.textContent = "🌙";
+      } else {
+        body.classList.remove("light-theme");
+        themeToggle.textContent = "☀️";
+      }
+    }
+    loadTheme();
+
+    themeToggle.addEventListener("click", () => {
+      body.classList.toggle("light-theme");
+      if (body.classList.contains("light-theme")) {
+        themeToggle.textContent = "🌙";
+        localStorage.setItem("theme", "light");
+      } else {
+        themeToggle.textContent = "☀️";
+        localStorage.setItem("theme", "dark");
+      }
+    });
+
+    // BUBBLE CANVAS
+    const canvas = document.getElementById("bubble-canvas");
+    const ctx = canvas.getContext("2d");
+    let width, height;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    class Bubble {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 200;
+        this.radius = 5 + Math.random() * 15;
+        this.speed = 1 + Math.random() * 2;
+        this.alpha = 0.4 + Math.random() * 0.6;
+        this.angle = Math.random() * 2 * Math.PI;
+        this.angleSpeed = 0.01 + Math.random() * 0.02;
+      }
+      update() {
+        this.y -= this.speed;
+        this.angle += this.angleSpeed;
+        this.x += Math.sin(this.angle) * 0.5;
+        if (this.y + this.radius < 0) {
+          this.x = Math.random() * width;
+          this.y = height + this.radius;
+          this.radius = 5 + Math.random() * 15;
+          this.speed = 1 + Math.random() * 2;
+          this.alpha = 0.4 + Math.random() * 0.6;
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.3, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187, 134, 252, ${this.alpha})`);
+        gradient.addColorStop(1, `rgba(187, 134, 252, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    const bubbles = [];
+    for (let i = 0; i < 60; i++) {
+      bubbles.push(new Bubble());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      bubbles.forEach(b => {
+        b.update();
+        b.draw(ctx);
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+  </script>
+</body>
+</html>

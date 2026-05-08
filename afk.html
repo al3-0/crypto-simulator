@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>AFK Zone BTC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="logo.png" type="image/png" />
+  <style>
+    /* ==== BODY E MAIN ==== */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      color: #bb86fc;
+      text-align: center;
+    }
+
+    p.welcome {
+      font-size: 1.1rem;
+      color: #ccc;
+      font-weight: 500;
+      margin-bottom: 30px;
+    }
+
+    #timer {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #bb86fc;
+      margin-bottom: 20px;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    #btc-stats {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #d6bfff;
+      margin-top: 10px;
+      min-height: 24px;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    /* ==== NAVBAR ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      z-index: 10;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) {
+      top: 0;
+    }
+    #nav-toggle span:nth-child(2) {
+      top: 9px;
+    }
+    #nav-toggle span:nth-child(3) {
+      top: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+
+    /* ==== TEMA CHIARO ==== */
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+    body.light-theme nav.navbar {
+      background: #ddd;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    body.light-theme .nav-menu li a,
+    body.light-theme #theme-toggle {
+      color: #444;
+    }
+    body.light-theme .nav-menu li a:hover,
+    body.light-theme #theme-toggle:hover {
+      background-color: #8861ff;
+      color: white;
+    }
+    body.light-theme #nav-toggle span {
+      background: #444;
+    }
+
+    /* ==== CANVAS ANIMAZIONE BOLLE ==== */
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==== GAIN ANIMATIONS ==== */
+    .btc-gained {
+      position: fixed;
+      font-weight: 900;
+      color: #bb86fc;
+      text-shadow: 0 0 8px #bb86fccc;
+      font-family: 'Courier New', Courier, monospace;
+      user-select: none;
+      pointer-events: none;
+      animation: floatUp 1.2s ease forwards;
+      z-index: 10000;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-60px);
+      }
+    }
+
+    /* ==== Gocce cadenti ==== */
+    #raindrop-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .raindrop {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #00aaff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 170, 255, 0.7);
+      animation: fall 6s linear forwards;
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-30px);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bubble-canvas"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div
+        id="nav-toggle"
+        tabindex="0"
+        aria-label="Toggle navigation menu"
+        role="button"
+        aria-expanded="false"
+      >
+        <span></span><span></span><span></span>
+      </div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html" aria-current="page">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Benvenuto in AFK Zone</h1>
+    <p class="welcome">Ottieni BTC restando attivo o cliccando le gocce!</p>
+    <div id="timer">03:00</div>
+    <div id="btc-stats">BTC: 0.0000</div>
+  </main>
+
+  <div id="raindrop-container"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+  authDomain: "coins-7104d.firebaseapp.com",
+  databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+  projectId: "coins-7104d",
+  storageBucket: "coins-7104d.appspot.com",
+  messagingSenderId: "893938643778",
+  appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+  measurementId: "G-QSY10CVX1F",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const user = localStorage.getItem("user");
+if (!user) {
+  // Se non c'è utente loggato, rimanda alla login
+  window.location.href = "index.html";
+}
+
+let countdown = 180;
+let timerInterval;
+let btc = 0;
+let uid = null;
+let isPageVisible = true;
+let dropCountPerMinute = 0;
+
+async function initGame() {
+  try {
+    // Recupero l'UID tramite username
+    const usernameSnap = await get(ref(db, `usernames/${user}`));
+    if (!usernameSnap.exists()) {
+      alert("Utente non trovato");
+      window.location.href = "index.html";
+      return;
+    }
+    uid = usernameSnap.val();
+
+    // Recupero i dati utente tramite UID
+    const userSnap = await get(ref(db, `users/${uid}`));
+    if (!userSnap.exists()) {
+      alert("Dati utente non trovati");
+      window.location.href = "index.html";
+      return;
+    }
+    const userData = userSnap.val();
+
+    // Se non c'è wallet o BTC, inizializza a 0
+    btc = (userData.wallet && userData.wallet.BTC) ? userData.wallet.BTC : 0;
+    updateBtc(btc);
+
+    startCountdown();
+    spawnRaindrops();
+    startDropCountReset();
+
+  } catch (error) {
+    console.error("Errore initGame:", error);
+  }
+}
+
+function saveBtc() {
+  if (!uid) {
+    console.warn("UID non definito, impossibile salvare BTC");
+    return;
+  }
+  update(ref(db, `users/${uid}/wallet`), { BTC: btc }).catch((err) => {
+    console.error("Errore salvataggio BTC:", err);
+  });
+}
+
+function updateBtc(amount) {
+  document.getElementById("btc-stats").textContent = `BTC: ${amount.toFixed(4)}`;
+}
+
+function gainBtc(amount) {
+  btc += amount;
+  updateBtc(btc);
+  showBtcGain(amount);
+  saveBtc();
+}
+
+function showBtcGain(amount) {
+  const gainElem = document.createElement("div");
+  gainElem.className = "btc-gained";
+  gainElem.textContent = `+${amount.toFixed(4)} BTC`;
+  document.body.appendChild(gainElem);
+  gainElem.style.left = `${window.innerWidth / 2}px`;
+  gainElem.style.top = `${window.innerHeight / 2}px`;
+  setTimeout(() => gainElem.remove(), 1200);
+}
+
+function startCountdown() {
+  const timerElem = document.getElementById("timer");
+  timerInterval = setInterval(() => {
+    if (!isPageVisible) return;
+    countdown--;
+    const minutes = String(Math.floor(countdown / 60)).padStart(2, "0");
+    const seconds = String(countdown % 60).padStart(2, "0");
+    timerElem.textContent = `${minutes}:${seconds}`;
+
+    if (countdown <= 0) {
+      gainBtc(0.001); // Guadagni 0.001 BTC ogni 3 minuti
+      countdown = 180;
+    }
+  }, 1000);
+}
+
+document.addEventListener("visibilitychange", () => {
+  isPageVisible = !document.hidden;
+});
+
+const canvas = document.getElementById("bubble-canvas");
+const ctx = canvas.getContext("2d");
+let bubbles = [];
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+class Bubble {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = random(0, window.innerWidth);
+    this.y = random(window.innerHeight, window.innerHeight + 200);
+    this.radius = random(5, 12);
+    this.speed = random(0.4, 1);
+    this.alpha = random(0.1, 0.5);
+  }
+  update() {
+    this.y -= this.speed;
+    if (this.y < -this.radius) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = `rgba(187, 134, 252, ${this.alpha})`;
+    ctx.fill();
+  }
+}
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+for (let i = 0; i < 100; i++) {
+  bubbles.push(new Bubble());
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  bubbles.forEach((b) => {
+    b.update();
+    b.draw();
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+
+const raindropContainer = document.getElementById("raindrop-container");
+let raindropInterval;
+
+function spawnRaindrops() {
+  raindropInterval = setInterval(() => {
+    createRaindrop();
+  }, 6000);
+}
+
+function createRaindrop() {
+  const drop = document.createElement("div");
+  drop.className = "raindrop";
+  drop.style.left = `${Math.random() * 100}vw`;
+  drop.style.animationDuration = `${4 + Math.random() * 3}s`;
+
+  drop.addEventListener("animationend", () => {
+    drop.remove();
+  });
+
+  drop.addEventListener("click", () => {
+    gainBtc(0.0005);
+    dropCountPerMinute++;
+    drop.remove();
+    if (dropCountPerMinute >= 10) {
+      gainBtc(0.0005);
+      dropCountPerMinute = 0;
+      alert("Bonus 0.0005 BTC per aver cliccato 10 gocce!");
+    }
+  });
+
+  raindropContainer.appendChild(drop);
+}
+
+function startDropCountReset() {
+  setInterval(() => {
+    dropCountPerMinute = 0;
+  }, 60000);
+}
+
+initGame();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Toggle navbar menu mobile
+  const navToggle = document.getElementById("nav-toggle");
+  const navMenu = document.getElementById("nav-menu");
+
+  navToggle.addEventListener("click", () => {
+    navToggle.classList.toggle("open");
+    navMenu.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", navToggle.classList.contains("open"));
+  });
+
+  // Toggle tema chiaro/scuro con salvataggio locale
+  const themeToggle = document.getElementById("theme-toggle");
+
+  function setTheme(theme) {
+    if (theme === 'light') {
+      document.body.classList.add('light-theme');
+      themeToggle.textContent = '🌙';
+    } else {
+      document.body.classList.remove('light-theme');
+      themeToggle.textContent = '☀️';
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+  });
+
+  // Carica il tema salvato
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  setTheme(savedTheme);
+});
+</script>
+</body>
+</html>

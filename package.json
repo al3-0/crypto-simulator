@@ -1,0 +1,13 @@
+{
+  "name": "crypto-simulator-main",
+  "version": "1.0.0",
+  "description": "Crypto Simulator with local reCAPTCHA v3 verification",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.4",
+    "node-fetch": "^3.4.2"
+  }
+}

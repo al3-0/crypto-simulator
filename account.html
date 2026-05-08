@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Account</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <style>
+    /* Body e stili principali */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      color: #bb86fc;
+      text-align: center;
+      width: 100%;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .info div {
+      background: #3b3b65;
+      padding: 16px 20px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+
+    .info div:hover {
+      background: #4b4b7a;
+    }
+
+    .info label {
+      font-weight: 600;
+      color: #ccc;
+    }
+
+    .value {
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .toggle-password {
+      cursor: pointer;
+      margin-left: 10px;
+      color: #7e5fff;
+    }
+
+    /* ==== NAVBAR STILI UGUALI A DASHBOARD ==== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-menu li a, #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-menu li a:hover, #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+
+    #theme-toggle {
+      margin-left: 6px;
+    }
+
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        margin: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #nav-toggle {
+        display: block;
+      }
+    }
+
+    #nav-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
+    #nav-toggle.open span:nth-child(2) { opacity: 0; }
+    #nav-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
+
+    /* BODY LIGHT THEME */
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+
+    body.light-theme .info div {
+      background: #e2e2ff;
+      color: #222;
+    }
+
+    body.light-theme .info div:hover {
+      background: #d0d0ff;
+    }
+
+    body.light-theme .info label {
+      color: #444;
+    }
+
+    body.light-theme .value {
+      color: #111;
+    }
+
+    body.light-theme .toggle-password {
+      color: #7b5fff;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" role="navigation" aria-label="Primary Navigation">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link" aria-label="Homepage"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle" tabindex="0" aria-label="Toggle navigation menu" role="button" aria-expanded="false"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle" aria-label="Toggle theme">🌙</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Il tuo Account</h1>
+    <div class="info">
+      <div><label>Username:</label><span class="value" id="username">--</span></div>
+      <div>
+        <label>Password:</label>
+        <span class="value">
+          <span id="password">••••••</span>
+          <span class="toggle-password" role="button" tabindex="0" aria-label="Mostra/nascondi password">👁️</span>
+        </span>
+      </div>
+      <div><label>Bitcoin (BTC):</label><span class="value" id="btc">0.000</span></div>
+      <div><label>Ethereum (ETH):</label><span class="value" id="eth">0.000</span></div>
+      <div><label>Litecoin (LTC):</label><span class="value" id="ltc">0.000</span></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { db, ref, get, onValue, set } from './js/firebase.js';
+
+  const user = localStorage.getItem("user");
+  let userUID = localStorage.getItem("userUID");
+  if (!user) window.location.href = "index.html";
+
+  const usernameEl = document.getElementById("username");
+  const passwordEl = document.getElementById("password");
+  const btcEl = document.getElementById("btc");
+  const ethEl = document.getElementById("eth");
+  const ltcEl = document.getElementById("ltc");
+  const togglePasswordEl = document.querySelector(".toggle-password");
+
+  async function resolveAccountUID() {
+    if (userUID) {
+      const userRef = ref(db, `users/${userUID}`);
+      const snap = await get(userRef);
+      if (snap.exists() && snap.val().username === user) {
+        return userUID;
+      }
+    }
+
+    const usernameRef = ref(db, `usernames/${user}`);
+    const usernameSnap = await get(usernameRef);
+    if (usernameSnap.exists()) {
+      userUID = usernameSnap.val();
+      localStorage.setItem("userUID", userUID);
+      return userUID;
+    }
+
+    const allUsersRef = ref(db, 'users');
+    const allUsersSnap = await get(allUsersRef);
+    if (allUsersSnap.exists()) {
+      const allUsers = allUsersSnap.val();
+      for (const [uid, data] of Object.entries(allUsers)) {
+        if (data.username === user) {
+          userUID = uid;
+          localStorage.setItem("userUID", userUID);
+          await set(ref(db, `usernames/${user}`), uid);
+          return userUID;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  async function setupAccountRealtime() {
+    const resolvedUID = await resolveAccountUID();
+    if (!resolvedUID) {
+      alert("Utente non trovato");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userUID");
+      window.location.href = "index.html";
+      return;
+    }
+
+    console.log('Account page resolved UID:', resolvedUID, 'for username:', user);
+
+    const accountRef = ref(db, `users/${resolvedUID}`);
+    onValue(accountRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        alert("Utente non trovato");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userUID");
+        window.location.href = "index.html";
+        return;
+      }
+
+      if (data.username && data.username !== user) {
+        localStorage.setItem('user', data.username);
+      }
+
+      usernameEl.textContent = data.username || user;
+      passwordEl.textContent = '••••••';
+      btcEl.textContent = (data.wallet?.BTC || 0).toFixed(3);
+      ethEl.textContent = (data.wallet?.ETH || 0).toFixed(3);
+      ltcEl.textContent = (data.wallet?.LTC || 0).toFixed(3);
+      togglePasswordEl.dataset.password = data.password || '';
+    });
+  }
+
+  setupAccountRealtime().catch((error) => {
+    console.error("Errore nel recupero dati:", error);
+  });
+
+    // Toggle password visibilità
+    let passwordVisible = false;
+    function togglePassword() {
+      passwordVisible = !passwordVisible;
+      passwordEl.textContent = passwordVisible ? togglePasswordEl.dataset.password : '••••••';
+      togglePasswordEl.textContent = passwordVisible ? '👁️' : '🔒';
+    }
+
+    togglePasswordEl.addEventListener('click', togglePassword);
+    togglePasswordEl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') togglePassword();
+    });
+
+    // Toggle navbar menu mobile
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    navToggle.addEventListener("click", () => {
+      navToggle.classList.toggle("open");
+      navMenu.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", navToggle.classList.contains("open"));
+    });
+
+    // Toggle tema chiaro/scuro con salvataggio locale
+    const themeToggle = document.getElementById("theme-toggle");
+
+    function setTheme(theme) {
+      if (theme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.textContent = '🌙';
+      } else {
+        document.body.classList.remove('light-theme');
+        themeToggle.textContent = '☀️';
+      }
+      localStorage.setItem('theme', theme);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+      setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
+
+    // Carica il tema salvato
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+  </script>
+</body>
+</html>

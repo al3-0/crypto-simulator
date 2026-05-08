@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Registrazione</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2b2b4f, #161630);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+    }
+    main {
+      background: #3b3b6a;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(187, 134, 252, 0.8);
+      width: 380px;
+    }
+    h1 {
+      margin-bottom: 24px;
+      font-weight: 700;
+      text-align: center;
+      color: #bb86fc;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    input {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #4b4b87;
+      color: #f0f0f0;
+      transition: background 0.3s ease;
+    }
+    input:focus {
+      background: #7a68e2;
+      outline: none;
+    }
+    input.input-error {
+      background-color: #a94442;
+    }
+    .error-message {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-top: -12px;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #bb86fc;
+      color: #1a1a2e;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #9a68e2;
+    }
+    .hcaptcha-container {
+      margin-top: 8px;
+    }
+    p.login-link a {
+      color: #7e5fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    p.login-link a:hover {
+      text-decoration: underline;
+    }
+    .message-box {
+      display: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      margin-top: 0;
+    }
+    .message-box.success {
+      background: #d4f7d3;
+      color: #1d5c2a;
+      border: 1px solid #85d27c;
+    }
+    .message-box.error {
+      background: #fde3e3;
+      color: #7a1a1e;
+      border: 1px solid #f5a7a7;
+    }
+  </style>
+
+
+  <script type="module">
+    import { app, db, ref, get, set, remove } from "./js/firebase.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+    const auth = getAuth(app);
+
+    window.firebaseApp = app;
+    window.firebaseDb = db;
+    window.firebaseRef = ref;
+    window.firebaseGet = get;
+    window.firebaseSet = set;
+    window.firebaseRemove = remove;
+
+    window.firebaseUser = null;
+
+    signInAnonymously(auth).catch((error) => {
+      console.error('Errore login anonimo:', error);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      window.firebaseUser = user;
+    });
+
+    window.getIPFunc = async function() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        return data.ip;
+      } catch (error) {
+        return '0.0.0.0';
+      }
+    };
+  </script>
+  <script src="https://js.hcaptcha.com/1/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <main role="main" aria-label="Registrazione Crypto Simulator">
+    <h1>Registrazione</h1>
+    <form id="register-form" onsubmit="return onRegisterFormSubmit(event)" novalidate>
+      <input type="text" name="username" placeholder="Username" required />
+      <div id="username-error" class="error-message"></div>
+      <div id="message-box" class="message-box" aria-live="polite"></div>
+      <input type="password" name="password" placeholder="Password" required />
+      <input type="password" name="passwordConfirm" placeholder="Conferma Password" required />
+      <div class="hcaptcha-container">
+        <div id="hcaptcha-register"></div>
+      </div>
+      <button type="submit">Registrati</button>
+    </form>
+    <p class="login-link">Hai già un account? <a href="index.html">Accedi qui</a></p>
+  </main>
+
+  <script>
+    // Determine site key based on hostname
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    window.hcaptchaSiteKey = isLocalhost ? '10000000-ffff-ffff-ffff-000000000001' : '816006ba-c112-43cc-9c1a-117adef251ac';
+
+    function showMessage(message, type = 'success') {
+      const box = document.getElementById('message-box');
+      box.textContent = message;
+      box.className = `message-box ${type}`;
+      box.style.display = 'block';
+      setTimeout(clearMessage, 5000);
+    }
+
+    function clearMessage() {
+      const box = document.getElementById('message-box');
+      box.style.display = 'none';
+      box.textContent = '';
+      box.className = 'message-box';
+    }
+
+    async function executeHcaptcha() {
+      return new Promise((resolve, reject) => {
+        hcaptcha.render('hcaptcha-register', {
+          sitekey: window.hcaptchaSiteKey,
+          callback: resolve,
+          'error-callback': reject,
+          'expired-callback': () => {
+            showMessage('hCaptcha scaduto. Riprova.', 'error');
+          }
+        });
+      });
+    }
+
+    async function onRegisterFormSubmit(event) {
+      event.preventDefault();
+      const form = document.getElementById('register-form');
+      const usernameInput = form.username;
+      const username = usernameInput.value.trim();
+      const password = form.password.value;
+      const passwordConfirm = form.passwordConfirm.value;
+
+      usernameInput.classList.remove('input-error');
+      document.getElementById('username-error').textContent = '';
+
+      if (!username.match(/^[a-zA-Z0-9]{3,15}$/)) {
+        usernameInput.classList.add('input-error');
+        showMessage('Username non valido. Usa solo lettere e numeri, 3-15 caratteri.', 'error');
+        return false;
+      }
+
+      if (password.length < 6) {
+        showMessage('La password deve essere almeno di 6 caratteri.', 'error');
+        return false;
+      }
+
+      if (password !== passwordConfirm) {
+        showMessage('Le password non corrispondono.', 'error');
+        return false;
+      }
+
+      try {
+        const hcaptchaResponse = await executeHcaptcha();
+        if (!hcaptchaResponse) {
+          showMessage('Completa il puzzle CAPTCHA.', 'error');
+          return false;
+        }
+
+        showMessage('Verifica CAPTCHA completata. Ora stiamo effettuando la registrazione...', 'success');
+        await performRegistration(username, password);
+      } catch (error) {
+        console.error(error);
+        showMessage('Errore hCaptcha. Riprova.', 'error');
+        window.registerToken = null;
+      }
+
+      return false;
+    }
+
+    async function performRegistration(username, password) {
+      try {
+        const usernameRef = window.firebaseRef(window.firebaseDb, `usernames/${username}`);
+        const usernameSnap = await window.firebaseGet(usernameRef);
+        if (usernameSnap.exists()) {
+          showMessage('Questo username è già in uso.', 'error');
+          window.registerToken = null;
+          return;
+        }
+
+        const userRef = window.firebaseRef(window.firebaseDb, `users/${window.firebaseUser.uid}`);
+        const ip = await window.getIPFunc();
+
+        await window.firebaseSet(userRef, {
+          username,
+          password,
+          ip,
+          wallet: {
+            BTC: 0,
+            ETH: 0,
+            LTC: 0
+          }
+        });
+        await window.firebaseSet(usernameRef, window.firebaseUser.uid);
+
+        localStorage.setItem('user', username);
+        showMessage('Registrazione avvenuta correttamente. Verrai reindirizzato alla dashboard...', 'success');
+        window.registerToken = null;
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1800);
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'Errore durante la registrazione.', 'error');
+        window.registerToken = null;
+        if (window.firebaseUser && username) {
+          try {
+            const usernameRef = window.firebaseRef(window.firebaseDb, `usernames/${username}`);
+            await window.firebaseRemove(usernameRef);
+          } catch (removeError) {
+            console.error('Rollback fallito:', removeError);
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

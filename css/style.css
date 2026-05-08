@@ -1,0 +1,114 @@
+/* === Base Styles === */
+body {
+  background-color: #121212;
+  color: #f0f0f0;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, p {
+  margin: 0 0 10px 0;
+}
+
+/* === Layout === */
+.container {
+  max-width: 400px;
+  margin: auto;
+  padding-top: 40px;
+  text-align: center;
+}
+
+/* === Card Style === */
+.card {
+  background: #1e1e2f;
+  border: 1px solid #3f3f5f;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(187, 134, 252, 0.2);
+}
+
+/* === Inputs and Buttons === */
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input {
+  background: #2b2b3d;
+  color: white;
+}
+
+input::placeholder {
+  color: #bbb;
+}
+
+button {
+  background-color: #bb86fc;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #9a68e2;
+}
+
+/* === Navbar === */
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  background-color: #1f1f1f;
+  border-bottom: 1px solid #333;
+  padding: 10px;
+}
+
+.navbar button {
+  flex: 1;
+  margin: 0 4px;
+  background-color: #29293f;
+  border-radius: 8px;
+}
+
+.navbar button:hover {
+  background-color: #3a2b5c;
+}
+
+/* === Sections === */
+.section {
+  display: none;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.section:not(.hidden) {
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* === AFK Timer === */
+#afk-timer {
+  font-size: 2em;
+  font-weight: bold;
+  color: #bb86fc;
+}
+
+/* === Account Info === */
+#acc-password {
+  font-family: monospace;
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

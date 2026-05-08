@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #1f1f3f, #12122b);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+    }
+    main {
+      background: #2a2a4f;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(187, 134, 252, 0.6);
+      width: 350px;
+    }
+    h1 {
+      margin-bottom: 24px;
+      font-weight: 700;
+      text-align: center;
+      color: #bb86fc;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    input {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #3b3b65;
+      color: #f0f0f0;
+      transition: background 0.3s ease;
+    }
+    input:focus {
+      background: #5849a3;
+      outline: none;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #bb86fc;
+      color: #1a1a2e;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #9a68e2;
+    }
+    .hcaptcha-container {
+      margin-top: 8px;
+    }
+    p.register-link {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #bbb;
+    }
+    p.register-link a {
+      color: #7e5fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    p.register-link a:hover {
+      text-decoration: underline;
+    }
+    .message-box {
+      display: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      margin-top: 0;
+    }
+    .message-box.success {
+      background: #d4f7d3;
+      color: #1d5c2a;
+      border: 1px solid #85d27c;
+    }
+    .message-box.error {
+      background: #fde3e3;
+      color: #7a1a1e;
+      border: 1px solid #f5a7a7;
+    }
+  </style>
+
+
+  <script type="module">
+    import { app, db, ref, get } from "./js/firebase.js";
+
+    window.firebaseApp = app;
+    window.firebaseDb = db;
+    window.firebaseRef = ref;
+    window.firebaseGet = get;
+  </script>
+  <script src="https://js.hcaptcha.com/1/api.js?render=explicit" async defer></script>
+</head>
+<body>
+  <main role="main" aria-label="Login Crypto Simulator">
+    <h1>Crypto Simulator</h1>
+    <form id="login-form" onsubmit="return onLoginFormSubmit(event)" novalidate>
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
+      <div id="message-box" class="message-box" aria-live="polite"></div>
+      <div class="hcaptcha-container">
+        <div id="hcaptcha-login"></div>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <p class="register-link">Se non sei registrato, <a href="register.html">clicca qui!</a></p>
+  </main>
+
+  <script>
+    // Determine site key based on hostname
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    window.hcaptchaSiteKey = isLocalhost ? '10000000-ffff-ffff-ffff-000000000001' : '816006ba-c112-43cc-9c1a-117adef251ac';
+
+    function showMessage(message, type = 'success') {
+      const box = document.getElementById('message-box');
+      box.textContent = message;
+      box.className = `message-box ${type}`;
+      box.style.display = 'block';
+      setTimeout(clearMessage, 5000);
+    }
+
+    function clearMessage() {
+      const box = document.getElementById('message-box');
+      box.style.display = 'none';
+      box.textContent = '';
+      box.className = 'message-box';
+    }
+
+    async function executeHcaptcha() {
+      return new Promise((resolve, reject) => {
+        hcaptcha.render('hcaptcha-login', {
+          sitekey: window.hcaptchaSiteKey,
+          callback: resolve,
+          'error-callback': reject,
+          'expired-callback': () => {
+            showMessage('hCaptcha scaduto. Riprova.', 'error');
+          }
+        });
+      });
+    }
+
+    async function onLoginFormSubmit(event) {
+      event.preventDefault();
+      const form = document.getElementById('login-form');
+      const username = form.username.value.trim();
+      const password = form.password.value;
+
+      if (!username || !password) {
+        showMessage('Inserisci username e password.', 'error');
+        return false;
+      }
+
+      try {
+        const hcaptchaResponse = await executeHcaptcha();
+        if (!hcaptchaResponse) {
+          showMessage('Completa il puzzle CAPTCHA.', 'error');
+          return false;
+        }
+
+        showMessage('Verifica CAPTCHA completata. Ora stiamo effettuando il login...', 'success');
+        await performLogin(username, password);
+      } catch (error) {
+        console.error(error);
+        showMessage('Errore hCaptcha. Riprova.', 'error');
+      }
+
+      return false;
+    }
+
+    async function performLogin(username, password) {
+      try {
+        const usernameRef = window.firebaseRef(window.firebaseDb, `usernames/${username}`);
+        const usernameSnap = await window.firebaseGet(usernameRef);
+
+        let uid;
+        let userData;
+
+        if (usernameSnap.exists()) {
+          uid = usernameSnap.val();
+          const userRef = window.firebaseRef(window.firebaseDb, `users/${uid}`);
+          const userSnap = await window.firebaseGet(userRef);
+          if (!userSnap.exists()) {
+            showMessage('Errore interno: dati utente non trovati.', 'error');
+            window.loginToken = null;
+            return;
+          }
+          userData = userSnap.val();
+        } else {
+          const allUsersRef = window.firebaseRef(window.firebaseDb, 'users');
+          const allUsersSnap = await window.firebaseGet(allUsersRef);
+          if (!allUsersSnap.exists()) {
+            showMessage('Nessun utente trovato nel database.', 'error');
+            window.loginToken = null;
+            return;
+          }
+          const allUsers = allUsersSnap.val();
+          let foundUid = null;
+          let foundUser = null;
+          for (const [userUid, userInfo] of Object.entries(allUsers)) {
+            if (userInfo && typeof userInfo === 'object' && userInfo.username === username) {
+              foundUser = userInfo;
+              foundUid = userUid;
+              break;
+            }
+          }
+          if (!foundUser) {
+            showMessage('Username o password errati.', 'error');
+            window.loginToken = null;
+            return;
+          }
+          uid = foundUid;
+          userData = foundUser;
+        }
+
+        if (userData.password !== password) {
+          showMessage('Username o password errati.', 'error');
+          window.loginToken = null;
+          return;
+        }
+
+        localStorage.setItem('user', username);
+        localStorage.setItem('userUID', uid);
+        showMessage('Login effettuato con successo. Reindirizzamento alla dashboard...', 'success');
+        window.loginToken = null;
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1500);
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'Errore durante il login.', 'error');
+        window.loginToken = null;
+      }
+    }
+  </script>
+</body>
+</html>

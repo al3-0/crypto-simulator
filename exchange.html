@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crypto Simulator - Exchange</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 100px 20px 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #eee;
+      background: linear-gradient(135deg, #1c1c3a, #12122b);
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    main {
+      background: #2a2a4fdd;
+      border-radius: 20px;
+      padding: 40px 60px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 30px rgba(187, 134, 252, 0.8);
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+      color: #bb86fc;
+    }
+    select, input, button {
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      margin: 10px 0;
+      width: 100%;
+      max-width: 400px;
+    }
+    button {
+      background-color: #6a4bbd;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #5a3daa;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1c1c3a;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      z-index: 10;
+      user-select: none;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    .logo-link img {
+      height: 36px;
+      cursor: pointer;
+    }
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-menu li a,
+    #theme-toggle {
+      color: #ddd;
+      background: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .nav-menu li a:hover,
+    #theme-toggle:hover {
+      background-color: #4b3ca7;
+      color: white;
+    }
+    #nav-toggle {
+      display: none;
+      position: relative;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      z-index: 15;
+    }
+    #nav-toggle span {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background: #ddd;
+      border-radius: 2px;
+      transition: 0.3s ease;
+      left: 0;
+    }
+    #nav-toggle span:nth-child(1) { top: 0; }
+    #nav-toggle span:nth-child(2) { top: 9px; }
+    #nav-toggle span:nth-child(3) { top: 18px; }
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #1c1c3a;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .nav-menu.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #nav-toggle {
+        display: block;
+      }
+    }
+    #nav-toggle.open span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 9px;
+    }
+    #nav-toggle.open span:nth-child(2) {
+      opacity: 0;
+    }
+    #nav-toggle.open span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 9px;
+    }
+    body.light-theme {
+      background: #f4f4f7;
+      color: #222;
+    }
+    body.light-theme main {
+      background: #fff;
+      color: #222;
+      box-shadow: 0 0 20px rgba(123, 85, 255, 0.3);
+    }
+    #bubble-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bubble-canvas"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo-link"><img src="logo.png" alt="Logo" /></a>
+      <div id="nav-toggle"><span></span><span></span><span></span></div>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="dashboard.html">Home</a></li>
+        <li><a href="exchange.html">Exchange</a></li>
+        <li><a href="vouch-create.html">Vouch Create</a></li>
+        <li><a href="vouch-redeem.html">Vouch Redeem</a></li>
+        <li><a href="afk.html">AFK Zone</a></li>
+        <li><a href="account.html">Account</a></li>
+        <li><button id="theme-toggle">🌙</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Exchange Criptovalute</h1>
+    <select id="from-coin">
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="LTC">Litecoin (LTC)</option>
+    </select>
+    <select id="to-coin">
+      <option value="ETH">Ethereum (ETH)</option>
+      <option value="BTC">Bitcoin (BTC)</option>
+      <option value="LTC">Litecoin (LTC)</option>
+    </select>
+    <input type="number" id="amount" placeholder="Quantità da scambiare" min="0" />
+    <button id="exchange-btn">Scambia</button>
+    <div id="result"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA63kHy6QyUQteu6Vqja3c6wZOM2-h9tRQ",
+      authDomain: "coins-7104d.firebaseapp.com",
+      databaseURL: "https://coins-7104d-default-rtdb.firebaseio.com",
+      projectId: "coins-7104d",
+      storageBucket: "coins-7104d.appspot.com",
+      messagingSenderId: "893938643778",
+      appId: "1:893938643778:web:30cdef9cfbc2776c77cedb",
+      measurementId: "G-QSY10CVX1F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const rates = { BTC: 1, ETH: 15, LTC: 100 };
+    const exchangeBtn = document.getElementById("exchange-btn");
+    const result = document.getElementById("result");
+
+    const username = localStorage.getItem("user");
+    let userUID = localStorage.getItem("userUID");
+
+    async function resolveExchangeUID() {
+      if (!username) return null;
+      if (userUID) {
+        const userRef = ref(db, `users/${userUID}`);
+        const snap = await get(userRef);
+        if (snap.exists() && snap.val().username === username) {
+          return userUID;
+        }
+      }
+      const usernameRef = ref(db, `usernames/${username}`);
+      const usernameSnap = await get(usernameRef);
+      if (usernameSnap.exists()) {
+        userUID = usernameSnap.val();
+        localStorage.setItem("userUID", userUID);
+        return userUID;
+      }
+      return null;
+    }
+
+    async function initUser() {
+      const resolvedUID = await resolveExchangeUID();
+      if (!resolvedUID) {
+        window.location.href = "index.html";
+      }
+      return resolvedUID;
+    }
+
+    const exchangeUserUID = await initUser();
+
+    exchangeBtn.addEventListener("click", async () => {
+      try {
+        if (!exchangeUserUID) {
+          result.textContent = "Utente non autenticato.";
+          return;
+        }
+
+        const from = document.getElementById("from-coin").value;
+        const to = document.getElementById("to-coin").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+
+        result.textContent = "";
+
+        if (from === to) {
+          result.textContent = "Scegli due valute diverse.";
+          return;
+        }
+        if (isNaN(amount) || amount <= 0) {
+          result.textContent = "Inserisci una quantità valida.";
+          return;
+        }
+
+        const walletRef = ref(db, `users/${exchangeUserUID}/wallet`);
+        const snapshot = await get(walletRef);
+        const wallet = snapshot.val() || {};
+
+        if (!wallet[from] || wallet[from] < amount) {
+          result.textContent = "Fondi insufficienti.";
+          return;
+        }
+
+        const converted = amount * (rates[from] / rates[to]);
+
+        // Aggiorna il wallet localmente
+        wallet[from] -= amount;
+        wallet[to] = (wallet[to] || 0) + converted;
+
+        // Salva il nuovo wallet
+        await set(walletRef, wallet);
+
+        result.textContent = `Scambio completato! Hai ricevuto ${converted.toFixed(3)} ${to}.`;
+      } catch (error) {
+        console.error("Errore nello scambio:", error);
+        result.textContent = "Errore durante lo scambio. Riprova più tardi.";
+      }
+    });
+
+    // Hamburger menu
+    const toggle = document.getElementById("nav-toggle");
+    const menu = document.getElementById("nav-menu");
+    toggle.addEventListener("click", () => {
+      toggle.classList.toggle("open");
+      menu.classList.toggle("open");
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById("theme-toggle");
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      document.body.classList.add("light-theme");
+      themeToggle.textContent = "☀️";
+    }
+    themeToggle.addEventListener("click", () => {
+      const isLight = document.body.classList.toggle("light-theme");
+      localStorage.setItem("theme", isLight ? "light" : "dark");
+      themeToggle.textContent = isLight ? "☀️" : "🌙";
+    });
+
+    // Canvas bubbles - il tuo codice originale qui
+    const canvas = document.getElementById("bubble-canvas");
+    const ctx = canvas.getContext("2d");
+    let width, height, bubbles;
+
+    class Bubble {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = height + Math.random() * 100;
+        this.radius = 8 + Math.random() * 12;
+        this.speed = 0.5 + Math.random();
+        this.alpha = 0.1 + Math.random() * 0.3;
+        this.phase = Math.random() * 2 * Math.PI;
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += Math.sin(this.phase) * 0.3;
+        this.phase += 0.03;
+        if (this.y + this.radius < 0) this.reset();
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        const gradient = ctx.createRadialGradient(this.x, this.y, this.radius * 0.2, this.x, this.y, this.radius);
+        gradient.addColorStop(0, `rgba(187,134,252,${this.alpha})`);
+        gradient.addColorStop(1, 'rgba(187,134,252,0)');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    }
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (const b of bubbles) {
+        b.update();
+        b.draw(ctx);
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function init() {
+      resize();
+      bubbles = Array.from({ length: 50 }, () => new Bubble());
+      animate();
+    }
+
+    window.addEventListener("resize", resize);
+    init();
+  </script>
+</body>
+</html>
